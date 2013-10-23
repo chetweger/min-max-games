@@ -2,9 +2,14 @@ import pyjd # this is dummy in pyjs
 
 '''
 What to do next: add in functionality to
-convert state to grid
-convert grid to state
-and then integrate full search functionality!
+convert state to grid (done)
+convert grid to state (shouldn't be too hard)
+ - must keep track of board
+ - must keep track of player
+ - must keep track of nextPiece
+and then integrate full search functionality:
+  1. pass optional arguments to ab(), setting global variables.
+allow for multiple 
 '''
 
 from pyjamas.ui.Button import Button
@@ -22,7 +27,7 @@ from pyjamas import logging
 
 log = logging.getConsoleLogger()
 
-from ttt import learning
+from learning import *
 
 class GridWidget(AbsolutePanel):
 
@@ -43,6 +48,10 @@ class GridWidget(AbsolutePanel):
     self.add(self.g)
 
     self.state = State()
+
+    self.state.boards[1][0][1][0]['cell'] = 1
+    self.state.boards[0][2][0][2]['cell'] = 2
+    self.state_to_grid()
 
   def onClick(self, sender):
     if hasattr(self, 'ai_first') and sender == self.ai_first:
@@ -77,21 +86,33 @@ class GridWidget(AbsolutePanel):
       self.state_to_grid(next_state)
 
 
-  def state_to_grid(self, state):
-    board = state.board
-    for y in range(3):
-      for x in range(3):
-        if board[y][x] == 0:
-          b = Button('Press', self)
-          b.point = {'x':x, 'y':y}
-          self.g.setWidget(y, x, b)
-        elif board[y][x] == '1':
-          self.g.setText(y, x, '1')
-        elif board[y][x] == '2':
-          self.g.setText(y, x, '2')
-        else:
-          print 'state_to_grid exception'
-          #assert False
+  def state_to_grid(self):
+    board = self.state.boards
+    for y_board in range(3):
+      for x_board in range(3):
+        g=Grid()
+        g.resize(3, 3)
+        g.setBorderWidth(2)
+        g.setCellPadding(9)
+        g.setCellSpacing(1)
+        for y_cell in range(3):
+          for x_cell in range(3):
+
+            if board[y_board][x_board][y_cell][x_cell]['cell'] == 0:
+              b = Button('Play here.', self)
+              b.point = {'x_cell':x_cell, 'y_cell':y_cell, 'y_board': y_board, 'x_board': x_board}
+              g.setWidget(y_cell, x_cell, b)
+
+            elif board[y_board][x_board][y_cell][x_cell]['cell'] == 1:
+              g.setText(y_cell, x_cell, '1')
+            elif board[y_board][x_board][y_cell][x_cell]['cell'] == 2:
+              g.setText(y_cell, x_cell, '2')
+            else:
+              print 'state_to_grid exception'
+              #assert False
+
+        self.add(g)
+        self.g.setWidget(y_board, x_board, g)
 
   def grid_to_state(self):
     next_state = State()
@@ -120,9 +141,9 @@ class GridWidget(AbsolutePanel):
         g.setCellSpacing(1)
         for x_cell in range(3):
           for y_cell in range(3):
-            but = Button('Play here.', self)
-            but.point = {'x_cell':x_cell, 'y_cell':y_cell, 'y_board': y_board, 'x_board': x_board}
-            g.setWidget(y_cell, x_cell, but)
+            b = Button('Play here.', self)
+            b.point = {'x_cell':x_cell, 'y_cell':y_cell, 'y_board': y_board, 'x_board': x_board}
+            g.setWidget(y_cell, x_cell, b)
 
         self.add(g)
         self.g.setWidget(y_board, x_board, g)
