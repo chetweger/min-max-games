@@ -29648,7 +29648,7 @@ $pyjs['loaded_modules']['GridTest'] = function (__mod_name__) {
 			} else {
 				var self = arguments[0];
 			}
-
+			var g;
 			$m['AbsolutePanel']['__init__'](self);
 			self['ai_first'] = $m['Button']('AI first.', self);
 			self['add']($p['getattr'](self, 'ai_first'));
@@ -29660,8 +29660,9 @@ $pyjs['loaded_modules']['GridTest'] = function (__mod_name__) {
 			self['init']();
 			self['add']($p['getattr'](self, 'g'));
 			self['state'] = (typeof State == "undefined"?$m['State']:State)();
-			$p['getattr']($p['getattr'](self, 'state'), 'boards')['__getitem__'](1)['__getitem__'](0)['__getitem__'](1)['__getitem__'](0)['__setitem__']('cell', 1);
-			$p['getattr']($p['getattr'](self, 'state'), 'boards')['__getitem__'](0)['__getitem__'](2)['__getitem__'](0)['__getitem__'](2)['__setitem__']('cell', 2);
+			g = self['g']['getWidget'](0, 0);
+			g['setText'](0, 0, '1');
+			self['grid_to_state']();
 			self['state_to_grid']();
 			return null;
 		}
@@ -29704,13 +29705,40 @@ $pyjs['loaded_modules']['GridTest'] = function (__mod_name__) {
 		}
 	, 1, [null,null,['self'],['sender']]);
 		$cls_definition['onClick'] = $method;
+		$method = $pyjs__bind_method2('will_buttons', function(y_board, x_board) {
+			if (this['__is_instance__'] === true) {
+				var self = this;
+			} else {
+				var self = arguments[0];
+				y_board = arguments[1];
+				x_board = arguments[2];
+			}
+			var piece,$or1,$or2,$and3,$and4,$and5,$and6,board,playable;
+			board = $p['getattr']($p['getattr'](self, 'state'), 'boards');
+			piece = $p['getattr']($p['getattr'](self, 'state'), 'nextPiece');
+			playable = true;
+			if ($p['bool'](($p['bool']($or1=(typeof isWin == "undefined"?$m['isWin']:isWin)(board['__getitem__'](piece['__getitem__'](0))['__getitem__'](piece['__getitem__'](1))))?$or1:(typeof isFull == "undefined"?$m['isFull']:isFull)(board['__getitem__'](piece['__getitem__'](0))['__getitem__'](piece['__getitem__'](1)))))) {
+				playable = false;
+			}
+			if ($p['bool'](($p['bool']($and3=!$p['bool']((typeof isWin == "undefined"?$m['isWin']:isWin)(board['__getitem__'](y_board)['__getitem__'](x_board))))?!$p['bool']((typeof isFull == "undefined"?$m['isFull']:isFull)(board['__getitem__'](y_board)['__getitem__'](x_board))):$and3))) {
+				if ($p['bool'](!$p['bool'](playable))) {
+					return true;
+				}
+				if ($p['bool'](playable)) {
+					return ($p['bool']($and5=$p['op_eq'](y_board, piece['__getitem__'](0)))?$p['op_eq'](x_board, piece['__getitem__'](1)):$and5);
+				}
+			}
+			return false;
+		}
+	, 1, [null,null,['self'],['y_board'],['x_board']]);
+		$cls_definition['will_buttons'] = $method;
 		$method = $pyjs__bind_method2('state_to_grid', function() {
 			if (this['__is_instance__'] === true) {
 				var self = this;
 			} else {
 				var self = arguments[0];
 			}
-			var y_cell,$iter3_type,$iter1_iter,$iter4_type,$iter2_type,$iter4_iter,$iter3_idx,$iter2_iter,$iter3_iter,x_board,$iter1_array,$iter1_nextval,$iter2_idx,b,$iter3_array,y_board,$iter2_nextval,$iter1_type,g,$iter4_nextval,board,$iter4_idx,x_cell,$iter1_idx,$iter4_array,$iter3_nextval,$iter2_array;
+			var will_make_buttons,y_cell,$iter3_type,$iter1_iter,$iter4_type,$iter2_type,$iter4_iter,$iter3_idx,$iter2_iter,$iter3_iter,x_board,$iter1_array,$iter1_nextval,$iter2_idx,b,$iter3_array,y_board,$iter2_nextval,$iter1_type,g,$iter4_nextval,board,$iter4_idx,x_cell,$iter1_idx,$iter4_array,$iter3_nextval,$iter2_array;
 			board = $p['getattr']($p['getattr'](self, 'state'), 'boards');
 			$iter1_iter = $p['range'](3);
 			$iter1_nextval=$p['__iter_prepare']($iter1_iter,false);
@@ -29720,6 +29748,7 @@ $pyjs['loaded_modules']['GridTest'] = function (__mod_name__) {
 				$iter2_nextval=$p['__iter_prepare']($iter2_iter,false);
 				while (typeof($p['__wrapped_next']($iter2_nextval)['$nextval']) != 'undefined') {
 					x_board = $iter2_nextval['$nextval'];
+					will_make_buttons = self['will_buttons'](y_board, x_board);
 					g = $m['Grid']();
 					g['resize'](3, 3);
 					g['setBorderWidth'](2);
@@ -29734,9 +29763,14 @@ $pyjs['loaded_modules']['GridTest'] = function (__mod_name__) {
 						while (typeof($p['__wrapped_next']($iter4_nextval)['$nextval']) != 'undefined') {
 							x_cell = $iter4_nextval['$nextval'];
 							if ($p['bool']($p['op_eq'](board['__getitem__'](y_board)['__getitem__'](x_board)['__getitem__'](y_cell)['__getitem__'](x_cell)['__getitem__']('cell'), 0))) {
-								b = $m['Button']('Play here.', self);
-								b['point'] = $p['dict']([['x_cell', x_cell], ['y_cell', y_cell], ['y_board', y_board], ['x_board', x_board]]);
-								g['setWidget'](y_cell, x_cell, b);
+								if ($p['bool'](will_make_buttons)) {
+									b = $m['Button']('Play here.', self);
+									b['point'] = $p['dict']([['x_cell', x_cell], ['y_cell', y_cell], ['y_board', y_board], ['x_board', x_board]]);
+									g['setWidget'](y_cell, x_cell, b);
+								}
+								else {
+									g['setText'](y_cell, x_cell, '-');
+								}
 							}
 							else if ($p['bool']($p['op_eq'](board['__getitem__'](y_board)['__getitem__'](x_board)['__getitem__'](y_cell)['__getitem__'](x_cell)['__getitem__']('cell'), 1))) {
 								g['setText'](y_cell, x_cell, '1');
@@ -29763,31 +29797,54 @@ $pyjs['loaded_modules']['GridTest'] = function (__mod_name__) {
 			} else {
 				var self = arguments[0];
 			}
-			var $iter5_nextval,x,$or1,$iter6_idx,$or2,$iter6_type,$iter5_array,$iter6_array,$iter5_iter,$iter5_idx,y,$iter5_type,$iter6_iter,$iter6_nextval,next_state;
-			next_state = (typeof State == "undefined"?$m['State']:State)();
+			var $iter5_nextval,y_cell,$iter6_type,$iter5_array,$iter8_iter,$iter5_iter,$iter5_type,$iter6_iter,$iter6_nextval,$or3,$add3,board,$iter5_idx,$iter7_type,x_board,$augexpr1,$or4,$iter8_idx,$iter6_idx,$iter7_iter,$iter8_type,$augsub1,$iter6_array,$iter8_nextval,$iter7_idx,y_board,$iter7_nextval,g,$iter7_array,$iter8_array,$add2,x_cell,$add1,$add4,piece;
+			board = $p['getattr']($p['getattr'](self, 'state'), 'boards');
 			$iter5_iter = $p['range'](3);
 			$iter5_nextval=$p['__iter_prepare']($iter5_iter,false);
 			while (typeof($p['__wrapped_next']($iter5_nextval)['$nextval']) != 'undefined') {
-				y = $iter5_nextval['$nextval'];
+				y_board = $iter5_nextval['$nextval'];
 				$iter6_iter = $p['range'](3);
 				$iter6_nextval=$p['__iter_prepare']($iter6_iter,false);
 				while (typeof($p['__wrapped_next']($iter6_nextval)['$nextval']) != 'undefined') {
-					x = $iter6_nextval['$nextval'];
-					if ($p['bool']($p['isinstance'](self['g']['getWidget'](y, x), $m['Button']))) {
-						$p['printFunc']([y, x], 1);
-						$p['getattr'](next_state, 'board')['__getitem__'](y)['__setitem__'](x, 0);
-					}
-					else if ($p['bool'](($p['bool']($or1=$p['op_eq'](self['g']['getText'](y, x), '1'))?$or1:$p['op_eq'](self['g']['getText'](y, x), '2')))) {
-						$p['getattr'](next_state, 'board')['__getitem__'](y)['__setitem__'](x, $p['float_int'](self['g']['getText'](y, x)));
-					}
-					else {
-						$p['printFunc'](['grid_to_state exception'], 1);
+					x_board = $iter6_nextval['$nextval'];
+					g = self['g']['getWidget'](y_board, x_board);
+					$iter7_iter = $p['range'](3);
+					$iter7_nextval=$p['__iter_prepare']($iter7_iter,false);
+					while (typeof($p['__wrapped_next']($iter7_nextval)['$nextval']) != 'undefined') {
+						y_cell = $iter7_nextval['$nextval'];
+						$iter8_iter = $p['range'](3);
+						$iter8_nextval=$p['__iter_prepare']($iter8_iter,false);
+						while (typeof($p['__wrapped_next']($iter8_nextval)['$nextval']) != 'undefined') {
+							x_cell = $iter8_nextval['$nextval'];
+							if ($p['bool']($p['isinstance'](g['getWidget'](y_cell, x_cell), $m['Button']))) {
+								if (!( $p['op_eq'](board['__getitem__'](y_board)['__getitem__'](x_board)['__getitem__'](y_cell)['__getitem__'](x_cell)['__getitem__']('cell'), 0) )) {
+								   throw $p['AssertionError']();
+								 }
+							}
+							else if ($p['bool'](($p['bool']($or3=$p['op_eq'](g['getText'](y_cell, x_cell), '1'))?$or3:$p['op_eq'](g['getText'](y_cell, x_cell), '2')))) {
+								if ($p['bool']($p['op_eq']($p['getattr']($p['getattr'](self, 'state'), 'boards')['__getitem__'](y_board)['__getitem__'](x_board)['__getitem__'](y_cell)['__getitem__'](x_cell)['__getitem__']('cell'), 0))) {
+									$p['getattr']($p['getattr'](self, 'state'), 'boards')['__getitem__'](y_board)['__getitem__'](x_board)['__getitem__'](y_cell)['__getitem__'](x_cell)['__setitem__']('cell', $p['str'](g['getText'](y_cell, x_cell)));
+									piece = $p['getattr']($p['getattr'](self, 'state'), 'nextPiece');
+									if ($p['bool']((typeof isWin == "undefined"?$m['isWin']:isWin)($p['getattr']($p['getattr'](self, 'state'), 'boards')['__getitem__'](piece['__getitem__'](0))['__getitem__'](piece['__getitem__'](1))))) {
+										var $augsub1 = $p['str'](piece['__getitem__'](2));
+										var $augexpr1 = $p['getattr']($p['getattr'](self, 'state'), 'score');
+										$augexpr1['__setitem__']($augsub1, $p['__op_add']($add1=$augexpr1['__getitem__']($augsub1),$add2=1));
+									}
+									piece['__setitem__'](2, $p['__op_add']($add3=piece['__getitem__'](2),$add4=(typeof turn == "undefined"?$m['turn']:turn)(piece['__getitem__'](2))));
+									piece['__setitem__'](0, y_cell);
+									piece['__setitem__'](1, x_cell);
+								}
+							}
+							else {
+								if (!( $p['op_eq'](g['getText'](y_cell, x_cell), '-') )) {
+								   throw $p['AssertionError']();
+								 }
+							}
+						}
 					}
 				}
 			}
-			next_state['min_v'] = $p['getattr']($p['getattr'](self, 'state'), 'min_v');
-			next_state['max_v'] = $p['getattr']($p['getattr'](self, 'state'), 'max_v');
-			return next_state;
+			return null;
 		}
 	, 1, [null,null,['self']]);
 		$cls_definition['grid_to_state'] = $method;
@@ -29797,28 +29854,28 @@ $pyjs['loaded_modules']['GridTest'] = function (__mod_name__) {
 			} else {
 				var self = arguments[0];
 			}
-			var $iter10_nextval,y_cell,$iter8_iter,$iter10_iter,$iter9_iter,$iter9_nextval,$iter9_idx,$iter7_type,$iter9_type,x_board,$iter8_idx,$iter7_iter,$iter8_type,$iter10_idx,$iter8_nextval,$iter7_idx,y_board,b,$iter7_nextval,g,$iter7_array,$iter8_array,$iter10_array,x_cell,$iter10_type,$iter9_array;
-			$iter7_iter = $p['range'](3);
-			$iter7_nextval=$p['__iter_prepare']($iter7_iter,false);
-			while (typeof($p['__wrapped_next']($iter7_nextval)['$nextval']) != 'undefined') {
-				y_board = $iter7_nextval['$nextval'];
-				$iter8_iter = $p['range'](3);
-				$iter8_nextval=$p['__iter_prepare']($iter8_iter,false);
-				while (typeof($p['__wrapped_next']($iter8_nextval)['$nextval']) != 'undefined') {
-					x_board = $iter8_nextval['$nextval'];
+			var $iter10_nextval,y_cell,$iter10_iter,$iter9_array,$iter9_iter,$iter9_nextval,$iter9_idx,$iter11_idx,$iter9_type,x_board,$iter11_iter,$iter12_array,$iter11_array,$iter11_nextval,y_board,b,g,$iter12_type,$iter11_type,$iter10_array,$iter12_nextval,$iter12_iter,x_cell,$iter10_type,$iter12_idx,$iter10_idx;
+			$iter9_iter = $p['range'](3);
+			$iter9_nextval=$p['__iter_prepare']($iter9_iter,false);
+			while (typeof($p['__wrapped_next']($iter9_nextval)['$nextval']) != 'undefined') {
+				y_board = $iter9_nextval['$nextval'];
+				$iter10_iter = $p['range'](3);
+				$iter10_nextval=$p['__iter_prepare']($iter10_iter,false);
+				while (typeof($p['__wrapped_next']($iter10_nextval)['$nextval']) != 'undefined') {
+					x_board = $iter10_nextval['$nextval'];
 					g = $m['Grid']();
 					g['resize'](3, 3);
 					g['setBorderWidth'](2);
 					g['setCellPadding'](9);
 					g['setCellSpacing'](1);
-					$iter9_iter = $p['range'](3);
-					$iter9_nextval=$p['__iter_prepare']($iter9_iter,false);
-					while (typeof($p['__wrapped_next']($iter9_nextval)['$nextval']) != 'undefined') {
-						x_cell = $iter9_nextval['$nextval'];
-						$iter10_iter = $p['range'](3);
-						$iter10_nextval=$p['__iter_prepare']($iter10_iter,false);
-						while (typeof($p['__wrapped_next']($iter10_nextval)['$nextval']) != 'undefined') {
-							y_cell = $iter10_nextval['$nextval'];
+					$iter11_iter = $p['range'](3);
+					$iter11_nextval=$p['__iter_prepare']($iter11_iter,false);
+					while (typeof($p['__wrapped_next']($iter11_nextval)['$nextval']) != 'undefined') {
+						x_cell = $iter11_nextval['$nextval'];
+						$iter12_iter = $p['range'](3);
+						$iter12_nextval=$p['__iter_prepare']($iter12_iter,false);
+						while (typeof($p['__wrapped_next']($iter12_nextval)['$nextval']) != 'undefined') {
+							y_cell = $iter12_nextval['$nextval'];
 							b = $m['Button']('Play here.', self);
 							b['point'] = $p['dict']([['x_cell', x_cell], ['y_cell', y_cell], ['y_board', y_board], ['x_board', x_board]]);
 							g['setWidget'](y_cell, x_cell, b);

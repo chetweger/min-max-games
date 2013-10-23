@@ -49,8 +49,15 @@ class GridWidget(AbsolutePanel):
 
     self.state = State()
 
+    '''
     self.state.boards[1][0][1][0]['cell'] = 1
     self.state.boards[0][2][0][2]['cell'] = 2
+    self.state_to_grid()
+    '''
+
+    g = self.g.getWidget(0, 0)
+    g.setText(0, 0, '1')
+    self.grid_to_state()
     self.state_to_grid()
 
   def onClick(self, sender):
@@ -85,11 +92,29 @@ class GridWidget(AbsolutePanel):
       next_state = ab(self.state)
       self.state_to_grid(next_state)
 
+  def will_buttons(self, y_board, x_board):
+    # first we determine if the nextPiece points to a playable board.
+    board = self.state.boards
+    piece = self.state.nextPiece
+    playable = True
+    if isWin(board[piece[0]][piece[1]]) or isFull(board[piece[0]][piece[1]]):
+      playable = False
+
+    if (not isWin(board[y_board][x_board])) and (not isFull(board[y_board][x_board])):
+      if not playable:
+        return True
+      if playable:
+        return (y_board == piece[0]) and (x_board == piece[1])
+    return False
 
   def state_to_grid(self):
     board = self.state.boards
     for y_board in range(3):
       for x_board in range(3):
+
+        # for this mini-grid, do i make butons or dashes?
+        will_make_buttons = self.will_buttons(y_board, x_board)
+
         g=Grid()
         g.resize(3, 3)
         g.setBorderWidth(2)
@@ -99,9 +124,12 @@ class GridWidget(AbsolutePanel):
           for x_cell in range(3):
 
             if board[y_board][x_board][y_cell][x_cell]['cell'] == 0:
-              b = Button('Play here.', self)
-              b.point = {'x_cell':x_cell, 'y_cell':y_cell, 'y_board': y_board, 'x_board': x_board}
-              g.setWidget(y_cell, x_cell, b)
+              if will_make_buttons:
+                b = Button('Play here.', self)
+                b.point = {'x_cell':x_cell, 'y_cell':y_cell, 'y_board': y_board, 'x_board': x_board}
+                g.setWidget(y_cell, x_cell, b)
+              else:
+                g.setText(y_cell, x_cell, '-')
 
             elif board[y_board][x_board][y_cell][x_cell]['cell'] == 1:
               g.setText(y_cell, x_cell, '1')
@@ -115,20 +143,25 @@ class GridWidget(AbsolutePanel):
         self.g.setWidget(y_board, x_board, g)
 
   def grid_to_state(self):
-    next_state = State()
-    for y in range(3):
-      for x in range(3):
-        if isinstance(self.g.getWidget(y, x), Button):
-          print y, x
-          next_state.board[y][x] = 0
-        elif self.g.getText(y, x) == '1' or self.g.getText(y, x) == '2':
-          next_state.board[y][x] = int(self.g.getText(y,x))
-        else:
-          print 'grid_to_state exception'
-          #assert False
-    next_state.min_v = self.state.min_v
-    next_state.max_v = self.state.max_v
-    return next_state
+    board = self.state.boards
+    for y_board in range(3):
+      for x_board in range(3):
+        g = self.g.getWidget(y_board, x_board)
+        for y_cell in range(3):
+          for x_cell in range(3):
+            if isinstance(g.getWidget(y_cell, x_cell), Button):
+              assert board[y_board][x_board][y_cell][x_cell]['cell'] == 0
+            elif (g.getText(y_cell, x_cell) == '1') or (g.getText(y_cell, x_cell) == '2'):
+              if self.state.boards[y_board][x_board][y_cell][x_cell]['cell'] == 0:
+                self.state.boards[y_board][x_board][y_cell][x_cell]['cell'] = str(g.getText(y_cell, x_cell))
+                piece = self.state.nextPiece
+                if isWin(self.state.boards[piece[0]][piece[1]]):
+                  self.state.score[str(piece[2])] += 1
+                piece[2] += turn(piece[2])
+                piece[0] = y_cell
+                piece[1] = x_cell
+            else:
+              assert (g.getText(y_cell, x_cell) == '-')
 
   def init(self):
     for y_board in range(3):
