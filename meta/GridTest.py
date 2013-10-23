@@ -3,13 +3,13 @@ import pyjd # this is dummy in pyjs
 '''
 What to do next: add in functionality to
 convert state to grid (done)
-convert grid to state (shouldn't be too hard)
+convert grid to state (done)
  - must keep track of board
  - must keep track of player
  - must keep track of nextPiece
-and then integrate full search functionality:
+Add onclick functionality!
+And then integrate full search functionality:
   1. pass optional arguments to ab(), setting global variables.
-allow for multiple 
 '''
 
 from pyjamas.ui.Button import Button
@@ -59,14 +59,16 @@ class GridWidget(AbsolutePanel):
     g.setText(0, 0, '1')
     self.grid_to_state()
     self.state_to_grid()
+    self.max_player = '-1'
+    self.min_player = '-1'
 
   def onClick(self, sender):
     if hasattr(self, 'ai_first') and sender == self.ai_first:
-      self.state.max_v = 1
-      self.state.min_v = 2
+      self.max_player = '1'
+      self.min_player = '2'
       self.remove(self.ai_first)
       del(self.ai_first) # remove all fucking traces
-      print 'button ai_first exists', hasattr(self, 'ai_first') 
+      print 'button ai_first exists', hasattr(self, 'ai_first')
 
       self.state.print_me()
       next_state = ab(self.state)
@@ -79,18 +81,21 @@ class GridWidget(AbsolutePanel):
       '''
       if hasattr(self, 'ai_first'):
         print 'Setting state.max_v'
-        self.state.max_v = 2
-        self.state.min_v = 1
+        self.max_player = '2'
+        self.min_player = '1'
         self.remove(self.ai_first)
-      p = sender.point
-      self.g.setText(p['y'], p['x'], str(self.state.min_v))
+      assert self.min_player == str(self.state.nextPiece[2])
 
-      self.state = self.grid_to_state()
-      self.state.player = next_player(self.state.player)
+      point = sender.point
+      g = self.g.getWidget(point['y_board'], point['x_board'])
+      g.setText(point['y_cell'], point['x_cell'], str(self.min_player))
 
-      self.state.print_me()
-      next_state = ab(self.state)
-      self.state_to_grid(next_state)
+      self.grid_to_state()
+      #self.state.player = next_player(self.state.player)
+
+      self.state.printInfo()
+      self.state = ab(self.state)
+      self.state_to_grid()
 
   def will_buttons(self, y_board, x_board):
     # first we determine if the nextPiece points to a playable board.
