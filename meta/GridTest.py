@@ -27,7 +27,7 @@ from pyjamas import logging
 
 log = logging.getConsoleLogger()
 
-from learning import *
+from learning import State, ab, isWin, isFull, turn
 
 class GridWidget(AbsolutePanel):
 
@@ -49,18 +49,19 @@ class GridWidget(AbsolutePanel):
 
     self.state = State()
 
-    '''
     self.state.boards[1][0][1][0]['cell'] = 1
     self.state.boards[0][2][0][2]['cell'] = 2
     self.state_to_grid()
-    '''
 
     g = self.g.getWidget(0, 0)
     g.setText(0, 0, '1')
+
     self.grid_to_state()
     self.state_to_grid()
     self.max_player = '-1'
     self.min_player = '-1'
+
+    self.TD_CONSTS = {'c3': 0.95992938236536673, 'c2': 1.3118140945279137, 'c1': 3.842547843349949, 'c6': 0.27602882530408006, 'c5': 0.3523534563973569, 'c4': 0.7573263980553335}
 
   def onClick(self, sender):
     if hasattr(self, 'ai_first') and sender == self.ai_first:
@@ -71,7 +72,9 @@ class GridWidget(AbsolutePanel):
       print 'button ai_first exists', hasattr(self, 'ai_first')
 
       self.state.print_me()
-      next_state = ab(self.state)
+      self.state = ab(self.state, self.TD_CONSTS, False, 
+        optional_args={'TD_CONSTS': self.TD_CONSTS, 
+          'MIN': self.min_player, 'MAX': self.max_player})
       self.state_to_grid(next_state)
 
     else:
@@ -83,18 +86,25 @@ class GridWidget(AbsolutePanel):
         print 'Setting state.max_v'
         self.max_player = '2'
         self.min_player = '1'
+        print 'hi1'
         self.remove(self.ai_first)
-      assert self.min_player == str(self.state.nextPiece[2])
+        del(self.ai_first) # remove all fucking traces
+        print 'hi2'
+      #assert self.min_player == str(self.state.nextPiece[2])
+      assert self.state.boards
 
       point = sender.point
       g = self.g.getWidget(point['y_board'], point['x_board'])
       g.setText(point['y_cell'], point['x_cell'], str(self.min_player))
 
       self.grid_to_state()
+      print 'yes'
       #self.state.player = next_player(self.state.player)
 
       self.state.printInfo()
-      self.state = ab(self.state)
+      self.state = ab(self.state, self.TD_CONSTS, False, 
+        optional_args={'TD_CONSTS': self.TD_CONSTS, 
+          'MIN': self.min_player, 'MAX': self.max_player})[1]
       self.state_to_grid()
 
   def will_buttons(self, y_board, x_board):

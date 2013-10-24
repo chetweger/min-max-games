@@ -747,11 +747,17 @@ $pyjs['loaded_modules']['learning'] = function (__mod_name__) {
 
 	$m['getWin']['__bind_type__'] = 0;
 	$m['getWin']['__args__'] = [null,null,['state']];
-	$m['ab'] = function(state, constants, sub) {
+	$m['ab'] = function(state, constants, sub, optional_args) {
+		if (typeof optional_args == 'undefined') optional_args=arguments['callee']['__args__'][5][1];
 		var $add74,nextState,duration,$$new,farthestDepth,$add73;
+		if ($p['bool']((typeof option_args == "undefined"?$m['option_args']:option_args))) {
+			$m['TD_CONSTS'] = optional_args['__getitem__']('TD_CONSTS');
+			$m['MIN'] = optional_args['__getitem__']('MIN');
+			$m['MAX'] = optional_args['__getitem__']('MAX');
+		}
 		farthestDepth = 1;
 		duration = 0;
-		while ($p['bool'](($p['cmp'](farthestDepth, 4) == -1))) {
+		while ($p['bool'](($p['cmp'](farthestDepth, 3) == -1))) {
 			$$new = (typeof State == "undefined"?$m['State']:State)();
 			$$new['copyThis'](state);
 			nextState = $m['maxH']($$new, 0, farthestDepth, (typeof Util == "undefined"?$m['Util']:Util)((typeof ($usub10=9005.0)=='number'?
@@ -764,7 +770,7 @@ $pyjs['loaded_modules']['learning'] = function (__mod_name__) {
 	$m['ab']['__name__'] = 'ab';
 
 	$m['ab']['__bind_type__'] = 0;
-	$m['ab']['__args__'] = [null,null,['state'],['constants'],['sub']];
+	$m['ab']['__args__'] = [null,null,['state'],['constants'],['sub'],['optional_args', $p['dict']([])]];
 	$m['turn'] = function(integer) {
 
 		if ($p['bool']($p['op_eq'](integer, 1))) {

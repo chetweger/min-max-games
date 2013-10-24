@@ -429,10 +429,18 @@ def getWin(state):
 Checks if a win exists
 Then calls helper
 '''
-def ab(state, constants, sub):
+def ab(state, constants, sub, optional_args={}):
+  if option_args:
+    global TD_CONSTS
+    global MIN
+    global MAX
+    TD_CONSTS = optional_args['TD_CONSTS']
+    MIN = optional_args['MIN']
+    MAX = optional_args['MAX']
+
   farthestDepth = 1
   duration = 0
-  while (farthestDepth < 4): # duration < WAIT and 
+  while (farthestDepth < 3): # duration < WAIT and 
     new = State()
     new.copyThis(state)
     nextState = maxH(new, 0, farthestDepth, Util(-9005.0, State()), Util(9005.0, State()), constants, sub)
