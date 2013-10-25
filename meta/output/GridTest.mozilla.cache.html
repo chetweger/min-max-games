@@ -29977,7 +29977,9 @@ $pyjs['loaded_modules']['GridTest'] = function (__mod_name__) {
 				sender = arguments[1];
 			}
 			var g,point,$and1,$and2;
+			$p['printFunc'](['Registered.'], 1);
 			if ($p['bool'](($p['bool']($and1=$p['hasattr'](self, 'ai_first'))?$p['op_eq'](sender, $p['getattr'](self, 'ai_first')):$and1))) {
+				$p['printFunc'](['ai_first'], 1);
 				self['max_player'] = '1';
 				self['min_player'] = '2';
 				self['remove']($p['getattr'](self, 'ai_first'));
@@ -29986,18 +29988,18 @@ $pyjs['loaded_modules']['GridTest'] = function (__mod_name__) {
 				self['state']['print_me']();
 				$p['printFunc'](['player is ', $p['getattr']($p['getattr'](self, 'state'), 'nextPiece')], 1);
 				self['state'] = $pyjs_kwargs_call(null, $m['ab'], null, null, [{'optional_args':$p['dict']([['TD_CONSTS', $p['getattr'](self, 'TD_CONSTS')], ['MIN', $p['getattr'](self, 'min_player')], ['MAX', $p['getattr'](self, 'max_player')]])}, $p['getattr'](self, 'state'), $p['getattr'](self, 'TD_CONSTS'), false]);
-				self['state_to_grid']((typeof next_state == "undefined"?$m['next_state']:next_state));
+				self['state_to_grid']();
 			}
 			else {
+				$p['printFunc'](['human'], 1);
 				if ($p['bool']($p['hasattr'](self, 'ai_first'))) {
 					$p['printFunc'](['Setting state.max_v'], 1);
 					self['max_player'] = '2';
 					self['min_player'] = '1';
-					$p['printFunc'](['hi1'], 1);
 					self['remove']($p['getattr'](self, 'ai_first'));
 					$p['delattr'](self, 'ai_first');
-					$p['printFunc'](['hi2'], 1);
 				}
+				$p['printFunc']([$p['getattr']($p['getattr'](self, 'state'), 'boards')], 1);
 				if (!( $p['getattr']($p['getattr'](self, 'state'), 'boards') )) {
 				   throw $p['AssertionError']();
 				 }
@@ -30005,7 +30007,7 @@ $pyjs['loaded_modules']['GridTest'] = function (__mod_name__) {
 				g = self['g']['getWidget'](point['__getitem__']('y_board'), point['__getitem__']('x_board'));
 				g['setText'](point['__getitem__']('y_cell'), point['__getitem__']('x_cell'), $p['str']($p['getattr'](self, 'min_player')));
 				self['grid_to_state']();
-				$p['printFunc'](['yes'], 1);
+				$p['printFunc'](['onClick'], 1);
 				self['state']['printInfo']();
 				$p['printFunc'](['player is ', $p['getattr']($p['getattr'](self, 'state'), 'nextPiece')], 1);
 				self['state'] = $pyjs_kwargs_call(null, $m['ab'], null, null, [{'optional_args':$p['dict']([['TD_CONSTS', $p['getattr'](self, 'TD_CONSTS')], ['MIN', $p['getattr'](self, 'min_player')], ['MAX', $p['getattr'](self, 'max_player')]])}, $p['getattr'](self, 'state'), $p['getattr'](self, 'TD_CONSTS'), false])['__getitem__'](1);
@@ -30025,7 +30027,7 @@ $pyjs['loaded_modules']['GridTest'] = function (__mod_name__) {
 			}
 			var piece,$or1,$or2,$and3,$and4,$and5,$and6,board,playable;
 			board = $p['getattr']($p['getattr'](self, 'state'), 'boards');
-			piece = $p['getattr']($p['getattr'](self, 'state'), 'nextPiece');
+			piece = $p['list']($p['getattr']($p['getattr'](self, 'state'), 'nextPiece'));
 			playable = true;
 			if ($p['bool'](($p['bool']($or1=$m['isWin'](board['__getitem__'](piece['__getitem__'](0))['__getitem__'](piece['__getitem__'](1))))?$or1:$m['isFull'](board['__getitem__'](piece['__getitem__'](0))['__getitem__'](piece['__getitem__'](1)))))) {
 				playable = false;
@@ -30050,6 +30052,7 @@ $pyjs['loaded_modules']['GridTest'] = function (__mod_name__) {
 			}
 			var will_make_buttons,y_cell,$iter3_type,$iter1_iter,$iter4_type,$iter2_type,$iter4_iter,$iter3_idx,$iter2_iter,$iter3_iter,x_board,$iter1_array,$iter1_nextval,$iter2_idx,b,$iter3_array,y_board,$iter2_nextval,$iter1_type,g,$iter4_nextval,board,$iter4_idx,x_cell,$iter1_idx,$iter4_array,$iter3_nextval,$iter2_array;
 			board = $p['getattr']($p['getattr'](self, 'state'), 'boards');
+			$p['printFunc'](['state_to_grid'], 1);
 			self['state']['printInfo']();
 			$iter1_iter = $p['range'](3);
 			$iter1_nextval=$p['__iter_prepare']($iter1_iter,false);
@@ -30135,15 +30138,22 @@ $pyjs['loaded_modules']['GridTest'] = function (__mod_name__) {
 							else if ($p['bool'](($p['bool']($or3=$p['op_eq'](g['getText'](y_cell, x_cell), '1'))?$or3:$p['op_eq'](g['getText'](y_cell, x_cell), '2')))) {
 								if ($p['bool']($p['op_eq']($p['getattr']($p['getattr'](self, 'state'), 'boards')['__getitem__'](y_board)['__getitem__'](x_board)['__getitem__'](y_cell)['__getitem__'](x_cell)['__getitem__']('cell'), 0))) {
 									$p['getattr']($p['getattr'](self, 'state'), 'boards')['__getitem__'](y_board)['__getitem__'](x_board)['__getitem__'](y_cell)['__getitem__'](x_cell)['__setitem__']('cell', $p['str'](g['getText'](y_cell, x_cell)));
-									piece = $p['getattr']($p['getattr'](self, 'state'), 'nextPiece');
+									piece = $p['list']($p['getattr']($p['getattr'](self, 'state'), 'nextPiece'));
+									$p['printFunc']([piece], 1);
 									if ($p['bool']($m['isWin']($p['getattr']($p['getattr'](self, 'state'), 'boards')['__getitem__'](piece['__getitem__'](0))['__getitem__'](piece['__getitem__'](1))))) {
 										var $augsub1 = $p['str'](piece['__getitem__'](2));
 										var $augexpr1 = $p['getattr']($p['getattr'](self, 'state'), 'score');
 										$augexpr1['__setitem__']($augsub1, $p['__op_add']($add1=$augexpr1['__getitem__']($augsub1),$add2=1));
 									}
-									piece['__setitem__'](2, $p['__op_add']($add3=$p['op_eq'](piece['__getitem__'](2), 1),$add4=1));
+									$p['printFunc'](['a', piece], 1);
+									piece['__setitem__'](2, 1);
+									$p['printFunc'](['yes'], 1);
+									piece['__setitem__'](2, $p['__op_add']($add3=$p['float_int']($p['op_eq'](piece['__getitem__'](2), 1)),$add4=1));
+									$p['printFunc'](['b'], 1);
 									piece['__setitem__'](0, y_cell);
+									$p['printFunc'](['c'], 1);
 									piece['__setitem__'](1, x_cell);
+									$p['printFunc'](['d'], 1);
 								}
 							}
 							else {
