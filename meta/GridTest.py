@@ -72,10 +72,11 @@ class GridWidget(AbsolutePanel):
       print 'button ai_first exists', hasattr(self, 'ai_first')
 
       self.state.print_me()
+      print 'player is ', self.state.nextPiece
       self.state = ab(self.state, self.TD_CONSTS, False, 
         optional_args={'TD_CONSTS': self.TD_CONSTS, 
           'MIN': self.min_player, 'MAX': self.max_player})
-      self.state_to_grid(next_state)
+      self.state_to_grid(next_state) # <---- this is an error but it doesn't print an error msg in javascript.
 
     else:
       '''
@@ -98,10 +99,11 @@ class GridWidget(AbsolutePanel):
       g.setText(point['y_cell'], point['x_cell'], str(self.min_player))
 
       self.grid_to_state()
-      print 'yes'
+      print 'onClick'
       #self.state.player = next_player(self.state.player)
 
       self.state.printInfo()
+      print 'player is ', self.state.nextPiece
       self.state = ab(self.state, self.TD_CONSTS, False, 
         optional_args={'TD_CONSTS': self.TD_CONSTS, 
           'MIN': self.min_player, 'MAX': self.max_player})[1]
@@ -124,6 +126,8 @@ class GridWidget(AbsolutePanel):
 
   def state_to_grid(self):
     board = self.state.boards
+    print 'state_to_grid'
+    self.state.printInfo()
     for y_board in range(3):
       for x_board in range(3):
 
@@ -151,7 +155,7 @@ class GridWidget(AbsolutePanel):
             elif board[y_board][x_board][y_cell][x_cell]['cell'] == 2:
               g.setText(y_cell, x_cell, '2')
             else:
-              print 'state_to_grid exception'
+              print 'state_to_grid exception', board[y_board][x_board][y_cell][x_cell]['cell']
               #assert False
 
         self.add(g)
@@ -172,7 +176,7 @@ class GridWidget(AbsolutePanel):
                 piece = self.state.nextPiece
                 if isWin(self.state.boards[piece[0]][piece[1]]):
                   self.state.score[str(piece[2])] += 1
-                piece[2] += turn(piece[2])
+                piece[2] = (piece[2] == 1) + 1
                 piece[0] = y_cell
                 piece[1] = x_cell
             else:

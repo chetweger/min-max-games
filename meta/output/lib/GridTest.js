@@ -77,6 +77,7 @@ $pyjs['loaded_modules']['GridTest'] = function (__mod_name__) {
 				$p['delattr'](self, 'ai_first');
 				$p['printFunc'](['button ai_first exists', $p['hasattr'](self, 'ai_first')], 1);
 				self['state']['print_me']();
+				$p['printFunc'](['player is ', $p['getattr']($p['getattr'](self, 'state'), 'nextPiece')], 1);
 				self['state'] = $pyjs_kwargs_call(null, $m['ab'], null, null, [{'optional_args':$p['dict']([['TD_CONSTS', $p['getattr'](self, 'TD_CONSTS')], ['MIN', $p['getattr'](self, 'min_player')], ['MAX', $p['getattr'](self, 'max_player')]])}, $p['getattr'](self, 'state'), $p['getattr'](self, 'TD_CONSTS'), false]);
 				self['state_to_grid']((typeof next_state == "undefined"?$m['next_state']:next_state));
 			}
@@ -99,6 +100,7 @@ $pyjs['loaded_modules']['GridTest'] = function (__mod_name__) {
 				self['grid_to_state']();
 				$p['printFunc'](['yes'], 1);
 				self['state']['printInfo']();
+				$p['printFunc'](['player is ', $p['getattr']($p['getattr'](self, 'state'), 'nextPiece')], 1);
 				self['state'] = $pyjs_kwargs_call(null, $m['ab'], null, null, [{'optional_args':$p['dict']([['TD_CONSTS', $p['getattr'](self, 'TD_CONSTS')], ['MIN', $p['getattr'](self, 'min_player')], ['MAX', $p['getattr'](self, 'max_player')]])}, $p['getattr'](self, 'state'), $p['getattr'](self, 'TD_CONSTS'), false])['__getitem__'](1);
 				self['state_to_grid']();
 			}
@@ -141,6 +143,7 @@ $pyjs['loaded_modules']['GridTest'] = function (__mod_name__) {
 			}
 			var will_make_buttons,y_cell,$iter3_type,$iter1_iter,$iter4_type,$iter2_type,$iter4_iter,$iter3_idx,$iter2_iter,$iter3_iter,x_board,$iter1_array,$iter1_nextval,$iter2_idx,b,$iter3_array,y_board,$iter2_nextval,$iter1_type,g,$iter4_nextval,board,$iter4_idx,x_cell,$iter1_idx,$iter4_array,$iter3_nextval,$iter2_array;
 			board = $p['getattr']($p['getattr'](self, 'state'), 'boards');
+			self['state']['printInfo']();
 			$iter1_iter = $p['range'](3);
 			$iter1_nextval=$p['__iter_prepare']($iter1_iter,false);
 			while (typeof($p['__wrapped_next']($iter1_nextval)['$nextval']) != 'undefined') {
@@ -180,7 +183,7 @@ $pyjs['loaded_modules']['GridTest'] = function (__mod_name__) {
 								g['setText'](y_cell, x_cell, '2');
 							}
 							else {
-								$p['printFunc'](['state_to_grid exception'], 1);
+								$p['printFunc'](['state_to_grid exception', board['__getitem__'](y_board)['__getitem__'](x_board)['__getitem__'](y_cell)['__getitem__'](x_cell)['__getitem__']('cell')], 1);
 							}
 						}
 					}
@@ -231,7 +234,7 @@ $pyjs['loaded_modules']['GridTest'] = function (__mod_name__) {
 										var $augexpr1 = $p['getattr']($p['getattr'](self, 'state'), 'score');
 										$augexpr1['__setitem__']($augsub1, $p['__op_add']($add1=$augexpr1['__getitem__']($augsub1),$add2=1));
 									}
-									piece['__setitem__'](2, $p['__op_add']($add3=piece['__getitem__'](2),$add4=$m['turn'](piece['__getitem__'](2))));
+									piece['__setitem__'](2, $p['__op_add']($add3=$p['op_eq'](piece['__getitem__'](2), 1),$add4=1));
 									piece['__setitem__'](0, y_cell);
 									piece['__setitem__'](1, x_cell);
 								}
