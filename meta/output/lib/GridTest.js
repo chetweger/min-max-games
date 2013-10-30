@@ -36,28 +36,10 @@ $pyjs['loaded_modules']['GridTest'] = function (__mod_name__) {
 			} else {
 				var self = arguments[0];
 			}
-			var g;
-			$m['AbsolutePanel']['__init__'](self);
-			self['ai_first'] = $m['Button']('AI first.', self);
-			self['add']($p['getattr'](self, 'ai_first'));
-			self['g'] = $m['Grid']();
-			self['g']['resize'](3, 3);
-			self['g']['setBorderWidth'](2);
-			self['g']['setCellPadding'](9);
-			self['g']['setCellSpacing'](1);
-			self['init']();
-			self['add']($p['getattr'](self, 'g'));
-			self['state'] = $m['State']();
-			$p['getattr']($p['getattr'](self, 'state'), 'boards')['__getitem__'](1)['__getitem__'](0)['__getitem__'](1)['__getitem__'](0)['__setitem__']('cell', 1);
-			$p['getattr']($p['getattr'](self, 'state'), 'boards')['__getitem__'](0)['__getitem__'](2)['__getitem__'](0)['__getitem__'](2)['__setitem__']('cell', 2);
-			self['state_to_grid']();
-			g = self['g']['getWidget'](0, 0);
-			g['setText'](0, 0, '1');
-			self['grid_to_state']();
-			self['state_to_grid']();
-			self['max_player'] = '-1';
-			self['min_player'] = '-1';
-			self['TD_CONSTS'] = $p['dict']([['c3', 0.959929382365], ['c2', 1.31181409453], ['c1', 3.84254784335], ['c6', 0.276028825304], ['c5', 0.352353456397], ['c4', 0.757326398055]]);
+			var TD_C,optional_args;
+			TD_C = $p['dict']([['c3', 0.959929382365], ['c2', 1.31181409453], ['c1', 3.84254784335], ['c6', 0.276028825304], ['c5', 0.352353456397], ['c4', 0.757326398055]]);
+			optional_args = $p['dict']([['TD_CONSTS', TD_C], ['MAX', '1'], ['MIN', 2]]);
+			$pyjs_kwargs_call(null, $m['ab'], null, null, [{'optional_args':optional_args}, $m['State'](), TD_C, false])['__getitem__'](1)['printInfo']();
 			return null;
 		}
 	, 1, [null,null,['self']]);
@@ -204,7 +186,7 @@ $pyjs['loaded_modules']['GridTest'] = function (__mod_name__) {
 			} else {
 				var self = arguments[0];
 			}
-			var $iter5_nextval,y_cell,$iter6_type,$iter5_array,$iter8_iter,$iter5_iter,$iter5_type,$iter6_iter,$iter6_nextval,$or3,$add3,board,$iter5_idx,$iter7_type,x_board,$augexpr1,$or4,$iter8_idx,$iter6_idx,$iter7_iter,$iter8_type,$augsub1,$iter6_array,$iter8_nextval,$iter7_idx,y_board,$iter7_nextval,g,$iter7_array,$iter8_array,$add2,x_cell,$add1,$add4,piece;
+			var $iter5_nextval,y_cell,$iter6_type,$iter5_array,$iter8_iter,$iter5_iter,$iter5_type,$iter6_iter,$iter6_nextval,$or3,board,$iter5_idx,$iter7_type,x_board,$augexpr1,$or4,$iter8_idx,$iter6_idx,$iter7_iter,$iter8_type,$augsub1,$iter6_array,$iter8_nextval,$iter7_idx,y_board,$iter7_nextval,g,$iter7_array,$iter8_array,$add2,x_cell,$add1,piece;
 			board = $p['getattr']($p['getattr'](self, 'state'), 'boards');
 			$iter5_iter = $p['range'](3);
 			$iter5_nextval=$p['__iter_prepare']($iter5_iter,false);
@@ -230,7 +212,7 @@ $pyjs['loaded_modules']['GridTest'] = function (__mod_name__) {
 							}
 							else if ($p['bool'](($p['bool']($or3=$p['op_eq'](g['getText'](y_cell, x_cell), '1'))?$or3:$p['op_eq'](g['getText'](y_cell, x_cell), '2')))) {
 								if ($p['bool']($p['op_eq']($p['getattr']($p['getattr'](self, 'state'), 'boards')['__getitem__'](y_board)['__getitem__'](x_board)['__getitem__'](y_cell)['__getitem__'](x_cell)['__getitem__']('cell'), 0))) {
-									$p['getattr']($p['getattr'](self, 'state'), 'boards')['__getitem__'](y_board)['__getitem__'](x_board)['__getitem__'](y_cell)['__getitem__'](x_cell)['__setitem__']('cell', $p['str'](g['getText'](y_cell, x_cell)));
+									$p['getattr']($p['getattr'](self, 'state'), 'boards')['__getitem__'](y_board)['__getitem__'](x_board)['__getitem__'](y_cell)['__getitem__'](x_cell)['__setitem__']('cell', $p['float_int'](g['getText'](y_cell, x_cell)));
 									piece = $p['list']($p['getattr']($p['getattr'](self, 'state'), 'nextPiece'));
 									$p['printFunc']([piece], 1);
 									if ($p['bool']($m['isWin']($p['getattr']($p['getattr'](self, 'state'), 'boards')['__getitem__'](piece['__getitem__'](0))['__getitem__'](piece['__getitem__'](1))))) {
@@ -241,7 +223,6 @@ $pyjs['loaded_modules']['GridTest'] = function (__mod_name__) {
 									$p['printFunc'](['a', piece], 1);
 									piece['__setitem__'](2, 1);
 									$p['printFunc'](['yes'], 1);
-									piece['__setitem__'](2, $p['__op_add']($add3=$p['float_int']($p['op_eq'](piece['__getitem__'](2), 1)),$add4=1));
 									$p['printFunc'](['b'], 1);
 									piece['__setitem__'](0, y_cell);
 									$p['printFunc'](['c'], 1);

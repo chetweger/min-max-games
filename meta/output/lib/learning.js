@@ -18,11 +18,7 @@ $pyjs['loaded_modules']['learning'] = function (__mod_name__) {
 	$m['WAIT'] = 5;
 	$m['userFirst'] = 1;
 	$m['computerFirst'] = 2;
-	$m['MIN'] = '1';
-	$m['MAX'] = '2';
 	$m['ALPHA'] = 0.005;
-	$m['CONSTS'] = $p['dict']([['c1', 1.0], ['c2', 1.0], ['c3', 1.0], ['c4', 1.0], ['c5', 1.0], ['c6', 1.0]]);
-	$m['TD_CONSTS'] = $p['dict']([['c1', 1.0], ['c2', 1.0], ['c3', 1.0], ['c4', 1.0], ['c5', 1.0], ['c6', 1.0]]);
 	$m['messageComputersTurn'] = "Computer's turn.";
 	$m['messageChoosePlayer'] = 'Which player goes first? (1 = you, 2 = computer, 0 = stop) ';
 	$m['messageGoodbye'] = 'Goodbye. Thanks for playing tic tac toe!.';
@@ -157,7 +153,7 @@ $pyjs['loaded_modules']['learning'] = function (__mod_name__) {
 		$p['printFunc'](['Final board position was:'], 1);
 		state['printInfo']();
 		writeTo = $p['open']($p['__op_add']($add1=$m['CURRENT_DIR'],$add2='/td.txt'), 'w+');
-		writeTo['write']($p['str']($m['TD_CONSTS']));
+		writeTo['write']($p['str']((typeof TD_CONSTS == "undefined"?$m['TD_CONSTS']:TD_CONSTS)));
 		writeTo['close']();
 		$p['printFunc'](['Game over.'], 1);
 		return null;
@@ -278,7 +274,7 @@ $pyjs['loaded_modules']['learning'] = function (__mod_name__) {
 	$m['subUtil']['__args__'] = [null,null,['state'],['constants'],['sub']];
 	$m['f1_score'] = function(state) {
 		var $sub6,$sub5;
-		return $p['__op_sub']($sub5=$p['getattr'](state, 'score')['__getitem__']($m['MIN']),$sub6=$p['getattr'](state, 'score')['__getitem__']($m['MAX']));
+		return $p['__op_sub']($sub5=$p['getattr'](state, 'score')['__getitem__']((typeof MIN == "undefined"?$m['MIN']:MIN)),$sub6=$p['getattr'](state, 'score')['__getitem__']((typeof MAX == "undefined"?$m['MAX']:MAX)));
 	};
 	$m['f1_score']['__name__'] = 'f1_score';
 
@@ -308,20 +304,20 @@ $pyjs['loaded_modules']['learning'] = function (__mod_name__) {
 	$m['getActive']['__args__'] = [null,null,['state']];
 	$m['f2_center'] = function(state) {
 		var $add28,$iter13_nextval,center,$iter13_iter,$add25,board,$add27,$iter13_array,$sub8,activeBoards,$add26,$sub7,$iter13_type,$iter13_idx;
-		center = $p['dict']([[$m['MIN'], 0], [$m['MAX'], 0]]);
+		center = $p['dict']([[(typeof MIN == "undefined"?$m['MIN']:MIN), 0], [(typeof MAX == "undefined"?$m['MAX']:MAX), 0]]);
 		activeBoards = $m['getActive'](state);
 		$iter13_iter = activeBoards;
 		$iter13_nextval=$p['__iter_prepare']($iter13_iter,false);
 		while (typeof($p['__wrapped_next']($iter13_nextval)['$nextval']) != 'undefined') {
 			board = $iter13_nextval['$nextval'];
-			if ($p['bool']($p['op_eq'](board['__getitem__'](1)['__getitem__'](1)['__getitem__']('cell'), $p['float_int']($m['MIN'])))) {
-				center['__setitem__']($m['MIN'], $p['__op_add']($add25=center['__getitem__']($m['MIN']),$add26=1));
+			if ($p['bool']($p['op_eq'](board['__getitem__'](1)['__getitem__'](1)['__getitem__']('cell'), $p['float_int']((typeof MIN == "undefined"?$m['MIN']:MIN))))) {
+				center['__setitem__']((typeof MIN == "undefined"?$m['MIN']:MIN), $p['__op_add']($add25=center['__getitem__']((typeof MIN == "undefined"?$m['MIN']:MIN)),$add26=1));
 			}
-			else if ($p['bool']($p['op_eq'](board['__getitem__'](1)['__getitem__'](1)['__getitem__']('cell'), $p['float_int']($m['MAX'])))) {
-				center['__setitem__']($m['MAX'], $p['__op_add']($add27=center['__getitem__']($m['MAX']),$add28=1));
+			else if ($p['bool']($p['op_eq'](board['__getitem__'](1)['__getitem__'](1)['__getitem__']('cell'), $p['float_int']((typeof MAX == "undefined"?$m['MAX']:MAX))))) {
+				center['__setitem__']((typeof MAX == "undefined"?$m['MAX']:MAX), $p['__op_add']($add27=center['__getitem__']((typeof MAX == "undefined"?$m['MAX']:MAX)),$add28=1));
 			}
 		}
-		return $p['__op_sub']($sub7=center['__getitem__']($m['MIN']),$sub8=center['__getitem__']($m['MAX']));
+		return $p['__op_sub']($sub7=center['__getitem__']((typeof MIN == "undefined"?$m['MIN']:MIN)),$sub8=center['__getitem__']((typeof MAX == "undefined"?$m['MAX']:MAX)));
 	};
 	$m['f2_center']['__name__'] = 'f2_center';
 
@@ -329,7 +325,7 @@ $pyjs['loaded_modules']['learning'] = function (__mod_name__) {
 	$m['f2_center']['__args__'] = [null,null,['state']];
 	$m['f3_corner'] = function(state) {
 		var cornerCount,corner,$add29,$iter15_iter,$sub9,board,$iter14_array,$sub10,$iter14_type,$iter15_array,activeBoards,$iter14_iter,$iter14_idx,$iter14_nextval,$add32,corners,$add30,$add31,$iter15_idx,$iter15_nextval,$iter15_type;
-		cornerCount = $p['dict']([[$m['MIN'], 0], [$m['MAX'], 0]]);
+		cornerCount = $p['dict']([[(typeof MIN == "undefined"?$m['MIN']:MIN), 0], [(typeof MAX == "undefined"?$m['MAX']:MAX), 0]]);
 		activeBoards = $m['getActive'](state);
 		$iter14_iter = activeBoards;
 		$iter14_nextval=$p['__iter_prepare']($iter14_iter,false);
@@ -340,15 +336,15 @@ $pyjs['loaded_modules']['learning'] = function (__mod_name__) {
 			$iter15_nextval=$p['__iter_prepare']($iter15_iter,false);
 			while (typeof($p['__wrapped_next']($iter15_nextval)['$nextval']) != 'undefined') {
 				corner = $iter15_nextval['$nextval'];
-				if ($p['bool']($p['op_eq'](corner['__getitem__']('cell'), $p['float_int']($m['MIN'])))) {
-					cornerCount['__setitem__']($m['MIN'], $p['__op_add']($add29=cornerCount['__getitem__']($m['MIN']),$add30=1));
+				if ($p['bool']($p['op_eq'](corner['__getitem__']('cell'), $p['float_int']((typeof MIN == "undefined"?$m['MIN']:MIN))))) {
+					cornerCount['__setitem__']((typeof MIN == "undefined"?$m['MIN']:MIN), $p['__op_add']($add29=cornerCount['__getitem__']((typeof MIN == "undefined"?$m['MIN']:MIN)),$add30=1));
 				}
-				else if ($p['bool']($p['op_eq'](corner['__getitem__']('cell'), $p['float_int']($m['MAX'])))) {
-					cornerCount['__setitem__']($m['MAX'], $p['__op_add']($add31=cornerCount['__getitem__']($m['MAX']),$add32=1));
+				else if ($p['bool']($p['op_eq'](corner['__getitem__']('cell'), $p['float_int']((typeof MAX == "undefined"?$m['MAX']:MAX))))) {
+					cornerCount['__setitem__']((typeof MAX == "undefined"?$m['MAX']:MAX), $p['__op_add']($add31=cornerCount['__getitem__']((typeof MAX == "undefined"?$m['MAX']:MAX)),$add32=1));
 				}
 			}
 		}
-		return $p['__op_sub']($sub9=cornerCount['__getitem__']($m['MIN']),$sub10=cornerCount['__getitem__']($m['MAX']));
+		return $p['__op_sub']($sub9=cornerCount['__getitem__']((typeof MIN == "undefined"?$m['MIN']:MIN)),$sub10=cornerCount['__getitem__']((typeof MAX == "undefined"?$m['MAX']:MAX)));
 	};
 	$m['f3_corner']['__name__'] = 'f3_corner';
 
@@ -356,7 +352,7 @@ $pyjs['loaded_modules']['learning'] = function (__mod_name__) {
 	$m['f3_corner']['__args__'] = [null,null,['state']];
 	$m['f4_side'] = function(state) {
 		var sideCount,$iter16_idx,$iter17_type,$iter16_iter,$iter17_iter,$iter16_type,board,$iter16_nextval,$iter17_nextval,$sub12,$sub11,$iter17_array,activeBoards,sides,$iter16_array,$add33,$add36,$add34,$add35,$iter17_idx,side;
-		sideCount = $p['dict']([[$m['MIN'], 0], [$m['MAX'], 0]]);
+		sideCount = $p['dict']([[(typeof MIN == "undefined"?$m['MIN']:MIN), 0], [(typeof MAX == "undefined"?$m['MAX']:MAX), 0]]);
 		activeBoards = $m['getActive'](state);
 		$iter16_iter = activeBoards;
 		$iter16_nextval=$p['__iter_prepare']($iter16_iter,false);
@@ -367,15 +363,15 @@ $pyjs['loaded_modules']['learning'] = function (__mod_name__) {
 			$iter17_nextval=$p['__iter_prepare']($iter17_iter,false);
 			while (typeof($p['__wrapped_next']($iter17_nextval)['$nextval']) != 'undefined') {
 				side = $iter17_nextval['$nextval'];
-				if ($p['bool']($p['op_eq'](side['__getitem__']('cell'), $p['float_int']($m['MIN'])))) {
-					sideCount['__setitem__']($m['MIN'], $p['__op_add']($add33=sideCount['__getitem__']($m['MIN']),$add34=1));
+				if ($p['bool']($p['op_eq'](side['__getitem__']('cell'), $p['float_int']((typeof MIN == "undefined"?$m['MIN']:MIN))))) {
+					sideCount['__setitem__']((typeof MIN == "undefined"?$m['MIN']:MIN), $p['__op_add']($add33=sideCount['__getitem__']((typeof MIN == "undefined"?$m['MIN']:MIN)),$add34=1));
 				}
-				else if ($p['bool']($p['op_eq'](side['__getitem__']('cell'), $p['float_int']($m['MAX'])))) {
-					sideCount['__setitem__']($m['MAX'], $p['__op_add']($add35=sideCount['__getitem__']($m['MAX']),$add36=1));
+				else if ($p['bool']($p['op_eq'](side['__getitem__']('cell'), $p['float_int']((typeof MAX == "undefined"?$m['MAX']:MAX))))) {
+					sideCount['__setitem__']((typeof MAX == "undefined"?$m['MAX']:MAX), $p['__op_add']($add35=sideCount['__getitem__']((typeof MAX == "undefined"?$m['MAX']:MAX)),$add36=1));
 				}
 			}
 		}
-		return $p['__op_sub']($sub11=sideCount['__getitem__']($m['MIN']),$sub12=sideCount['__getitem__']($m['MAX']));
+		return $p['__op_sub']($sub11=sideCount['__getitem__']((typeof MIN == "undefined"?$m['MIN']:MIN)),$sub12=sideCount['__getitem__']((typeof MAX == "undefined"?$m['MAX']:MAX)));
 	};
 	$m['f4_side']['__name__'] = 'f4_side';
 
@@ -503,11 +499,11 @@ $pyjs['loaded_modules']['learning'] = function (__mod_name__) {
 			while (typeof($p['__wrapped_next']($iter24_nextval)['$nextval']) != 'undefined') {
 				row = $iter24_nextval['$nextval'];
 				getblock = $m['hasBlock'](row);
-				if ($p['bool']($p['op_eq'](getblock, $m['MAX']))) {
-					blocking['__setitem__']($m['MAX'], $p['__op_add']($add43=blocking['__getitem__']($m['MAX']),$add44=1));
+				if ($p['bool']($p['op_eq'](getblock, (typeof MAX == "undefined"?$m['MAX']:MAX)))) {
+					blocking['__setitem__']((typeof MAX == "undefined"?$m['MAX']:MAX), $p['__op_add']($add43=blocking['__getitem__']((typeof MAX == "undefined"?$m['MAX']:MAX)),$add44=1));
 				}
-				else if ($p['bool']($p['op_eq'](getblock, $m['MIN']))) {
-					blocking['__setitem__']($m['MIN'], $p['__op_add']($add45=blocking['__getitem__']($m['MIN']),$add46=1));
+				else if ($p['bool']($p['op_eq'](getblock, (typeof MIN == "undefined"?$m['MIN']:MIN)))) {
+					blocking['__setitem__']((typeof MIN == "undefined"?$m['MIN']:MIN), $p['__op_add']($add45=blocking['__getitem__']((typeof MIN == "undefined"?$m['MIN']:MIN)),$add46=1));
 				}
 			}
 		}
@@ -544,15 +540,15 @@ $pyjs['loaded_modules']['learning'] = function (__mod_name__) {
 			while (typeof($p['__wrapped_next']($iter28_nextval)['$nextval']) != 'undefined') {
 				row = $iter28_nextval['$nextval'];
 				getBlock = $m['hasBlock'](row);
-				if ($p['bool']($p['op_eq'](getBlock, $m['MAX']))) {
-					blocking['__setitem__']($m['MAX'], $p['__op_add']($add49=blocking['__getitem__']($m['MAX']),$add50=1));
+				if ($p['bool']($p['op_eq'](getBlock, (typeof MAX == "undefined"?$m['MAX']:MAX)))) {
+					blocking['__setitem__']((typeof MAX == "undefined"?$m['MAX']:MAX), $p['__op_add']($add49=blocking['__getitem__']((typeof MAX == "undefined"?$m['MAX']:MAX)),$add50=1));
 				}
-				else if ($p['bool']($p['op_eq'](getBlock, $m['MIN']))) {
-					blocking['__setitem__']($m['MIN'], $p['__op_add']($add51=blocking['__getitem__']($m['MIN']),$add52=1));
+				else if ($p['bool']($p['op_eq'](getBlock, (typeof MIN == "undefined"?$m['MIN']:MIN)))) {
+					blocking['__setitem__']((typeof MIN == "undefined"?$m['MIN']:MIN), $p['__op_add']($add51=blocking['__getitem__']((typeof MIN == "undefined"?$m['MIN']:MIN)),$add52=1));
 				}
 			}
 		}
-		return $p['__op_sub']($sub17=blocking['__getitem__']($m['MIN']),$sub18=blocking['__getitem__']($m['MAX']));
+		return $p['__op_sub']($sub17=blocking['__getitem__']((typeof MIN == "undefined"?$m['MIN']:MIN)),$sub18=blocking['__getitem__']((typeof MAX == "undefined"?$m['MAX']:MAX)));
 	};
 	$m['f5_blocking']['__name__'] = 'f5_blocking';
 
@@ -574,11 +570,11 @@ $pyjs['loaded_modules']['learning'] = function (__mod_name__) {
 			while (typeof($p['__wrapped_next']($iter30_nextval)['$nextval']) != 'undefined') {
 				row = $iter30_nextval['$nextval'];
 				getpot = $m['hasPotential'](row);
-				if ($p['bool']($p['op_eq'](getpot, $m['MAX']))) {
-					potential['__setitem__']($m['MAX'], $p['__op_add']($add53=potential['__getitem__']($m['MAX']),$add54=1));
+				if ($p['bool']($p['op_eq'](getpot, (typeof MAX == "undefined"?$m['MAX']:MAX)))) {
+					potential['__setitem__']((typeof MAX == "undefined"?$m['MAX']:MAX), $p['__op_add']($add53=potential['__getitem__']((typeof MAX == "undefined"?$m['MAX']:MAX)),$add54=1));
 				}
-				else if ($p['bool']($p['op_eq'](getpot, $m['MIN']))) {
-					potential['__setitem__']($m['MIN'], $p['__op_add']($add55=potential['__getitem__']($m['MIN']),$add56=1));
+				else if ($p['bool']($p['op_eq'](getpot, (typeof MIN == "undefined"?$m['MIN']:MIN)))) {
+					potential['__setitem__']((typeof MIN == "undefined"?$m['MIN']:MIN), $p['__op_add']($add55=potential['__getitem__']((typeof MIN == "undefined"?$m['MIN']:MIN)),$add56=1));
 				}
 			}
 		}
@@ -615,15 +611,15 @@ $pyjs['loaded_modules']['learning'] = function (__mod_name__) {
 			while (typeof($p['__wrapped_next']($iter34_nextval)['$nextval']) != 'undefined') {
 				row = $iter34_nextval['$nextval'];
 				getPot = $m['hasPotential'](row);
-				if ($p['bool']($p['op_eq'](getPot, $m['MAX']))) {
-					potential['__setitem__']($m['MAX'], $p['__op_add']($add59=potential['__getitem__']($m['MAX']),$add60=1));
+				if ($p['bool']($p['op_eq'](getPot, (typeof MAX == "undefined"?$m['MAX']:MAX)))) {
+					potential['__setitem__']((typeof MAX == "undefined"?$m['MAX']:MAX), $p['__op_add']($add59=potential['__getitem__']((typeof MAX == "undefined"?$m['MAX']:MAX)),$add60=1));
 				}
-				else if ($p['bool']($p['op_eq'](getPot, $m['MIN']))) {
-					potential['__setitem__']($m['MIN'], $p['__op_add']($add61=potential['__getitem__']($m['MIN']),$add62=1));
+				else if ($p['bool']($p['op_eq'](getPot, (typeof MIN == "undefined"?$m['MIN']:MIN)))) {
+					potential['__setitem__']((typeof MIN == "undefined"?$m['MIN']:MIN), $p['__op_add']($add61=potential['__getitem__']((typeof MIN == "undefined"?$m['MIN']:MIN)),$add62=1));
 				}
 			}
 		}
-		return $p['__op_sub']($sub23=potential['__getitem__']($m['MIN']),$sub24=potential['__getitem__']($m['MAX']));
+		return $p['__op_sub']($sub23=potential['__getitem__']((typeof MIN == "undefined"?$m['MIN']:MIN)),$sub24=potential['__getitem__']((typeof MAX == "undefined"?$m['MAX']:MAX)));
 	};
 	$m['f6_potential']['__name__'] = 'f6_potential';
 
@@ -750,7 +746,7 @@ $pyjs['loaded_modules']['learning'] = function (__mod_name__) {
 	$m['ab'] = function(state, constants, sub, optional_args) {
 		if (typeof optional_args == 'undefined') optional_args=arguments['callee']['__args__'][5][1];
 		var $add74,nextState,duration,$$new,farthestDepth,$add73;
-		if ($p['bool']((typeof option_args == "undefined"?$m['option_args']:option_args))) {
+		if ($p['bool'](optional_args)) {
 			$m['TD_CONSTS'] = optional_args['__getitem__']('TD_CONSTS');
 			$m['MIN'] = optional_args['__getitem__']('MIN');
 			$m['MAX'] = optional_args['__getitem__']('MAX');
@@ -1131,7 +1127,7 @@ $pyjs['loaded_modules']['learning'] = function (__mod_name__) {
 				var self = arguments[0];
 			}
 
-			$p['printFunc'](['boards are:\n', self['printer'](), 'You are playing into board column', $p['getattr'](self, 'nextPiece')['__getitem__'](1), 'row', $p['getattr'](self, 'nextPiece')['__getitem__'](0), '\nScore is:', $p['getattr'](self, 'score')], 1);
+			$p['printFunc'](['boards are:\n', self['printer'](), 'You are playing into board column', $p['getattr'](self, 'nextPiece')['__getitem__'](1), 'row', $p['getattr'](self, 'nextPiece')['__getitem__'](0), '\nNext player is ', $p['getattr'](self, 'nextPiece')['__getitem__'](2)], 1);
 			return null;
 		}
 	, 1, [null,null,['self']]);
@@ -1370,7 +1366,7 @@ var $generator_state = [0], $generator_exc = [null], $yield_value = null, $exc =
 																			for (var $i = 10 ; $i < ($generator_state['length']<12?12:$generator_state['length']); $i++) $generator_state[$i]=0;
 																			child['copyThis'](self);
 																			nP = $m['turn']($p['getattr'](self, 'nextPiece')['__getitem__'](2));
-																			child['nextPiece'] = $p['tuple']([c, d, nP]);
+																			child['nextPiece'] = $p['list']([c, d, nP]);
 																			$p['getattr'](child, 'boards')['__getitem__'](a)['__getitem__'](b)['__getitem__'](c)['__getitem__'](d)['__setitem__']('cell', $p['getattr'](self, 'nextPiece')['__getitem__'](2));
 																			if ($p['bool']($m['isWin']($p['getattr'](child, 'boards')['__getitem__'](a)['__getitem__'](b)))) {
 																				var $augsub3 = $p['str']($p['getattr'](self, 'nextPiece')['__getitem__'](2));
@@ -1481,7 +1477,7 @@ var $generator_state = [0], $generator_exc = [null], $yield_value = null, $exc =
 													for (var $i = 6 ; $i < ($generator_state['length']<8?8:$generator_state['length']); $i++) $generator_state[$i]=0;
 													child['copyThis'](self);
 													nP = $m['turn']($p['getattr'](self, 'nextPiece')['__getitem__'](2));
-													child['nextPiece'] = $p['tuple']([c, d, nP]);
+													child['nextPiece'] = $p['list']([c, d, nP]);
 													$p['getattr'](child, 'boards')['__getitem__'](a)['__getitem__'](b)['__getitem__'](c)['__getitem__'](d)['__setitem__']('cell', $p['getattr'](self, 'nextPiece')['__getitem__'](2));
 													if ($p['bool']($m['isWin']($p['getattr'](child, 'boards')['__getitem__'](a)['__getitem__'](b)))) {
 														var $augsub4 = $p['str']($p['getattr'](self, 'nextPiece')['__getitem__'](2));
@@ -1728,7 +1724,6 @@ var $generator_state = [0], $generator_exc = [null], $yield_value = null, $exc =
 		expectedUtility = $tupleassign7[0];
 		nextState = $tupleassign7[1];
 		$p['printFunc'](['Expected utility is: ', expectedUtility], 1);
-		nextState['printInfo']();
 		state = $m['copy']['deepcopy'](nextState);
 		$p['printFunc'](['Scores: Player 1: ', $p['getattr'](state, 'score')['__getitem__']('1'), ' Player 2: ', $p['getattr'](state, 'score')['__getitem__']('2')], 1);
 		$m['userTurn'](state);
@@ -1902,7 +1897,7 @@ var $generator_state = [0], $generator_exc = [null], $yield_value = null, $exc =
 		$p['printFunc'](['\n\nNaive AIs turn which plays the piece: ', $p['getattr'](state, 'nextPiece')['__getitem__'](2)], 1);
 		SUBTRACT = true;
 		$m['checkOver'](state);
-		var $tupleassign9 = $p['__ass_unpack']($m['ab'](state, $m['TD_CONSTS'], SUBTRACT), 2, null);
+		var $tupleassign9 = $p['__ass_unpack']($m['ab'](state, (typeof TD_CONSTS == "undefined"?$m['TD_CONSTS']:TD_CONSTS), SUBTRACT), 2, null);
 		expectedUtility = $tupleassign9[0];
 		nextState = $tupleassign9[1];
 		state = $m['copy']['deepcopy'](nextState);
@@ -1927,8 +1922,8 @@ var $generator_state = [0], $generator_exc = [null], $yield_value = null, $exc =
 		a['printInfo']();
 		$p['getattr'](a, 'nextPiece')['__setitem__'](2, 1);
 		SUBTRACT = false;
-		b = $m['ab'](a, $m['CONSTS'], SUBTRACT)['__getitem__'](1);
-		$p['printFunc']([$m['utility'](b, $m['CONSTS'], SUBTRACT)], 1);
+		b = $m['ab'](a, (typeof CONSTS == "undefined"?$m['CONSTS']:CONSTS), SUBTRACT)['__getitem__'](1);
+		$p['printFunc']([$m['utility'](b, (typeof CONSTS == "undefined"?$m['CONSTS']:CONSTS), SUBTRACT)], 1);
 		b['printInfo']();
 		return null;
 	};
@@ -1942,7 +1937,7 @@ var $generator_state = [0], $generator_exc = [null], $yield_value = null, $exc =
 		$p['getattr'](a, 'nextPiece')['__setitem__'](0, 1);
 		$p['getattr'](a, 'nextPiece')['__setitem__'](1, 1);
 		a['printInfo']();
-		b = $m['ab'](a, $m['CONSTS'])['__getitem__'](1);
+		b = $m['ab'](a, (typeof CONSTS == "undefined"?$m['CONSTS']:CONSTS))['__getitem__'](1);
 		b['printInfo']();
 		return null;
 	};
@@ -1959,7 +1954,7 @@ var $generator_state = [0], $generator_exc = [null], $yield_value = null, $exc =
 		$p['getattr'](a, 'nextPiece')['__setitem__'](1, 0);
 		$p['getattr'](a, 'nextPiece')['__setitem__'](2, 2);
 		a['printInfo']();
-		b = $m['ab'](a, $m['CONSTS'])['__getitem__'](1);
+		b = $m['ab'](a, (typeof CONSTS == "undefined"?$m['CONSTS']:CONSTS))['__getitem__'](1);
 		b['printInfo']();
 		return null;
 	};

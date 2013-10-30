@@ -21,13 +21,13 @@ DIMENSION = 3
 WAIT = 5
 userFirst = 1
 computerFirst = 2
-MIN = "1"
-MAX = "2"
+#MIN = "1"
+#MAX = "2"
 # standard function constants based on conjecture
 # and limited gameplay experience
 ALPHA = 0.005
-CONSTS = {'c1': 1.0,'c2': 1.0,'c3': 1.0,'c4': 1.0,'c5': 1.0,'c6': 1.0,}
-TD_CONSTS = {'c1': 1.0,'c2': 1.0,'c3': 1.0,'c4': 1.0,'c5': 1.0,'c6': 1.0,}
+#CONSTS = {'c1': 1.0,'c2': 1.0,'c3': 1.0,'c4': 1.0,'c5': 1.0,'c6': 1.0,}
+#TD_CONSTS = {'c1': 1.0,'c2': 1.0,'c3': 1.0,'c4': 1.0,'c5': 1.0,'c6': 1.0,}
 
 messageComputersTurn   = "Computer's turn."
 messageChoosePlayer    = "Which player goes first? (1 = you, 2 = computer, 0 = stop) "
@@ -430,7 +430,7 @@ Checks if a win exists
 Then calls helper
 '''
 def ab(state, constants, sub, optional_args={}):
-  if option_args:
+  if optional_args:
     global TD_CONSTS
     global MIN
     global MAX
@@ -526,7 +526,7 @@ class State:
 
 
   def printInfo(self):
-    print "boards are:\n", self.printer(), "You are playing into board column", self.nextPiece[1], "row", self.nextPiece[0], "\nScore is:", self.score#, "Complicated info:\n", self.printerComplicated()
+    print "boards are:\n", self.printer(), "You are playing into board column", self.nextPiece[1], "row", self.nextPiece[0], "\nNext player is ", self.nextPiece[2]
 
 
   def copyBoards(self, otherState):
@@ -563,7 +563,7 @@ class State:
                 if(self.boards[a][b][c][d]['cell'] == 0):
                   child.copyThis(self)
                   nP = turn(self.nextPiece[2])
-                  child.nextPiece = (c,d,nP)
+                  child.nextPiece = [c,d,nP]
                   child.boards[a][b][c][d]['cell'] = self.nextPiece[2]
                   if isWin(child.boards[a][b]):
                     child.score[str(self.nextPiece[2])] += 1
@@ -578,7 +578,7 @@ class State:
           if(self.boards[a][b][c][d]['cell'] == 0):
             child.copyThis(self)
             nP = turn(self.nextPiece[2])
-            child.nextPiece = (c,d,nP)
+            child.nextPiece = [c,d,nP]
             child.boards[a][b][c][d]['cell'] = self.nextPiece[2]
             if isWin(child.boards[a][b]):
               child.score[str(self.nextPiece[2])] += 1
@@ -715,7 +715,7 @@ def computerTurn(state):
   print state.printInfo()
   (expectedUtility, nextState) = ab(state, TD_CONSTS, True)
   print "Expected utility is: ", expectedUtility
-  nextState.printInfo()
+
   state = copy.deepcopy(nextState)
   print "Scores: Player 1: ", state.score['1'], " Player 2: ", state.score['2']
   userTurn(state)

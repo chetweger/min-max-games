@@ -32,6 +32,10 @@ from learning import State, ab, isWin, isFull, turn
 class GridWidget(AbsolutePanel):
 
   def __init__(self):
+    TD_C = {'c3': 0.95992938236536673, 'c2': 1.3118140945279137, 'c1': 3.842547843349949, 'c6': 0.27602882530408006, 'c5': 0.3523534563973569, 'c4': 0.7573263980553335}
+    optional_args = {'TD_CONSTS': TD_C, 'MAX': '1', 'MIN': 2}
+    ab(State(),  TD_C, False, optional_args=optional_args)[1].printInfo()
+    '''
     AbsolutePanel.__init__(self)
 
 
@@ -48,20 +52,14 @@ class GridWidget(AbsolutePanel):
     self.add(self.g)
 
     self.state = State()
-
-    self.state.boards[1][0][1][0]['cell'] = 1
-    self.state.boards[0][2][0][2]['cell'] = 2
-    self.state_to_grid()
-
-    g = self.g.getWidget(0, 0)
-    g.setText(0, 0, '1')
-
-    self.grid_to_state()
-    self.state_to_grid()
-    self.max_player = '-1'
-    self.min_player = '-1'
-
     self.TD_CONSTS = {'c3': 0.95992938236536673, 'c2': 1.3118140945279137, 'c1': 3.842547843349949, 'c6': 0.27602882530408006, 'c5': 0.3523534563973569, 'c4': 0.7573263980553335}
+    self.state.printInfo()
+    self.state = ab(self.state, self.TD_CONSTS, False)[1]
+    self.state.printInfo()
+    print 'done'
+    self.state_to_grid()
+    '''
+
 
   def onClick(self, sender):
     print "Registered."
@@ -174,7 +172,7 @@ class GridWidget(AbsolutePanel):
               assert board[y_board][x_board][y_cell][x_cell]['cell'] == 0
             elif (g.getText(y_cell, x_cell) == '1') or (g.getText(y_cell, x_cell) == '2'):
               if self.state.boards[y_board][x_board][y_cell][x_cell]['cell'] == 0:
-                self.state.boards[y_board][x_board][y_cell][x_cell]['cell'] = str(g.getText(y_cell, x_cell))
+                self.state.boards[y_board][x_board][y_cell][x_cell]['cell'] = int(g.getText(y_cell, x_cell))
                 piece = list(self.state.nextPiece)
                 print piece
                 if isWin(self.state.boards[piece[0]][piece[1]]):
@@ -182,7 +180,7 @@ class GridWidget(AbsolutePanel):
                 print 'a', piece
                 piece[2] = 1
                 print 'yes'
-                piece[2] = int(piece[2] == 1) + 1
+                #piece[2] = int(piece[2] == 1) + 1 # next player!
                 print 'b'
                 piece[0] = y_cell
                 print 'c'
