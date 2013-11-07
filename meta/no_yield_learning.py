@@ -377,7 +377,8 @@ def maxH(state, depth, maxDepth, a, b, constants, sub):
 
   util_child_pairs = []
   for child in child_list:
-    util_value = minH(child, depth+1, maxDepth, a, b, constants, sub)
+    #util_value = minH(child, depth+1, maxDepth, a, b, constants, sub) # TODO fix this: this is broken
+    util_value = utility(child, constants, sub)                        # TODO however, this works.
     util_child_pairs += [(util_value, child)]
   max_child = max(util_child_pairs)
 
