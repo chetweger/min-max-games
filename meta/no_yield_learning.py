@@ -17,6 +17,12 @@ if __name__ == '__main__':
   global CURRENT_DIR
   CURRENT_DIR = os.getcwd()
 
+def define_constants():
+  global MIN
+  global MAX
+  MIN = '1'
+  MAX = '2'
+
 DIMENSION = 3
 WAIT = 5
 userFirst = 1
@@ -26,13 +32,8 @@ computerFirst = 2
 # standard function constants based on conjecture
 # and limited gameplay experience
 ALPHA = 0.005
-<<<<<<< HEAD
-CONSTS = {'c1': 4.0,'c2': 1.4,'c3': .9,'c4': .7,'c5': .4,'c6': .2,}
-TD_CONSTS = {'c1': 4.0,'c2': 1.4,'c3': .9,'c4': .7,'c5': .4,'c6': .2,}
-=======
 #CONSTS = {'c1': 1.0,'c2': 1.0,'c3': 1.0,'c4': 1.0,'c5': 1.0,'c6': 1.0,}
 TD_CONSTS = {'c1': 0,'c2': 1.0,'c3': 0,'c4': 0,'c5': 0,'c6': 0,}
->>>>>>> 7cd8656180665661d1d0a48e01f8271a014bdd4e
 
 messageComputersTurn   = "Computer's turn."
 messageChoosePlayer    = "Which player goes first? (1 = you, 2 = computer, 0 = stop) "
@@ -157,7 +158,9 @@ def f1_score(state):
   # Why MIN - MAX ?
   # Because player who call utility does not change state
   # so the state corresponds to the previous player.
-  return state.score[MIN] - state.score[MAX]
+  v = state.score[MIN] - state.score[MAX]
+  print v
+  return v
 
 '''
 Returns all the boards that have not been won yet.
@@ -343,55 +346,22 @@ alpha-beta helper
 '''
 def minH(state, depth, maxDepth, a, b, constants, sub):
 
-  value = Util(9001.0, State())
-  s = State()
-  gen = state.genChildren(s)
-  nextS = gen.next()
+  value = Util(+9001.0, State())
+  child_list = state.genChildren()
 
-  if (depth == maxDepth) or (nextS == None):
+  if (not child_list) or (depth == maxDepth):
     return Util(utility(state, constants, sub), state)
 
-  iterations = 0
-  copy_in = State()
-  while nextS != None:
-    copy_in.copyThis(nextS)
-    value = min_util([value, maxH(copy_in, depth+1, maxDepth, a, b, constants, sub)])
-    assert type(value) == type(a)
-    if value.value <= a.value:
-      return Util(-9001.0, State()) # we don't want to choose this!
-    b = min_util([b, value])
-    nextS = gen.next()
-  return value
+  util_child_pairs = []
+  for child in child_list:
+    util_value = maxH(child, depth+1, maxDepth, a, b, constants, sub)
+    util_child_pairs += [(util_value, child)]
+  max_child = min(util_child_pairs)
 
-def get_max(copy_to_me, choice1, choice2):
-  '''This is horifyingly ugly code, but I had to get rid of the 
-  copy module in order to allow pyjamas to work.'''
-  print choice1[0].value
-  print choice2[0].value
-  if choice1[0].value >= choice2[0].value:
-    copy_to_me[1].copyThis(choice1[1])
-    copy_to_me[0] = choice1[0]
+  if depth == 0:
+    return max_child
   else:
-    copy_to_me[1].copyThis(choice2[1])
-    copy_to_me[0] = choice2[0]
-
-def max_util(utils):
-  max_u = Util(-102323, None)
-  for util in utils:
-    print util.value
-    print util.value
-    if util.value > max_u.value:
-      max_u = util
-  return max_u
-
-def min_util(utils):
-  max_u =  Util(102323, None)
-  for util in utils:
-    print util.value
-    print util.value
-    if util.value < max_u.value:
-      max_u = util
-  return max_u
+    return max_child[0]
 
 '''
 called by ab
@@ -400,42 +370,24 @@ The minmax alpha-beta prunning algorithm as described by Norvig p. 170
 def maxH(state, depth, maxDepth, a, b, constants, sub):
 
   value = Util(-9001.0, State())
-  s = State()
-  gen = state.genChildren(s)
-  nextS = gen.next()
+  child_list = state.genChildren()
 
-  if (depth == maxDepth):
+  if (not child_list) or (depth == maxDepth):
     return Util(utility(state, constants, sub), state)
 
+  util_child_pairs = []
+  for child in child_list:
+    #util_value = minH(child, depth+1, maxDepth, a, b, constants, sub) # TODO fix this: this is broken
+    util_value = utility(child, constants, sub)                        # TODO however, this works.
+    util_child_pairs += [(util_value, child)]
+  max_child = max(util_child_pairs)
+
   if depth == 0:
-    iteration = 0
-
-    highestSoFar = State()
-    highestSoFar.copyThis(nextS)
-
-    min_h = minH(nextS, depth+1, maxDepth, a, b, constants, sub)
-    value = [min_h, highestSoFar]
-    while nextS != None:
-      iteration += 1
-      min_h = minH(nextS, depth+1, maxDepth, a, b, constants, sub)
-      assert type(value) == type([min_h, nextS])
-      get_max( value, value, [min_h, nextS] )
-      if value[0].value >= b.value:
-        return (Util(9001.0, State()), value[1]) # we don't want to select this
-      a = max_util([a, value[0]])
-      nextS = gen.next()
-    return value
+    return max_child
   else:
-    copy_in = State()
-    while nextS != None:
-      copy_in.copyThis(nextS)
-      value = max_util([value, minH(copy_in, depth+1, maxDepth, a, b, constants, sub)])
-      assert type(value) == type(b)
-      if value.value >= b.value:
-        return Util(9001.0, State()) # don't want to select this (another option is implied)
-      a = max_util([a, value])
-      nextS = gen.next()
-    return value
+    return max_child[0]
+
+
 
 '''
 Could the current player force a win?
@@ -466,7 +418,7 @@ def ab(state, constants, sub, optional_args={}):
 
   farthestDepth = 1
   duration = 0
-  while (farthestDepth < 3): # duration < WAIT and 
+  while (farthestDepth < 2): # duration < WAIT and 
     new = State()
     new.copyThis(state)
     nextState = maxH(new, 0, farthestDepth, Util(-9005.0, State()), Util(9005.0, State()), constants, sub)
@@ -573,12 +525,13 @@ class State:
     self.score['1'] = other.score['1']
     self.score['2'] = other.score['2']
 
-  def genChildren(self, child): #list of states
+  def genChildren(self): #list of states
     aL = range(DIMENSION)
     bL = range(DIMENSION)
     cL = range(DIMENSION)
     dL = range(DIMENSION)
     #print "isWin?", isWin(self.boards[self.nextPiece[0]][self.nextPiece[1]])
+    children_list = []
     if isWin(self.boards[self.nextPiece[0]][self.nextPiece[1]]):
       #print "One"
       for a in aL:
@@ -587,14 +540,14 @@ class State:
             for c in cL:
               for d in dL:
                 if(self.boards[a][b][c][d]['cell'] == 0):
+                  child = State()
                   child.copyThis(self)
                   nP = turn(self.nextPiece[2])
                   child.nextPiece = [c,d,nP]
                   child.boards[a][b][c][d]['cell'] = self.nextPiece[2]
                   if isWin(child.boards[a][b]):
                     child.score[str(self.nextPiece[2])] += 1
-                  child.printer
-                  yield child
+                  children_list.append(child)
     else:
       #print "Two"
       a = self.nextPiece[0]
@@ -602,14 +555,15 @@ class State:
       for c in cL:
         for d in dL:
           if(self.boards[a][b][c][d]['cell'] == 0):
+            child = State()
             child.copyThis(self)
             nP = turn(self.nextPiece[2])
             child.nextPiece = [c,d,nP]
             child.boards[a][b][c][d]['cell'] = self.nextPiece[2]
             if isWin(child.boards[a][b]):
               child.score[str(self.nextPiece[2])] += 1
-            yield child
-    yield None
+            children_list.append(child)
+    return children_list
 
 ''' Face the AI in meta-ttt '''
 def playAI():

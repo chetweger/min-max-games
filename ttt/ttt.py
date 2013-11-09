@@ -151,7 +151,7 @@ def next_player(player_int):
     return 2
   elif player_int == 2:
     return 1
-  player_int['fail']
+  assert False
 
 def is_win(state):
   board = state.board
