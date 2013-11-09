@@ -26,8 +26,8 @@ MAX = "2"
 # standard function constants based on conjecture
 # and limited gameplay experience
 ALPHA = 0.005
-CONSTS = {'c1': 1.0,'c2': 1.0,'c3': 1.0,'c4': 1.0,'c5': 1.0,'c6': 1.0,}
-TD_CONSTS = {'c1': 1.0,'c2': 1.0,'c3': 1.0,'c4': 1.0,'c5': 1.0,'c6': 1.0,}
+CONSTS = {'c1': 4.0,'c2': 1.4,'c3': .9,'c4': .7,'c5': .4,'c6': .2,}
+TD_CONSTS = {'c1': 4.0,'c2': 1.4,'c3': .9,'c4': .7,'c5': .4,'c6': .2,}
 
 messageComputersTurn   = "Computer's turn."
 messageChoosePlayer    = "Which player goes first? (1 = you, 2 = computer, 0 = stop) "
@@ -349,23 +349,43 @@ def minH(state, depth, maxDepth, a, b, constants, sub):
   copy_in = State()
   while nextS != None:
     copy_in.copyThis(nextS)
-    value = min(value, maxH(copy_in, depth+1, maxDepth, a, b, constants, sub))
+    value = min_util([value, maxH(copy_in, depth+1, maxDepth, a, b, constants, sub)])
     assert type(value) == type(a)
-    if value <= a:
+    if value.value <= a.value:
       return Util(-9001.0, State()) # we don't want to choose this!
-    b = min(b, value)
+    b = min_util([b, value])
     nextS = gen.next()
   return value
 
 def get_max(copy_to_me, choice1, choice2):
   '''This is horifyingly ugly code, but I had to get rid of the 
   copy module in order to allow pyjamas to work.'''
-  if choice1[0] >= choice2[0]:
+  print choice1[0].value
+  print choice2[0].value
+  if choice1[0].value >= choice2[0].value:
     copy_to_me[1].copyThis(choice1[1])
     copy_to_me[0] = choice1[0]
   else:
     copy_to_me[1].copyThis(choice2[1])
     copy_to_me[0] = choice2[0]
+
+def max_util(utils):
+  max_u = Util(-102323, None)
+  for util in utils:
+    print util.value
+    print util.value
+    if util.value > max_u.value:
+      max_u = util
+  return max_u
+
+def min_util(utils):
+  max_u =  Util(102323, None)
+  for util in utils:
+    print util.value
+    print util.value
+    if util.value < max_u.value:
+      max_u = util
+  return max_u
 
 '''
 called by ab
@@ -394,20 +414,20 @@ def maxH(state, depth, maxDepth, a, b, constants, sub):
       min_h = minH(nextS, depth+1, maxDepth, a, b, constants, sub)
       assert type(value) == type([min_h, nextS])
       get_max( value, value, [min_h, nextS] )
-      if value >= (b, 'make comparisons work'):
+      if value[0].value >= b.value:
         return (Util(9001.0, State()), value[1]) # we don't want to select this
-      a = max(a, value[0])
+      a = max_util([a, value[0]])
       nextS = gen.next()
     return value
   else:
     copy_in = State()
     while nextS != None:
       copy_in.copyThis(nextS)
-      value = max(value, minH(copy_in, depth+1, maxDepth, a, b, constants, sub))
+      value = max_util([value, minH(copy_in, depth+1, maxDepth, a, b, constants, sub)])
       assert type(value) == type(b)
-      if value >= b:
+      if value.value >= b.value:
         return Util(9001.0, State()) # don't want to select this (another option is implied)
-      a = max(a, value)
+      a = max_util([a, value])
       nextS = gen.next()
     return value
 
@@ -430,7 +450,7 @@ Checks if a win exists
 Then calls helper
 '''
 def ab(state, constants, sub, optional_args={}):
-  if option_args:
+  if optional_args:
     global TD_CONSTS
     global MIN
     global MAX

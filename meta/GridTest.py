@@ -48,7 +48,7 @@ class GridWidget(AbsolutePanel):
     self.add(self.g)
 
     self.state = State()
-
+    '''
     self.state.boards[1][0][1][0]['cell'] = 1
     self.state.boards[0][2][0][2]['cell'] = 2
     self.state_to_grid()
@@ -60,6 +60,7 @@ class GridWidget(AbsolutePanel):
     self.state_to_grid()
     self.max_player = '-1'
     self.min_player = '-1'
+    '''
 
     self.TD_CONSTS = {'c3': 0.95992938236536673, 'c2': 1.3118140945279137, 'c1': 3.842547843349949, 'c6': 0.27602882530408006, 'c5': 0.3523534563973569, 'c4': 0.7573263980553335}
 
@@ -168,7 +169,7 @@ class GridWidget(AbsolutePanel):
               assert board[y_board][x_board][y_cell][x_cell]['cell'] == 0
             elif (g.getText(y_cell, x_cell) == '1') or (g.getText(y_cell, x_cell) == '2'):
               if self.state.boards[y_board][x_board][y_cell][x_cell]['cell'] == 0:
-                self.state.boards[y_board][x_board][y_cell][x_cell]['cell'] = str(g.getText(y_cell, x_cell))
+                self.state.boards[y_board][x_board][y_cell][x_cell]['cell'] = int(g.getText(y_cell, x_cell))
                 piece = self.state.nextPiece
                 if isWin(self.state.boards[piece[0]][piece[1]]):
                   self.state.score[str(piece[2])] += 1
