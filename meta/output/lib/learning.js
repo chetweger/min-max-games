@@ -307,21 +307,23 @@ $pyjs['loaded_modules']['learning'] = function (__mod_name__) {
 	$m['getActive']['__bind_type__'] = 0;
 	$m['getActive']['__args__'] = [null,null,['state']];
 	$m['f2_center'] = function(state) {
-		var $add28,$iter13_nextval,center,$iter13_iter,$add25,board,$add27,$iter13_array,$sub8,activeBoards,$add26,$sub7,$iter13_type,$iter13_idx;
-		center = $p['dict']([[$m['MIN'], 0], [$m['MAX'], 0]]);
+		var $add28,$iter13_nextval,center,$iter13_iter,MAX,MIN,$add25,board,$add27,$iter13_array,$sub8,activeBoards,$add26,$sub7,$iter13_type,$iter13_idx;
+		MIN = '1';
+		MAX = '2';
+		center = $p['dict']([[MIN, 0], [MAX, 0]]);
 		activeBoards = $m['getActive'](state);
 		$iter13_iter = activeBoards;
 		$iter13_nextval=$p['__iter_prepare']($iter13_iter,false);
 		while (typeof($p['__wrapped_next']($iter13_nextval)['$nextval']) != 'undefined') {
 			board = $iter13_nextval['$nextval'];
-			if ($p['bool']($p['op_eq'](board['__getitem__'](1)['__getitem__'](1)['__getitem__']('cell'), $p['float_int']($m['MIN'])))) {
-				center['__setitem__']($m['MIN'], $p['__op_add']($add25=center['__getitem__']($m['MIN']),$add26=1));
+			if ($p['bool']($p['op_eq'](board['__getitem__'](1)['__getitem__'](1)['__getitem__']('cell'), $p['float_int'](MIN)))) {
+				center['__setitem__'](MIN, $p['__op_add']($add25=center['__getitem__'](MIN),$add26=1));
 			}
-			else if ($p['bool']($p['op_eq'](board['__getitem__'](1)['__getitem__'](1)['__getitem__']('cell'), $p['float_int']($m['MAX'])))) {
-				center['__setitem__']($m['MAX'], $p['__op_add']($add27=center['__getitem__']($m['MAX']),$add28=1));
+			else if ($p['bool']($p['op_eq'](board['__getitem__'](1)['__getitem__'](1)['__getitem__']('cell'), $p['float_int'](MAX)))) {
+				center['__setitem__'](MAX, $p['__op_add']($add27=center['__getitem__'](MAX),$add28=1));
 			}
 		}
-		return $p['__op_sub']($sub7=center['__getitem__']($m['MIN']),$sub8=center['__getitem__']($m['MAX']));
+		return $p['__op_sub']($sub7=center['__getitem__'](MIN),$sub8=center['__getitem__'](MAX));
 	};
 	$m['f2_center']['__name__'] = 'f2_center';
 
@@ -1173,7 +1175,7 @@ $pyjs['loaded_modules']['learning'] = function (__mod_name__) {
 				var self = arguments[0];
 			}
 
-			$p['printFunc'](['boards are:\n', self['printer'](), 'You are playing into board column', $p['getattr'](self, 'nextPiece')['__getitem__'](1), 'row', $p['getattr'](self, 'nextPiece')['__getitem__'](0), '\nScore is:', $p['getattr'](self, 'score')], 1);
+			$p['printFunc'](['boards are:\n', self['printer'](), 'You are playing into board column', $p['getattr'](self, 'nextPiece')['__getitem__'](1), 'row', $p['getattr'](self, 'nextPiece')['__getitem__'](0), '\nNext player is ', $p['getattr'](self, 'nextPiece')['__getitem__'](2)], 1);
 			return null;
 		}
 	, 1, [null,null,['self']]);
@@ -1412,7 +1414,7 @@ var $generator_state = [0], $generator_exc = [null], $yield_value = null, $exc =
 																			for (var $i = 10 ; $i < ($generator_state['length']<12?12:$generator_state['length']); $i++) $generator_state[$i]=0;
 																			child['copyThis'](self);
 																			nP = $m['turn']($p['getattr'](self, 'nextPiece')['__getitem__'](2));
-																			child['nextPiece'] = $p['tuple']([c, d, nP]);
+																			child['nextPiece'] = $p['list']([c, d, nP]);
 																			$p['getattr'](child, 'boards')['__getitem__'](a)['__getitem__'](b)['__getitem__'](c)['__getitem__'](d)['__setitem__']('cell', $p['getattr'](self, 'nextPiece')['__getitem__'](2));
 																			if ($p['bool']($m['isWin']($p['getattr'](child, 'boards')['__getitem__'](a)['__getitem__'](b)))) {
 																				var $augsub3 = $p['str']($p['getattr'](self, 'nextPiece')['__getitem__'](2));
@@ -1523,7 +1525,7 @@ var $generator_state = [0], $generator_exc = [null], $yield_value = null, $exc =
 													for (var $i = 6 ; $i < ($generator_state['length']<8?8:$generator_state['length']); $i++) $generator_state[$i]=0;
 													child['copyThis'](self);
 													nP = $m['turn']($p['getattr'](self, 'nextPiece')['__getitem__'](2));
-													child['nextPiece'] = $p['tuple']([c, d, nP]);
+													child['nextPiece'] = $p['list']([c, d, nP]);
 													$p['getattr'](child, 'boards')['__getitem__'](a)['__getitem__'](b)['__getitem__'](c)['__getitem__'](d)['__setitem__']('cell', $p['getattr'](self, 'nextPiece')['__getitem__'](2));
 													if ($p['bool']($m['isWin']($p['getattr'](child, 'boards')['__getitem__'](a)['__getitem__'](b)))) {
 														var $augsub4 = $p['str']($p['getattr'](self, 'nextPiece')['__getitem__'](2));
@@ -1770,7 +1772,6 @@ var $generator_state = [0], $generator_exc = [null], $yield_value = null, $exc =
 		expectedUtility = $tupleassign7[0];
 		nextState = $tupleassign7[1];
 		$p['printFunc'](['Expected utility is: ', expectedUtility], 1);
-		nextState['printInfo']();
 		state = $m['copy']['deepcopy'](nextState);
 		$p['printFunc'](['Scores: Player 1: ', $p['getattr'](state, 'score')['__getitem__']('1'), ' Player 2: ', $p['getattr'](state, 'score')['__getitem__']('2')], 1);
 		$m['userTurn'](state);

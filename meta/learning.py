@@ -21,18 +21,13 @@ DIMENSION = 3
 WAIT = 5
 userFirst = 1
 computerFirst = 2
-#MIN = "1"
-#MAX = "2"
+MIN = "1"
+MAX = "2"
 # standard function constants based on conjecture
 # and limited gameplay experience
 ALPHA = 0.005
-<<<<<<< HEAD
 CONSTS = {'c1': 4.0,'c2': 1.4,'c3': .9,'c4': .7,'c5': .4,'c6': .2,}
 TD_CONSTS = {'c1': 4.0,'c2': 1.4,'c3': .9,'c4': .7,'c5': .4,'c6': .2,}
-=======
-#CONSTS = {'c1': 1.0,'c2': 1.0,'c3': 1.0,'c4': 1.0,'c5': 1.0,'c6': 1.0,}
-TD_CONSTS = {'c1': 0,'c2': 1.0,'c3': 0,'c4': 0,'c5': 0,'c6': 0,}
->>>>>>> 7cd8656180665661d1d0a48e01f8271a014bdd4e
 
 messageComputersTurn   = "Computer's turn."
 messageChoosePlayer    = "Which player goes first? (1 = you, 2 = computer, 0 = stop) "

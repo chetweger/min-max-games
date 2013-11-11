@@ -32,9 +32,10 @@ from learning import State, ab, isWin, isFull, turn
 class GridWidget(AbsolutePanel):
 
   def __init__(self):
-    TD_C = {'c3': 0.95992938236536673, 'c2': 1.3118140945279137, 'c1': 3.842547843349949, 'c6': 0.27602882530408006, 'c5': 0.3523534563973569, 'c4': 0.7573263980553335}
+    self.TD_CONSTS = {'c3': 0.95992938236536673, 'c2': 1.3118140945279137, 'c1': 3.842547843349949, 'c6': 0.27602882530408006, 'c5': 0.3523534563973569, 'c4': 0.7573263980553335}
     optional_args = {'TD_CONSTS': TD_C, 'MAX': '1', 'MIN': 2}
-    ab(State(),  TD_C, False, optional_args=optional_args)[1].printInfo()
+    #ab(State(),  TD_C, False, optional_args=optional_args)[1].printInfo()
+    '''
     '''
     AbsolutePanel.__init__(self)
 
@@ -52,28 +53,10 @@ class GridWidget(AbsolutePanel):
     self.add(self.g)
 
     self.state = State()
-<<<<<<< HEAD
-    '''
-    self.state.boards[1][0][1][0]['cell'] = 1
-    self.state.boards[0][2][0][2]['cell'] = 2
-    self.state_to_grid()
 
-    g = self.g.getWidget(0, 0)
-    g.setText(0, 0, '1')
-
-    self.grid_to_state()
     self.state_to_grid()
     self.max_player = '-1'
     self.min_player = '-1'
-=======
-    self.TD_CONSTS = {'c3': 0.95992938236536673, 'c2': 1.3118140945279137, 'c1': 3.842547843349949, 'c6': 0.27602882530408006, 'c5': 0.3523534563973569, 'c4': 0.7573263980553335}
-    self.state.printInfo()
-    self.state = ab(self.state, self.TD_CONSTS, False)[1]
-    self.state.printInfo()
-    print 'done'
-    self.state_to_grid()
->>>>>>> 7cd8656180665661d1d0a48e01f8271a014bdd4e
-    '''
 
 
   def onClick(self, sender):
@@ -114,14 +97,16 @@ class GridWidget(AbsolutePanel):
       g.setText(point['y_cell'], point['x_cell'], str(self.min_player))
 
       self.grid_to_state()
+      self.state.nextPiece[2] = self.max_player
       print 'onClick'
       #self.state.player = next_player(self.state.player)
 
-      self.state.printInfo()
       print 'player is ', self.state.nextPiece
-      self.state = ab(self.state, self.TD_CONSTS, False, 
+      self.state.printInfo()
+      self.state = ab(self.state, self.TD_CONSTS, True, 
         optional_args={'TD_CONSTS': self.TD_CONSTS, 
           'MIN': self.min_player, 'MAX': self.max_player})[1]
+      self.state.printInfo()
       self.state_to_grid()
 
   def will_buttons(self, y_board, x_board):
@@ -188,12 +173,7 @@ class GridWidget(AbsolutePanel):
             elif (g.getText(y_cell, x_cell) == '1') or (g.getText(y_cell, x_cell) == '2'):
               if self.state.boards[y_board][x_board][y_cell][x_cell]['cell'] == 0:
                 self.state.boards[y_board][x_board][y_cell][x_cell]['cell'] = int(g.getText(y_cell, x_cell))
-<<<<<<< HEAD
                 piece = self.state.nextPiece
-=======
-                piece = list(self.state.nextPiece)
-                print piece
->>>>>>> 7cd8656180665661d1d0a48e01f8271a014bdd4e
                 if isWin(self.state.boards[piece[0]][piece[1]]):
                   self.state.score[str(piece[2])] += 1
                 print 'a', piece
