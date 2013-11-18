@@ -69,11 +69,11 @@ class GridWidget(AbsolutePanel):
       del(self.ai_first) # remove all fucking traces
       print 'button ai_first exists', hasattr(self, 'ai_first')
 
-      self.state.print_me()
+      self.state.printInfo()
       print 'player is ', self.state.nextPiece
       self.state = ab(self.state, self.TD_CONSTS, False, 
         optional_args={'TD_CONSTS': self.TD_CONSTS, 
-          'MIN': self.min_player, 'MAX': self.max_player})
+          'MIN': self.min_player, 'MAX': self.max_player})[1]
       self.state_to_grid()
 
     else:
