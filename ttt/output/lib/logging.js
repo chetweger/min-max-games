@@ -24,7 +24,7 @@ $pyjs['loaded_modules']['logging'] = function (__mod_name__) {
 	$m['__status__'] = 'production';
 	$m['__version__'] = '0.5.0.2';
 	$m['__date__'] = '16 February 2007';
-	$m['_srcfile'] = '/home/chet/Desktop/programs/python/pyjs/pyjs/src/pyjs/lib/logging/__init__.py';
+	$m['_srcfile'] = '/home/chet/libraries/pyjs/pyjs/src/pyjs/lib/logging/__init__.py';
 	$m['currentframe'] = function() {
 		var $pyjs_try_err;
 		try {

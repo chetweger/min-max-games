@@ -385,7 +385,9 @@ $pyjs['loaded_modules']['ttt'] = function (__mod_name__) {
 		else if ($p['bool']($p['op_eq'](player_int, 2))) {
 			return 1;
 		}
-		player_int['__getitem__']('fail');
+		if (!( false )) {
+		   throw $p['AssertionError']();
+		 }
 		return null;
 	};
 	$m['next_player']['__name__'] = 'next_player';

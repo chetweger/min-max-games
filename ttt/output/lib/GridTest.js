@@ -106,7 +106,7 @@ $pyjs['loaded_modules']['GridTest'] = function (__mod_name__) {
 			}
 
 			if ($p['bool']((typeof is_over == "undefined"?$m['is_over']:is_over)($p['getattr'](self, 'state')))) {
-				$pyjs_kwargs_call(self, 'state_to_grid', null, null, [{'game_over':true, 'over_message':'<b>The game was a tie.</b>'}, $p['getattr'](self, 'state')]);
+				$pyjs_kwargs_call(self, 'state_to_grid', null, null, [{'game_over':true, 'over_message':'<b>The game is a tie.</b>'}, $p['getattr'](self, 'state')]);
 			}
 			return null;
 		}

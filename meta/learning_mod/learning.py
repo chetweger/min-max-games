@@ -26,8 +26,8 @@ MAX = "2"
 # standard function constants based on conjecture
 # and limited gameplay experience
 ALPHA = 0.005
-CONSTS = {'c1': 1, 'c2': 1, 'c3': 1, 'c4': 1, 'c5': 1, 'c6': 1}
-TD_CONSTS = {'c1': 1, 'c2': 1, 'c3': 1, 'c4': 1, 'c5': 1, 'c6': 1}
+CONSTS = {'c1': 1, 'c2': 1, 'c3': 1, 'c4': 1, 'c5': 1}
+TD_CONSTS = {'c1': 1, 'c2': 1, 'c3': 1, 'c4': 1, 'c5': 1}
 
 messageComputersTurn   = "Computer's turn."
 messageChoosePlayer    = "Which player goes first? (1 = you, 2 = computer, 0 = stop) "
@@ -108,6 +108,7 @@ def checkOver(state):
   writeTo.write(str(TD_CONSTS))
   writeTo.close()
   print "Game over."
+  exit()
 
 '''
 Determines if the game is over!
@@ -134,12 +135,14 @@ def utility(state, constants, sub):
   f2 = f2_center(state) * constants['c2']
   f3 = f3_corner(state) * constants['c3']
   f4 = f4_side(state) * constants['c4']
-  f5 = f5_blocking(state) * constants['c5']
-  f6 = f6_potential(state) * constants['c6']
+  f5 = f5_potentials(state)
+  f5 = f5 * constants['c5']
+  #f6 = f6 * constants['c6']
+  #f7 = f7 * constants['c7']
   if sub:
-    return -(f1 + f2 + f3 + f4 + f5 + f6)
+    return -(f1 + f2 + f3 + f4 + f5)
   else:
-    return (f1 + f2 + f3 + f4 + f5 + f6)
+    return (f1 + f2 + f3 + f4 + f5)
 
 ''' the utility function plus dictionary for TD learning! '''
 def subUtil(state, constants, sub):
@@ -147,12 +150,14 @@ def subUtil(state, constants, sub):
   f2 = f2_center(state) * constants['c2']
   f3 = f3_corner(state) * constants['c3']
   f4 = f4_side(state) * constants['c4']
-  f5 = f5_blocking(state) * constants['c5']
-  f6 = f6_potential(state) * constants['c6']
+  f5 = f5_potentials(state)
+  f5 = f5 * constants['c5']
+  #f6 = f6 * constants['c6']
+  #f7 = f7 * constants['c7']
   if sub:
-    return [-f1, -f2, -f3, -f4, -f5, -f6]
+    return [-f1, -f2, -f3, -f4, -f5]
   else:
-    return [f1, f2, f3, f4, f5, f6]
+    return [f1, f2, f3, f4, f5]
 
 
 '''
@@ -193,11 +198,10 @@ def f2_center(state):
       center[MAX] += 1
   return center[MIN] - center[MAX]
 
-'''
-Relative number of ACTIVE corner
-pieces
-'''
 def f3_corner(state):
+  '''Relative number of ACTIVE corner
+  pieces
+  '''
   cornerCount = {MIN: 0, MAX: 0,}
   activeBoards = getActive(state)
   for board in activeBoards:
@@ -209,11 +213,10 @@ def f3_corner(state):
         cornerCount[MAX] += 1
   return cornerCount[MIN] - cornerCount[MAX]
 
-'''
-Relative number of ACTIVE side
-pieces
-'''
 def f4_side(state):
+  '''Relative number of ACTIVE side
+  pieces
+  '''
   sideCount = {MIN: 0, MAX: 0,}
   activeBoards = getActive(state)
   for board in activeBoards:
@@ -225,23 +228,9 @@ def f4_side(state):
         sideCount[MAX] += 1
   return sideCount[MIN] - sideCount[MAX]
 
-'''
-returns true if 2 is blocked by 1 in a row
-'''
-def hasBlock(listDict):
-  cells = map((lambda x: x['cell']), listDict)
-  cells = sorted(cells)
-  if cells == [1, 2, 2]:
-    return "1" # Good for player 1
-  elif cells == [1, 1, 2]:
-    return "2"
-  else:
-    return None
-
-'''
-returns true we have [DIMENSION] in a row
-'''
 def hasPotential(listDict):
+  '''returns true we have [DIMENSION] in a row
+  '''
   cells = map((lambda x: x['cell']), listDict)
   cells = sorted(cells)
   if cells == [0, 2, 2]:
@@ -251,10 +240,9 @@ def hasPotential(listDict):
   else:
     return None
 
-'''
-gets the transpose of each board in a list of boards
-'''
 def transposeBoards(lBoards):
+  '''gets the transpose of each board in a list of boards
+  '''
   newList = []
   for board in lBoards:
     newBoard = []
@@ -263,71 +251,49 @@ def transposeBoards(lBoards):
     newList += [newBoard]
   return newList
 
-'''
-like getActive but gets all boards instead
-'''
 def getAllBoards(state):
+  '''like getActive but gets all boards instead
+  '''
   active_boards = []
   for line_boards in state.boards:
     for board in line_boards:
       active_boards += [board]
   return active_boards
 
-'''
-Counts the relative number of blocking positions.
-'''
-def f5_blocking(inputState):
+def f5_potentials(inputState):
+  '''Counts the relative number of potential positions.
+  Returns: we return 2 values: relative number of boards with one or more potential and relative number of boards with 2 potentials.
+  '''
   # why this line?
   # b/c i modify state
   state = State()
   state.copyThis(inputState)
-  blocking = {'1': 0, '2': 0, }
-
-  # we count activeBoards as ALLL boards:
-  activeBoards = getAllBoards(state)
-
-  activeBoardsTranspose = transposeBoards(activeBoards)
-  for board in activeBoards:
-    for row in board:
-      getblock = hasBlock(row)
-      if getblock == MAX:
-        blocking[MAX] += 1
-      elif getblock == MIN:
-        blocking[MIN] += 1
-  for board in activeBoardsTranspose:
-    #returns y=-x diagonal (the trace):
-    diagonal1 = [board[i][i] for i in range(DIMENSION)]
-    #returns y=x diagonal:
-    diagonal2 = [board[i][DIMENSION-i-1] for i in range(DIMENSION)]
-    # convert type to list so we can add diags...
-    board = list(board)
-    board += [diagonal1, diagonal2]
-    for row in board:
-      getBlock = hasBlock(row)
-      if getBlock == MAX:
-        blocking[MAX] += 1
-      elif getBlock == MIN:
-        blocking[MIN] += 1
-  return blocking[MIN] - blocking[MAX]
-
-'''
-Counts the relative number of potential positions.
-'''
-def f6_potential(inputState):
-  # why this line?
-  # b/c i modify state
-  state = State()
-  state.copyThis(inputState)
-  potential = {'1': 0, '2': 0, }
+  potential_1 = {'1': 0, '2': 0, '3': 0, }
+  potential_2 = {'1': 0, '2': 0, '3': 0, }
+  potential_3 = {'1': 0, '2': 0, '3': 0, }
   activeBoards = getActive(state)
   activeBoardsTranspose = transposeBoards(activeBoards)
   for board in activeBoards:
+    min_pot = 0
+    max_pot = 0
     for row in board:
       getpot = hasPotential(row)
       if getpot == MAX:
-        potential[MAX] += 1
+        max_pot += 1
       elif getpot == MIN:
-        potential[MIN] += 1
+        min_pot += 1
+    if min_pot == 1:
+      potential_1[MIN] += 1
+    if min_pot == 2:
+      potential_2[MIN] += 1
+    if min_pot == 3:
+      potential_3[MIN] += 1
+    if max_pot == 1:
+      potential_1[MAX] += 1
+    if max_pot == 2:
+      potential_2[MAX] += 1
+    if max_pot == 3:
+      potential_3[MAX] += 1
   for board in activeBoardsTranspose:
     #returns y=-x diagonal (the trace):
     diagonal1 = [board[i][i] for i in range(DIMENSION)]
@@ -336,18 +302,32 @@ def f6_potential(inputState):
     # convert type to list so we can add diags...
     board = list(board)
     board += [diagonal1, diagonal2]
+    min_pot = 0
+    max_pot = 0
     for row in board:
-      getPot = hasPotential(row)
-      if getPot == MAX:
-        potential[MAX] += 1
-      elif getPot == MIN:
-        potential[MIN] += 1
-  return potential[MIN] - potential[MAX]
+      getpot = hasPotential(row)
+      if getpot == MAX:
+        max_pot += 1
+      elif getpot == MIN:
+        min_pot += 1
+    if min_pot == 1:
+      potential_1[MIN] += 1
+    if min_pot == 2:
+      potential_2[MIN] += 1
+    if min_pot == 3:
+      potential_3[MIN] += 1
+    if max_pot == 1:
+      potential_1[MAX] += 1
+    if max_pot == 2:
+      potential_2[MAX] += 1
+    if max_pot == 3:
+      potential_3[MAX] += 1
 
-'''
-alpha-beta helper
-'''
+  return potential_1[MIN] - potential_1[MAX]#, potential_2[MIN] - potential_2[MAX], potential_3[MIN] - potential_3[MAX]
+
 def minH(state, depth, maxDepth, a, b, constants, sub):
+  '''alpha-beta helper
+  '''
 
   value = Util(9001.0, State())
   s = State()
@@ -393,11 +373,10 @@ def min_util(utils):
       max_u = util
   return max_u
 
-'''
-called by ab
-The minmax alpha-beta prunning algorithm as described by Norvig p. 170
-'''
 def maxH(state, depth, maxDepth, a, b, constants, sub):
+  '''called by ab
+  The minmax alpha-beta prunning algorithm as described by Norvig p. 170
+  '''
 
   value = Util(-9001.0, State())
   s = State()
@@ -437,11 +416,10 @@ def maxH(state, depth, maxDepth, a, b, constants, sub):
       nextS = gen.next()
     return value
 
-'''
-Could the current player force a win?
-return move if yes; None if not
-'''
 def getWin(state):
+  '''Could the current player force a win?
+  return move if yes; None if not
+  '''
   a = State()
   cG = state.genChildren(a)
   nextS = cG.next()
@@ -798,6 +776,21 @@ def trainAI():
   return TD_CONSTS
 
 
+def td_update(terminal_state, SUBTRACT, prevState):
+  '''Performs the necessary temporal difference update.
+  '''
+  print 'works'
+  # modify temporal difference:
+  global TD_CONSTS
+  changeTotalUtility = utility(terminal_state, TD_CONSTS, SUBTRACT) - utility(prevState, TD_CONSTS, SUBTRACT)
+  sub1 = subUtil(terminal_state, TD_CONSTS, SUBTRACT)
+  sub2 = subUtil(prevState, TD_CONSTS, SUBTRACT)
+  changeSubUtil = [ (sub1[i] - sub2[i]) for i in range(len(sub1)) ]
+  for i in range(len(TD_CONSTS)):
+    TD_CONSTS['c' + str(i+1)] += ALPHA * changeTotalUtility * (changeSubUtil[i]) * (-1)
+  # normalize
+  TD_CONSTS = normalize(TD_CONSTS)
+
 def learning_TD_AI(prevState):
   # if over, return to trainer:
   if isOver(prevState):
@@ -814,16 +807,7 @@ def learning_TD_AI(prevState):
   print "Scores: Player 1: ", state.score['1'], " Player 2: ", state.score['2']
   state.printInfo()
 
-  # modify temporal difference:
-  changeTotalUtility = utility(terminal_state, TD_CONSTS, SUBTRACT) - utility(prevState, TD_CONSTS, SUBTRACT)
-  sub1 = subUtil(terminal_state, TD_CONSTS, SUBTRACT)
-  sub2 = subUtil(prevState, TD_CONSTS, SUBTRACT)
-  changeSubUtil = [ (sub1[i] - sub2[i]) for i in range(len(sub1)) ]
-  for i in range(len(TD_CONSTS)):
-    TD_CONSTS['c' + str(i+1)] += ALPHA * changeTotalUtility * (changeSubUtil[i]) * (-1)
-
-  # normalize
-  TD_CONSTS = normalize(TD_CONSTS)
+  td_update(terminal_state, SUBTRACT, prevState)
 
   print "TD_CONSTS after being adjusted are: ", TD_CONSTS
   naiveAI(state)
