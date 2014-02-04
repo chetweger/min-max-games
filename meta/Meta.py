@@ -1,11 +1,13 @@
 import pyjd # this is dummy in pyjs
 
 '''
-1. Keep track of score!
-2. Tell who wins.
-3. Show learning.
-4. Display graph of learning values.
-'''
+bugs:
+
+Goals for resume tomorrow:
+1. fix bugs.
+2. then integrate with website immediately
+3. fix bug with constants.
+4. schedule interview with sam.'''
 
 from pyjamas.ui.Button import Button
 from pyjamas.ui.RootPanel import RootPanel
@@ -53,7 +55,6 @@ class GridWidget(AbsolutePanel):
     self.add(self.score_label)
 
     html = "<a href=\"file:///home/chet/projects/pyjs/meta/output/Meta.html\">Start a new game.</a>" # TODO: make this work for the general case
-    print html
     self.new_game = HTML(html)
     self.add(self.new_game)
 
@@ -89,7 +90,6 @@ class GridWidget(AbsolutePanel):
     self.incr_buttons = {}
     td_keys = ['c1', 'c2', 'c3', 'c4', 'c5', 'c6']
     for i, key in enumerate(td_keys):
-      print i, key
       self.decr_buttons[key] = Button('<', self)
       self.adj_grid.setWidget(i, 0, self.decr_buttons[key])
 
@@ -135,16 +135,12 @@ class GridWidget(AbsolutePanel):
 
     if not self.game_over:
       if hasattr(self, 'ai_first') and sender == self.ai_first:
-        print 'ai_first'
         self.human_first = False
         self.max_player = '1'
         self.min_player = '2'
         self.remove(self.ai_first)
-        del(self.ai_first) # remove all fucking traces
-        print 'button ai_first exists', hasattr(self, 'ai_first')
+        del(self.ai_first) # remove all traces
 
-        self.state.printInfo()
-        print 'player is ', self.state.nextPiece
         self.state = ab(self.state, self.TD_CONSTS, False,
           optional_args={'TD_CONSTS': self.TD_CONSTS,
             'MIN': self.min_player, 'MAX': self.max_player,
@@ -153,51 +149,41 @@ class GridWidget(AbsolutePanel):
 
 
       if hasattr(sender, 'point'):
-        print 'human'
         if hasattr(self, 'ai_first'):
-          print 'Setting state.max_v'
           self.max_player = '2'
           self.min_player = '1'
           self.remove(self.ai_first)
           del(self.ai_first) # remove all fucking traces
         #assert self.min_player == str(self.state.nextPiece[2])
-        print self.state.boards
         assert self.state.boards
 
         point = sender.point
+
+
         g = self.g.getWidget(point['y_board'], point['x_board'])
         g.setText(point['y_cell'], point['x_cell'], str(self.min_player))
 
-        self.grid_to_state()
+        self.grid_to_state(point)
+
         self.check_win()
         self.state.nextPiece[2] = self.max_player
-        print 'onClick'
         #self.state.player = next_player(self.state.player)
 
-        print 'player is ', self.state.nextPiece
-        self.state.printInfo()
         self.state = ab(self.state, self.TD_CONSTS, True,
           optional_args={'TD_CONSTS': self.TD_CONSTS,
             'MIN': self.min_player, 'MAX': self.max_player,
             'depthLimit': self.depthLimit})[1]
-        self.state.printInfo()
         self.state_to_grid()
         self.check_win()
 
 
   def check_adjusts(self, sender):
-    print 'check_adjusts has occured.'
     td_keys = ['c1', 'c2', 'c3', 'c4', 'c5', 'c6']
     for key in td_keys:
-      print self.incr_buttons[key], sender
       if self.incr_buttons[key] == sender:
-        print '+ happened', key
         self.change_td_const(key, '+')
-        print 'lool'
       if self.decr_buttons[key] == sender:
-        print '- happened', key
         self.change_td_const(key, '-')
-        print 'l00l'
       self.TD_CONSTS = normalize(self.TD_CONSTS)
       self.adj_labels[key].setText("Constant %d: %f" % (key[1], self.TD_CONSTS[key]))
 
@@ -209,7 +195,6 @@ class GridWidget(AbsolutePanel):
 
   def check_win(self):
     self.state_to_grid()
-    print 'Score is ', self.state.score
     if self.human_first:
       human_score = self.state.score['1']
       ai_score = self.state.score['2']
@@ -246,12 +231,10 @@ class GridWidget(AbsolutePanel):
 
   def state_to_grid(self):
     board = self.state.boards
-    print 'state_to_grid'
-    self.state.printInfo()
     for y_board in range(3):
       for x_board in range(3):
 
-        # for this mini-grid, do i make butons or dashes?
+        # for this mini-grid, do i make buttons or dashes?
         will_make_buttons = self.will_buttons(y_board, x_board)
 
         g=Grid()
@@ -275,13 +258,13 @@ class GridWidget(AbsolutePanel):
             elif board[y_board][x_board][y_cell][x_cell]['cell'] == 2:
               g.setText(y_cell, x_cell, '2')
             else:
-              print 'state_to_grid exception', board[y_board][x_board][y_cell][x_cell]['cell']
+              print 'a'
               #assert False
 
         self.add(g)
         self.g.setWidget(y_board, x_board, g)
 
-  def grid_to_state(self):
+  def grid_to_state(self, point):
     board = self.state.boards
     for y_board in range(3):
       for x_board in range(3):
@@ -294,22 +277,16 @@ class GridWidget(AbsolutePanel):
               if self.state.boards[y_board][x_board][y_cell][x_cell]['cell'] == 0:
                 self.state.boards[y_board][x_board][y_cell][x_cell]['cell'] = int(g.getText(y_cell, x_cell))
                 piece = self.state.nextPiece
-                if isWin(self.state.boards[piece[0]][piece[1]]):
-                  self.state.score[str(piece[2])] += 1
-                print 'a', piece
                 piece[2] = 1
-                print 'yes'
                 #piece[2] = int(piece[2] == 1) + 1 # next player!
-                print 'b'
                 piece[0] = y_cell
-                print 'c'
                 piece[1] = x_cell
-                print 'd'
             else:
               assert (g.getText(y_cell, x_cell) == '-')
+    if isWin(self.state.boards[point['y_board']][point['x_board']]):
+      self.state.score[str(piece[2])] += 1
 
 def AppInit():
-  print 'sd'
   #GridWidget()
   pyjd.setup("./GridTest.html")
   g = GridWidget()

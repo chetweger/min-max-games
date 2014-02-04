@@ -456,7 +456,7 @@ Checks if a win exists
 Then calls helper
 '''
 def ab(state, constants, sub, optional_args={}):
-  depthLimit = 5
+  depthLimit = 3
   if optional_args:
     global TD_CONSTS
     global MIN
@@ -502,11 +502,12 @@ class Util:
 class State:
 # state represents the board, next piece to be played, and other relevant info
   def __init__(self):
-    """ Construct a new board. """
+    """ Construct a new board."""
     self.boards = [[[[ {"cell": 0, "x": x, "y": y, "x_board": x_board, "y_board": y_board}
                for x in range(DIMENSION)] for y in range(DIMENSION)]
                for x_board in range(DIMENSION)] for y_board in range(DIMENSION)]
     self.nextPiece = [1,1,1] # next board to be played in {(-1, -1, ?) for any board}
+                             # index 0 points to x, index 1 point to y
     self.score = {"1": 0, "2": 0}
 
   def isWinExampleBoard(self, board):
