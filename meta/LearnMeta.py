@@ -1,13 +1,5 @@
 import pyjd # this is dummy in pyjs
 
-'''
-bugs:
-
-Goals for resume tomorrow:
-1. fix bugs.
-2. then integrate with website immediately
-3. fix bug with constants.
-4. schedule interview with sam.'''
 
 from pyjamas.ui.Button import Button
 from pyjamas.ui.RootPanel import RootPanel
