@@ -407,6 +407,10 @@ def maxH(state, depth, maxDepth, a, b, constants, sub):
   if (depth == maxDepth):
     return Util(utility(state, constants, sub), state)
 
+  if not nextS:
+    assert depth > 0
+    return Util(utility(state, constants, sub), state)
+
   if depth == 0:
     iteration = 0
 
@@ -457,7 +461,7 @@ Then calls helper
 '''
 def ab(state, constants, sub, optional_args={}):
   print "I have been called lol"
-  depthLimit = 3
+  depthLimit = 2
   if optional_args:
     global TD_CONSTS
     global MIN
@@ -579,12 +583,12 @@ class State:
     self.score['2'] = other.score['2']
 
   def genChildren(self, child): #list of states
-    aL = range(DIMENSION)
-    bL = range(DIMENSION)
+    aL = range(DIMENSION)  # originally I thought I might generalize this to any-dimensional meta
+    bL = range(DIMENSION)  # tic-tac-toe, but that never happened...
     cL = range(DIMENSION)
     dL = range(DIMENSION)
     #print "isWin?", isWin(self.boards[self.nextPiece[0]][self.nextPiece[1]])
-    if isWin(self.boards[self.nextPiece[0]][self.nextPiece[1]]):
+    if isWin(self.boards[self.nextPiece[0]][self.nextPiece[1]]) or isFull(self.boards[self.nextPiece[0]][self.nextPiece[1]]):
       #print "One"
       for a in aL:
         for b in bL:
@@ -823,7 +827,12 @@ def learning_TD_AI(prevState):
 
   # print, alpha-beta search etc.:
   SUBTRACT = False
-  (expectedUtility, state) = ab(prevState, TD_CONSTS, SUBTRACT)
+  tuple_expected = ab(prevState, TD_CONSTS, SUBTRACT)
+  try:
+    (expectedUtility, state) =  tuple_expected
+  except:
+    print tuple_expected
+    assert False
   terminal_state = expectedUtility.terminal
   print "Scores: Player 1: ", state.score['1'], " Player 2: ", state.score['2']
   state.printInfo()
