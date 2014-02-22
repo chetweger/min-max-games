@@ -136,10 +136,13 @@ def utility(state, constants, sub):
   f4 = f4_side(state) * constants['c4']
   f5 = f5_blocking(state) * constants['c5']
   f6 = f6_potential(state) * constants['c6']
+  return_value = (f1 + f2 + f3 + f4 + f5 + f6)
+  state.printInfo()
+  print 'return value is ', return_value
   if sub:
-    return -(f1 + f2 + f3 + f4 + f5 + f6)
+    return - return_value
   else:
-    return (f1 + f2 + f3 + f4 + f5 + f6)
+    return return_value
 
 ''' the utility function plus dictionary for TD learning! '''
 def subUtil(state, constants, sub):

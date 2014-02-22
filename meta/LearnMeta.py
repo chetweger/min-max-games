@@ -34,7 +34,8 @@ class GridWidget(AbsolutePanel):
   def __init__(self):
     self.state = State()
     self.game_over = False
-    self.TD_CONSTS = {'c3': 1., 'c2': 1., 'c1': 1., 'c6': 1., 'c5': 1., 'c4': 1.}
+    # {'c3': 0.767944, 'c2': 1.049451, 'c1': 3.074038, 'c6': 0.220823, 'c5': 0.281883, 'c4': 0.605861}
+    self.TD_CONSTS ={'c3': 0.767944, 'c2': 1.049451, 'c1': 3.074038, 'c6': 0.220823, 'c5': 0.281883, 'c4': 0.605861} #{'c3': 1., 'c2': 1., 'c1': 1., 'c6': 1., 'c5': 1., 'c4': 1.}
     self.CONSTS = {'c3': 1., 'c2': 1., 'c1': 1., 'c6': 1., 'c5': 1., 'c4': 1.}
     optional_args = {'TD_CONSTS': self.TD_CONSTS, 'MAX': '1', 'MIN': 2}
     AbsolutePanel.__init__(self)
@@ -137,8 +138,11 @@ class GridWidget(AbsolutePanel):
       self.remove(self.train_dumb)
       print "here!!!!"
 
+      self.dumb_ai_int = 2
+      self.td_ai_int = 1
+
       self.state.nextPiece = [1, 1, 1]
-      self.pause_update = Timer(250, notify=self.td_ai)
+      Timer(250, notify=self.td_ai_turn)
       print "Done training."
 
     if sender == self.train_dumb:
@@ -149,8 +153,11 @@ class GridWidget(AbsolutePanel):
       self.remove(self.train_dumb)
       print "here!!!!"
 
+      self.dumb_ai_int = 1
+      self.td_ai_int = 2
+
       self.state.nextPiece = [1, 1, 1]
-      self.pause_update = Timer(250, notify=self.dumb_ai)
+      Timer(250, notify=self.dumb_ai_turn)
       print "Done training."
 
   def sync_td_consts(self):
@@ -177,38 +184,25 @@ class GridWidget(AbsolutePanel):
       self.add(game_over_message)
       self.game_over = True
 
-  def dumb_ai(self):
+  def dumb_ai_turn(self):
     print "\n\nNaive AIs turn which plays the piece: ", self.state.nextPiece[2]
     print "next piece is ", self.state.nextPiece
     (expectedUtility, nextState) = ab(self.state,
                                       self.TD_CONSTS,
                                       False,
                                       optional_args={'TD_CONSTS': self.TD_CONSTS,
-                                                     'MIN': 2,
-                                                     'MAX': 1,
+                                                     'MIN': self.td_ai_int,
+                                                     'MAX': self.dumb_ai_int,
                                                      'depthLimit': self.depthLimit},
                                      )
     self.state = nextState
     print "Scores: Player 1: ", self.state.score['1'], " Player 2: ", self.state.score['2']
     self.state.printInfo()
     self.check_win()
-    self.pause_update = Timer(250, notify=self.td_ai)
+    self.pause_update = Timer(250, notify=self.td_ai_turn)
     #return isOver(self.state)
 
-  def train_loop(self):
-    print "inside train_loop"
-    if not self.game_over:
-      self.sync_td_consts()
-      print "player 1's turn"
-      game_over = self.td_ai(self.state)
-      if game_over:
-        print "oops..."
-        # uh oh...break
-      print "player 2's turn"
-      game_over = self.dumb_ai(self.state)
-      self.pause_update = Timer(250, notify=self.train_loop)
-
-  def td_ai(self):
+  def td_ai_turn(self):
     print "\n\nTD AI player starting turn. TD AI places the piece:", self.state.nextPiece[2]
     print "TD_CONSTS after being adjusted are: ", self.TD_CONSTS
 
@@ -217,8 +211,8 @@ class GridWidget(AbsolutePanel):
                                   self.TD_CONSTS,
                                   False,
                                   optional_args={'TD_CONSTS': self.TD_CONSTS,
-                                                 'MIN': 2,
-                                                 'MAX': 1,
+                                                 'MIN': self.dumb_ai_int,
+                                                 'MAX': self.td_ai_int,
                                                  'depthLimit': self.depthLimit},
                                  )
     terminal_state = expectedUtility.terminal
@@ -232,7 +226,7 @@ class GridWidget(AbsolutePanel):
 
     print "TD_CONSTS after being adjusted are: ", self.TD_CONSTS
     self.check_win() # check if game is over and take appropriate action.
-    self.pause_update = Timer(250, notify=self.dumb_ai)
+    self.pause_update = Timer(250, notify=self.dumb_ai_turn)
     #return isOver(self.state)
 
   def will_buttons(self, y_board, x_board):
