@@ -456,6 +456,7 @@ Checks if a win exists
 Then calls helper
 '''
 def ab(state, constants, sub, optional_args={}):
+  print "I have been called lol"
   depthLimit = 3
   if optional_args:
     global TD_CONSTS
@@ -798,6 +799,18 @@ def trainAI():
   writeTo.close()
   return TD_CONSTS
 
+def td_learning(terminal_state, TD_CONSTS, SUBTRACT, prevState):
+  # modify temporal difference:
+  changeTotalUtility = utility(terminal_state, TD_CONSTS, SUBTRACT) - utility(prevState, TD_CONSTS, SUBTRACT)
+  sub1 = subUtil(terminal_state, TD_CONSTS, SUBTRACT)
+  sub2 = subUtil(prevState, TD_CONSTS, SUBTRACT)
+  changeSubUtil = [ (sub1[i] - sub2[i]) for i in range(len(sub1)) ]
+  for i in range(len(TD_CONSTS)):
+    TD_CONSTS['c' + str(i+1)] += ALPHA * changeTotalUtility * (changeSubUtil[i]) * (-1)
+
+  # normalize
+  TD_CONSTS = normalize(TD_CONSTS)
+  return TD_CONSTS
 
 def learning_TD_AI(prevState):
   # if over, return to trainer:
@@ -815,16 +828,7 @@ def learning_TD_AI(prevState):
   print "Scores: Player 1: ", state.score['1'], " Player 2: ", state.score['2']
   state.printInfo()
 
-  # modify temporal difference:
-  changeTotalUtility = utility(terminal_state, TD_CONSTS, SUBTRACT) - utility(prevState, TD_CONSTS, SUBTRACT)
-  sub1 = subUtil(terminal_state, TD_CONSTS, SUBTRACT)
-  sub2 = subUtil(prevState, TD_CONSTS, SUBTRACT)
-  changeSubUtil = [ (sub1[i] - sub2[i]) for i in range(len(sub1)) ]
-  for i in range(len(TD_CONSTS)):
-    TD_CONSTS['c' + str(i+1)] += ALPHA * changeTotalUtility * (changeSubUtil[i]) * (-1)
-
-  # normalize
-  TD_CONSTS = normalize(TD_CONSTS)
+  TD_CONSTS = td_learning(terminal_state, TD_CONSTS, SUBTRACT, prevState)
 
   print "TD_CONSTS after being adjusted are: ", TD_CONSTS
   naiveAI(state)

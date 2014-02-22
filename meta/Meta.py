@@ -210,8 +210,8 @@ class GridWidget(AbsolutePanel):
         msg = "You lost! Better luck next time."
       elif human_score == ai_score:
         msg = "Game ends in a tie."
-      self.game_over = Label(msg)
-      self.add(self.game_over)
+      game_over_msg = Label(msg)
+      self.add(game_over_msg)
       self.game_over = True
 
 

@@ -1,5 +1,13 @@
 import pyjd # this is dummy in pyjs
-
+"""
+bugs:
+  score not updated
+  crashes in learn.py due to only a few possible positions being left on the board:
+    it is therefore possible to move, and game is not over, but a search of the ply depth more than a depth of one
+    will terminate.
+  ai moving first loses badly (why?) <-- understand (don't want to kill other three)
+  fix bug where available positions are not shown correctly (everything shows up as "ai could player here")
+"""
 
 from pyjamas.ui.Button import Button
 from pyjamas.ui.RootPanel import RootPanel
@@ -11,28 +19,37 @@ from pyjamas.ui.HTML import HTML
 from pyjamas.ui.CheckBox import CheckBox
 from pyjamas.ui.AbsolutePanel import AbsolutePanel
 from pyjamas import Window
+from pyjamas.Timer import Timer
 
 from pyjamas import logging
 
 log = logging.getConsoleLogger()
 
-from learning import State, ab, isWin, isFull, turn, isOver, normalize
+from learning import State, ab, isWin, isFull, turn, isOver, normalize, td_learning
 
 INCREMENT_AMOUNT = .05
 
 class GridWidget(AbsolutePanel):
 
   def __init__(self):
+    self.state = State()
     self.game_over = False
-    self.TD_CONSTS = {'c3': 0.767944, 'c2': 1.049451, 'c1': 3.074038, 'c6': 0.220823, 'c5': 0.281883, 'c4': 0.605861}
+    self.TD_CONSTS = {'c3': 1., 'c2': 1., 'c1': 1., 'c6': 1., 'c5': 1., 'c4': 1.}
+    self.CONSTS = {'c3': 1., 'c2': 1., 'c1': 1., 'c6': 1., 'c5': 1., 'c4': 1.}
     optional_args = {'TD_CONSTS': self.TD_CONSTS, 'MAX': '1', 'MIN': 2}
     AbsolutePanel.__init__(self)
 
 
     self.depthLimit = 3
-    self.human_first = True
-    self.ai_first = Button("AI first.", self)
-    self.add(self.ai_first)
+    html = "<a href=\"file:///home/chet/projects/pyjs/meta/output/LearnMeta.html\">Start a new game.</a>" # TODO: make this work for the general case
+    self.new_game = HTML(html)
+    self.add(self.new_game)
+
+    self.train_td = Button("Begin game.  Learning AI first!", self)
+    self.add(self.train_td)
+
+    self.train_dumb = Button("Begin game.  Dumb AI first!", self)
+    self.add(self.train_dumb)
 
     self.increase_depth = Button("Increase ply search depth.", self)
     self.add(self.increase_depth)
@@ -43,12 +60,8 @@ class GridWidget(AbsolutePanel):
     self.depth_label = Label("Current depth is " + str(self.depthLimit) +".")
     self.add(self.depth_label)
 
-    self.score_label = Label("Human: %d | AI: %d"% (0,0))
+    self.score_label = Label("Learning AI: %d | Dumb AI: %d"% (0,0))
     self.add(self.score_label)
-
-    html = "<a href=\"file:///home/chet/projects/pyjs/meta/output/Meta.html\">Start a new game.</a>" # TODO: make this work for the general case
-    self.new_game = HTML(html)
-    self.add(self.new_game)
 
     # initialize the board grid:
     self.g=Grid()
@@ -61,14 +74,13 @@ class GridWidget(AbsolutePanel):
 
     # initialize the contstants adjustment grid:
     self.adj_grid = Grid()
-    self.adj_grid.resize(6, 3)
+    self.adj_grid.resize(6, 1)
     self.adj_grid.setBorderWidth(2)
     self.adj_grid.setCellPadding(9)
     self.adj_grid.setCellSpacing(1)
     self.init_contstants_adj_grid()
     self.add(self.adj_grid)
 
-    self.state = State()
 
     self.state_to_grid()
     self.max_player = '-1'
@@ -82,14 +94,8 @@ class GridWidget(AbsolutePanel):
     self.incr_buttons = {}
     td_keys = ['c1', 'c2', 'c3', 'c4', 'c5', 'c6']
     for i, key in enumerate(td_keys):
-      self.decr_buttons[key] = Button('<', self)
-      self.adj_grid.setWidget(i, 0, self.decr_buttons[key])
-
-      self.incr_buttons[key] = Button('>', self)
-      self.adj_grid.setWidget(i, 2, self.incr_buttons[key])
-
       self.adj_labels[key] = Label("Constant %d: %f" % (key[1], self.TD_CONSTS[key]))
-      self.adj_grid.setWidget(i, 1, self.adj_labels[key])
+      self.adj_grid.setWidget(i, 0, self.adj_labels[key])
 
   def init(self):
     '''Initializes the grid on which the game is played.
@@ -104,7 +110,7 @@ class GridWidget(AbsolutePanel):
         g.setCellSpacing(1)
         for x_cell in range(3):
           for y_cell in range(3):
-            b = Button('Play here.', self)
+            b = Button('AI could play here.', self)
             b.point = {'x_cell':x_cell, 'y_cell':y_cell, 'y_board': y_board, 'x_board': x_board}
             g.setWidget(y_cell, x_cell, b)
 
@@ -123,89 +129,111 @@ class GridWidget(AbsolutePanel):
     if sender == self.new_game:
       AppInit()
 
-    self.check_adjusts(sender)
+    if sender == self.train_td:
 
-    if not self.game_over:
-      if hasattr(self, 'ai_first') and sender == self.ai_first:
-        self.human_first = False
-        self.max_player = '1'
-        self.min_player = '2'
-        self.remove(self.ai_first)
-        del(self.ai_first) # remove all traces
+      self.remove(self.decrease_depth)
+      self.remove(self.increase_depth)
+      self.remove(self.train_td)
+      self.remove(self.train_dumb)
+      print "here!!!!"
 
-        self.state = ab(self.state, self.TD_CONSTS, False,
-          optional_args={'TD_CONSTS': self.TD_CONSTS,
-            'MIN': self.min_player, 'MAX': self.max_player,
-            'depthLimit': self.depthLimit})[1]
-        self.state_to_grid()
+      self.state.nextPiece = [1, 1, 1]
+      self.pause_update = Timer(250, notify=self.td_ai)
+      print "Done training."
 
+    if sender == self.train_dumb:
 
-      if hasattr(sender, 'point'):
-        if hasattr(self, 'ai_first'):
-          self.max_player = '2'
-          self.min_player = '1'
-          self.remove(self.ai_first)
-          del(self.ai_first) # remove all fucking traces
-        #assert self.min_player == str(self.state.nextPiece[2])
-        assert self.state.boards
+      self.remove(self.decrease_depth)
+      self.remove(self.increase_depth)
+      self.remove(self.train_td)
+      self.remove(self.train_dumb)
+      print "here!!!!"
 
-        point = sender.point
+      self.state.nextPiece = [1, 1, 1]
+      self.pause_update = Timer(250, notify=self.dumb_ai)
+      print "Done training."
 
-
-        g = self.g.getWidget(point['y_board'], point['x_board'])
-        g.setText(point['y_cell'], point['x_cell'], str(self.min_player))
-
-        self.grid_to_state(point)
-
-        self.check_win()
-        self.state.nextPiece[2] = self.max_player
-        #self.state.player = next_player(self.state.player)
-
-        self.state = ab(self.state, self.TD_CONSTS, True,
-          optional_args={'TD_CONSTS': self.TD_CONSTS,
-            'MIN': self.min_player, 'MAX': self.max_player,
-            'depthLimit': self.depthLimit})[1]
-        self.state_to_grid()
-        self.check_win()
-
-
-  def check_adjusts(self, sender):
+  def sync_td_consts(self):
+    """Sync td rates with the current state.
+    """
     td_keys = ['c1', 'c2', 'c3', 'c4', 'c5', 'c6']
     for key in td_keys:
-      if self.incr_buttons[key] == sender:
-        self.change_td_const(key, '+')
-      if self.decr_buttons[key] == sender:
-        self.change_td_const(key, '-')
-      self.TD_CONSTS = normalize(self.TD_CONSTS)
       self.adj_labels[key].setText("Constant %d: %f" % (key[1], self.TD_CONSTS[key]))
-
-  def change_td_const(self, key, sign):
-    if sign == '+':
-      self.TD_CONSTS[key] += INCREMENT_AMOUNT
-    elif sign == '-':
-      self.TD_CONSTS[key] -= INCREMENT_AMOUNT
 
   def check_win(self):
     self.state_to_grid()
-    if self.human_first:
-      human_score = self.state.score['1']
-      ai_score = self.state.score['2']
-      self.score_label.setText("Human: %d | AI: %d" % (human_score, ai_score))
-    else:
-      human_score = self.state.score['2']
-      ai_score = self.state.score['1']
-      self.score_label.setText("Human: %d | AI: %d" % (human_score, ai_score))
+    p1_score = self.state.score['1']
+    p2_score = self.state.score['2']
+    print "scores are ", p1_score, p2_score
+    self.score_label.setText("Learning AI: %d | Dumb AI: %d" % (p1_score, p2_score))
     if isOver(self.state):
-      if human_score > ai_score:
-        msg = "Congratulations, you won! To increase the difficulty, increase the search depth."
+      if p1_score > p2_score:
+        msg = "AI 1 won the game."
       elif human_score < ai_score:
-        msg = "You lost! Better luck next time."
+        msg = "AI 2 won the game."
       elif human_score == ai_score:
         msg = "Game ends in a tie."
-      self.game_over = Label(msg)
-      self.add(self.game_over)
+      game_over_message = Label(msg)
+      self.add(game_over_message)
       self.game_over = True
 
+  def dumb_ai(self):
+    print "\n\nNaive AIs turn which plays the piece: ", self.state.nextPiece[2]
+    print "next piece is ", self.state.nextPiece
+    (expectedUtility, nextState) = ab(self.state,
+                                      self.TD_CONSTS,
+                                      False,
+                                      optional_args={'TD_CONSTS': self.TD_CONSTS,
+                                                     'MIN': 2,
+                                                     'MAX': 1,
+                                                     'depthLimit': self.depthLimit},
+                                     )
+    self.state = nextState
+    print "Scores: Player 1: ", self.state.score['1'], " Player 2: ", self.state.score['2']
+    self.state.printInfo()
+    self.check_win()
+    self.pause_update = Timer(250, notify=self.td_ai)
+    #return isOver(self.state)
+
+  def train_loop(self):
+    print "inside train_loop"
+    if not self.game_over:
+      self.sync_td_consts()
+      print "player 1's turn"
+      game_over = self.td_ai(self.state)
+      if game_over:
+        print "oops..."
+        # uh oh...break
+      print "player 2's turn"
+      game_over = self.dumb_ai(self.state)
+      self.pause_update = Timer(250, notify=self.train_loop)
+
+  def td_ai(self):
+    print "\n\nTD AI player starting turn. TD AI places the piece:", self.state.nextPiece[2]
+    print "TD_CONSTS after being adjusted are: ", self.TD_CONSTS
+
+    # print, alpha-beta search etc.:
+    (expectedUtility, state) = ab(self.state,
+                                  self.TD_CONSTS,
+                                  False,
+                                  optional_args={'TD_CONSTS': self.TD_CONSTS,
+                                                 'MIN': 2,
+                                                 'MAX': 1,
+                                                 'depthLimit': self.depthLimit},
+                                 )
+    terminal_state = expectedUtility.terminal
+    self.TD_CONSTS = td_learning(terminal_state, self.TD_CONSTS, False, self.state)
+    self.sync_td_consts() # reflect the new TD_CONSTS in the game.
+
+    self.state = state
+
+    print "Scores: Player 1: ", self.state.score['1'], " Player 2: ", self.state.score['2']
+    state.printInfo()
+
+    print "TD_CONSTS after being adjusted are: ", self.TD_CONSTS
+    self.check_win() # check if game is over and take appropriate action.
+    self.pause_update = Timer(250, notify=self.dumb_ai)
+    #return isOver(self.state)
 
   def will_buttons(self, y_board, x_board):
     # first we determine if the nextPiece points to a playable board.
@@ -239,7 +267,7 @@ class GridWidget(AbsolutePanel):
 
             if board[y_board][x_board][y_cell][x_cell]['cell'] == 0:
               if will_make_buttons:
-                b = Button('Play here.', self)
+                b = Button('AI could play here.', self)
                 b.point = {'x_cell':x_cell, 'y_cell':y_cell, 'y_board': y_board, 'x_board': x_board}
                 g.setWidget(y_cell, x_cell, b)
               else:
@@ -255,28 +283,6 @@ class GridWidget(AbsolutePanel):
 
         self.add(g)
         self.g.setWidget(y_board, x_board, g)
-
-  def grid_to_state(self, point):
-    board = self.state.boards
-    for y_board in range(3):
-      for x_board in range(3):
-        g = self.g.getWidget(y_board, x_board)
-        for y_cell in range(3):
-          for x_cell in range(3):
-            if isinstance(g.getWidget(y_cell, x_cell), Button):
-              assert board[y_board][x_board][y_cell][x_cell]['cell'] == 0
-            elif (g.getText(y_cell, x_cell) == '1') or (g.getText(y_cell, x_cell) == '2'):
-              if self.state.boards[y_board][x_board][y_cell][x_cell]['cell'] == 0:
-                self.state.boards[y_board][x_board][y_cell][x_cell]['cell'] = int(g.getText(y_cell, x_cell))
-                piece = self.state.nextPiece
-                piece[2] = 1
-                #piece[2] = int(piece[2] == 1) + 1 # next player!
-                piece[0] = y_cell
-                piece[1] = x_cell
-            else:
-              assert (g.getText(y_cell, x_cell) == '-')
-    if isWin(self.state.boards[point['y_board']][point['x_board']]):
-      self.state.score[str(piece[2])] += 1
 
 def AppInit():
   #GridWidget()
