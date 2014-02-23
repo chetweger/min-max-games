@@ -44,7 +44,7 @@ def train():
   """Trains the AI indefinitely.
   """
   while True:
-    subprocess.call(['cp', 'td2.txt', 'td.txt'])
+    #subprocess.call(['cp', 'td2.txt', 'td.txt'])
     trainAI()
 
 def hasRow(listDict):
@@ -108,6 +108,8 @@ def utility(state, constants):
   f5 = f5_blocking(state) * constants['c5']
   f6 = f6_potential(state) * constants['c6']
   return_value = (f1 + f2 + f3 + f4 + f5 + f6)
+  print "return value is ", return_value, "and corresponding state is::"
+  state.printInfo()
   return - return_value
 
 def sub_utility(state, constants):
@@ -128,7 +130,9 @@ def f1_score(state):
   # Why MIN - MAX ?
   # Because player who call utility does not change state
   # so the state corresponds to the previous player.
-  return state.score[state.min_player] - state.score[state.max_player]
+  MAX = turn_str(state.nextPiece[2])
+  MIN = str(state.nextPiece[2])
+  return state.score[MIN] - state.score[MAX]
 
 def getActive(state):
   '''Returns all the boards that have not been won yet.
@@ -146,8 +150,8 @@ def f2_center(state):
   '''Relative number of ACTIVE center
   pieces
   '''
-  MIN = state.min_player
-  MAX = state.max_player
+  MAX = turn_str(state.nextPiece[2])
+  MIN = str(state.nextPiece[2])
   center = {MIN: 0, MAX: 0,}
   activeBoards = getActive(state)
   for board in activeBoards:
@@ -155,14 +159,15 @@ def f2_center(state):
       center[MIN] += 1
     elif board[1][1]['cell'] == int(MAX):
       center[MAX] += 1
-  return center[MIN] - center[MAX]
+  return_value = center[MIN] - center[MAX]
+  return return_value
 
 def f3_corner(state):
   '''Relative number of ACTIVE corner
   pieces
   '''
-  MIN = state.min_player
-  MAX = state.max_player
+  MAX = turn_str(state.nextPiece[2])
+  MIN = str(state.nextPiece[2])
   cornerCount = {MIN: 0, MAX: 0,}
   activeBoards = getActive(state)
   for board in activeBoards:
@@ -178,8 +183,8 @@ def f4_side(state):
   '''Relative number of ACTIVE side
   pieces
   '''
-  MIN = state.min_player
-  MAX = state.max_player
+  MAX = turn_str(state.nextPiece[2])
+  MIN = str(state.nextPiece[2])
   sideCount = {MIN: 0, MAX: 0,}
   activeBoards = getActive(state)
   for board in activeBoards:
@@ -242,8 +247,8 @@ def f5_blocking(inputState):
   # b/c i modify state
   state = State()
   state.copyThis(inputState)
-  MIN = state.min_player
-  MAX = state.max_player
+  MAX = turn_str(state.nextPiece[2])
+  MIN = str(state.nextPiece[2])
   blocking = {'1': 0, '2': 0, }
 
   # we count activeBoards as ALLL boards:
@@ -280,8 +285,8 @@ def f6_potential(inputState):
   # b/c i modify state
   state = State()
   state.copyThis(inputState)
-  MIN = state.min_player
-  MAX = state.max_player
+  MAX = turn_str(state.nextPiece[2])
+  MIN = str(state.nextPiece[2])
   potential = {'1': 0, '2': 0, }
   activeBoards = getActive(state)
   activeBoardsTranspose = transposeBoards(activeBoards)
@@ -314,24 +319,24 @@ def minH(state, depth, depth_limit, alpha, beta, constants):
   '''
 
   value = Util(9001.0, State())
-  s = State() # min_player=state.min_player, max_player=state.max_player
+  s = State()
   gen = state.genChildren(s)
   nextS = gen.next()
 
   if (depth == depth_limit) or (nextS == None):
     return Util(utility(state, constants), state)
 
-  copy_in = State() # min_player=state.min_player, max_player=state.max_player
+  highest_so_far = State()
   while nextS != None:
-    copy_in.copyThis(nextS)
+    highest_so_far.copyThis(nextS)
 
     # next_state = maxH(state, depth_limit, alpha, beta, constants, MIN, MAX)
-    next_value = maxH(copy_in, depth + 1, depth_limit, alpha, beta, constants)
+    next_value = maxH(highest_so_far, depth + 1, depth_limit, alpha, beta, constants)
 
     value = min_util([value, next_value])
     assert type(value) == type(alpha)
     if value.value <= alpha.value:
-      return Util(-9001.0, State()) # we don't want to choose this!min_player=state.min_player, max_player=state.max_player
+      return Util(-9001.0, State()) # we don't want to choose this!
     beta = min_util([beta, value])
     nextS = gen.next()
   return value
@@ -368,8 +373,8 @@ def maxH(state, depth, depth_limit, a, b, constants):
   The minmax alpha-beta prunning algorithm as described by Norvig p. 170
   '''
 
-  value = Util(-9001.0, State()) # min_player=state.min_player, max_player=state.max_player
-  s = State()  #min_player=state.min_player, max_player=state.max_player
+  value = Util(-9001.0, State())
+  s = State()
   gen = state.genChildren(s)
   nextS = gen.next()
 
@@ -381,44 +386,58 @@ def maxH(state, depth, depth_limit, a, b, constants):
 
   if depth == 0:
 
-    highestSoFar = State() # min_player=state.min_player, max_player=state.max_player
-    highestSoFar.copyThis(nextS)
+    highest_so_far = State()
+    highest_so_far.copyThis(nextS)
 
     min_h = minH(nextS, depth + 1, depth_limit, a, b, constants)
-    value = [min_h, highestSoFar]
+    value = [min_h, highest_so_far]
     while nextS != None:
       min_h = minH(nextS, depth + 1, depth_limit, a, b, constants)
       assert type(value) == type([min_h, nextS])
       get_max( value, value, [min_h, nextS] )
       if value[0].value >= b.value:
-        return (Util(9001.0, State()), value[1]) # we don't want to select this  min_player=state.min_player, max_player=state.max_player
+        return (Util(9001.0, State()), value[1]) # we don't want to select this
       a = max_util([a, value[0]])
       nextS = gen.next()
     return value
   else:
-    copy_in = State()  #min_player=state.min_player, max_player=state.max_player
+    highest_so_far = State()
     while nextS != None:
-      copy_in.copyThis(nextS)
-      value = max_util([value, minH(copy_in, depth + 1, depth_limit, a, b, constants)])
+      highest_so_far.copyThis(nextS)
+      value = max_util([value, minH(highest_so_far, depth + 1, depth_limit, a, b, constants)])
       assert type(value) == type(b)
       if value.value >= b.value:
-        return Util(9001.0, State()) # don't want to select this (another option is implied)  min_player=state.min_player, max_player=state.max_player
+        return Util(9001.0, State())
       a = max_util([a, value])
       nextS = gen.next()
     return value
 
-def ab(state, constants, depth_limit=5):
-  '''The minmax alpha-beta prunning algorithm as described by Norvig p. 170
+def ab(state, constants, depth_limit=3):
+  '''The minmax alpha-beta prunning algorithm as described by Norvig p. 170.
+  ab is essentially a wrapper around maxH.
   '''
-  alpha = Util(-9005.0, State()) #  min_player=state.min_player, max_player=state.max_player
-  beta  = Util(9005.0, State())  #  min_player=state.min_player, max_player=state.max_player
-  print 'debugging state in ab ', state.min_player
+  alpha = Util(-9005.0, State())
+  beta  = Util(9005.0, State())
   next_state = maxH(state, 0, depth_limit, alpha, beta, constants)
   return next_state
 
 def turn(integer):
-  if(integer == 1): return 2
-  else: return 1
+  """Returns next turn
+  (for state.nextPiece[2])
+  """
+  if(integer == 1):
+    return 2
+  else:
+    return 1
+
+def turn_str(integer):
+  """Same turn but
+  returns a string
+  """
+  if(integer == 1):
+    return '2'
+  else:
+    return '1'
 
 class Util:
   def __init__(self, value, state):
@@ -520,9 +539,6 @@ class State:
     self.nextPiece = other.nextPiece[:3]
     self.score['1'] = other.score['1']
     self.score['2'] = other.score['2']
-    self.max_player = other.max_player
-    self.min_player = other.min_player
-    assert other.max_player
 
   def genChildren(self, child): #list of states
     aL = range(DIMENSION)  # originally I thought I might generalize this to any-dimensional meta
@@ -561,16 +577,20 @@ class State:
             yield child
     yield None
 
+#----------------------------------
+# Command line interface functions.
+#----------------------------------
+
 def playAI():
   """Play successive games until the user decides to stop. """
   print messageWelcome
-  playUntilExit()
+  TD_CONSTS = load_TD_CONSTS()
   while True:
     first_player = getFirstPlayer()
     if first_player == 0:
       print messageGoodbye
       return
-    playMeta(first_player)
+    playMeta(first_player, TD_CONSTS)
 
 def getFirstPlayer():
   """Get the first player, or an indication to stop. """
@@ -585,25 +605,26 @@ def getFirstPlayer():
     else:
       print messageTryAgain
 
-def playMeta(first_player):
+def playMeta(first_player, TD_CONSTS):
   '''Play the game, given first player, or stop.
   '''
   print "Should only happen once"
   state = State()
   if first_player == userFirst:
-    user_turn(state) # starts user which calls ai and then continues to switch back and forth... until over
+    user_turn(state, TD_CONSTS) # starts user which calls ai and then continues to switch back and forth... until over
 
   elif first_player == computerFirst:
-    computer_turn(state)
+    computer_turn(state, TD_CONSTS)
   else:
     assert False # Should never happen
 
-def user_turn(state, user_first):
+def user_turn(state, TD_CONSTS):
   '''Simulate one round of play with the user starting.
   '''
   print messageUsersTurn
   print state.printInfo()
-  checkOver(state)
+  if isOver(state):
+    return True
 
   print "You are playing piece", state.nextPiece[2]
   while True:
@@ -647,23 +668,23 @@ def user_turn(state, user_first):
   print "Your move was:"
   state.printInfo()
   print "Scores: Player 1: ", state.score['1'], " Player 2: ", state.score['2']
-  computer_turn(state)
+  return computer_turn(state, TD_CONSTS)
 
 
-def computer_turn(state, user_first):
+def computer_turn(state, TD_CONSTS):
   '''Plays meta-ttt using learned TD_CONSTS data
   '''
-  global TD_CONSTS
   print messageComputersTurn
   print "AI using following constants:\n", TD_CONSTS
-  checkOver(state)
+  if isOver(state):
+    return True
   print state.printInfo()
   (expectedUtility, nextState) = ab(state, TD_CONSTS)
   print "Expected utility is: ", expectedUtility
 
   state = copy.deepcopy(nextState)
   print "Scores: Player 1: ", state.score['1'], " Player 2: ", state.score['2']
-  user_turn(state, user_first)
+  return user_turn(state, TD_CONSTS)
 
 def load_TD_CONSTS():
   try:
@@ -729,9 +750,6 @@ def learning_TD_AI(prev_state, TD_CONSTS):
   print "\n\nTD AI player starting turn. TD AI places the piece:", prev_state.nextPiece[2]
   print "TD_CONSTS after being adjusted are: ", TD_CONSTS
 
-
-  prev_state.min_player = '2' # because learning_TD_AI goes first, min is '2', and
-  prev_state.max_player = '1' #                                    max is '1'
   (expectedUtility, state) = ab(prev_state, TD_CONSTS)
   terminal_state = expectedUtility.terminal
 
@@ -752,8 +770,6 @@ def naive_AI(state, TD_CONSTS):
     return True
   print "\n\nNaive AIs turn which plays the piece: ", state.nextPiece[2]
 
-  state.min_player = '1' # because naive_AI goes second, min is '1', and
-  state.max_player = '2' #                               max is '2'
   (expectedUtility, nextState) = ab(state, TD_CONSTS)
   state = copy.deepcopy(nextState)
   print "Scores: Player 1: ", state.score['1'], " Player 2: ", state.score['2']
@@ -761,6 +777,10 @@ def naive_AI(state, TD_CONSTS):
   return learning_TD_AI(state, TD_CONSTS)
 
 print README
+
+#-------------------
+# Testing functions.
+#-------------------
 
 def test1():
   '''Test for f1_score

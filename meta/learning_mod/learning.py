@@ -434,7 +434,7 @@ Checks if a win exists
 Then calls helper
 '''
 def ab(state, constants, sub, optional_args={}):
-  depthLimit = 5
+  depthLimit = 2
   if optional_args:
     global TD_CONSTS
     global MIN

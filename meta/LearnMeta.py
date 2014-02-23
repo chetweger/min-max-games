@@ -35,13 +35,13 @@ class GridWidget(AbsolutePanel):
     self.state = State()
     self.game_over = False
     # {'c3': 0.767944, 'c2': 1.049451, 'c1': 3.074038, 'c6': 0.220823, 'c5': 0.281883, 'c4': 0.605861}
-    self.TD_CONSTS ={'c3': 0.767944, 'c2': 1.049451, 'c1': 3.074038, 'c6': 0.220823, 'c5': 0.281883, 'c4': 0.605861} #{'c3': 1., 'c2': 1., 'c1': 1., 'c6': 1., 'c5': 1., 'c4': 1.}
+    self.TD_CONSTS ={'c3': 1., 'c2': 1.3, 'c1': 3.074038, 'c6': 0.220823, 'c5': 0.281883, 'c4': 0.605861} #{'c3': 1., 'c2': 1., 'c1': 1., 'c6': 1., 'c5': 1., 'c4': 1.}
     self.CONSTS = {'c3': 1., 'c2': 1., 'c1': 1., 'c6': 1., 'c5': 1., 'c4': 1.}
     optional_args = {'TD_CONSTS': self.TD_CONSTS, 'MAX': '1', 'MIN': 2}
     AbsolutePanel.__init__(self)
 
 
-    self.depthLimit = 3
+    self.depth_limit = 3
     html = "<a href=\"file:///home/chet/projects/pyjs/meta/output/LearnMeta.html\">Start a new game.</a>" # TODO: make this work for the general case
     self.new_game = HTML(html)
     self.add(self.new_game)
@@ -58,7 +58,7 @@ class GridWidget(AbsolutePanel):
     self.decrease_depth = Button("Decrease ply search depth.", self)
     self.add(self.decrease_depth)
 
-    self.depth_label = Label("Current depth is " + str(self.depthLimit) +".")
+    self.depth_label = Label("Current depth is " + str(self.depth_limit) +".")
     self.add(self.depth_label)
 
     self.score_label = Label("Learning AI: %d | Dumb AI: %d"% (0,0))
@@ -120,12 +120,12 @@ class GridWidget(AbsolutePanel):
 
   def onClick(self, sender):
     if sender == self.increase_depth:
-      self.depthLimit += 1
-      self.depth_label.setText("Current depth is " + str(self.depthLimit) +".")
+      self.depth_limit += 1
+      self.depth_label.setText("Current depth is " + str(self.depth_limit) +".")
 
     if sender == self.decrease_depth:
-      self.depthLimit -= 1
-      self.depth_label.setText("Current depth is " + str(self.depthLimit) +".")
+      self.depth_limit -= 1
+      self.depth_label.setText("Current depth is " + str(self.depth_limit) +".")
 
     if sender == self.new_game:
       AppInit()
@@ -192,10 +192,7 @@ class GridWidget(AbsolutePanel):
     print "TD_CONSTS", self.TD_CONSTS
     (expectedUtility, nextState) = ab(self.state,
                                       self.TD_CONSTS,
-                                      optional_args={'MIN': self.td_ai_str,
-                                                     'MAX': self.dumb_ai_str,
-                                                     'depthLimit': self.depthLimit},
-                                     )
+                                      depth_limit=self.depth_limit)
     self.state = nextState
     print "Scores: Player 1: ", self.state.score['1'], " Player 2: ", self.state.score['2']
     self.state.printInfo()
@@ -210,13 +207,9 @@ class GridWidget(AbsolutePanel):
     # print, alpha-beta search etc.:
     (expectedUtility, state) = ab(self.state,
                                   self.TD_CONSTS,
-                                  False,
-                                  optional_args={'MIN': self.dumb_ai_str,
-                                                 'MAX': self.td_ai_str,
-                                                 'depthLimit': self.depthLimit},
-                                 )
+                                  depth_limit=self.depth_limit)
     terminal_state = expectedUtility.terminal
-    self.TD_CONSTS = td_learning(terminal_state, self.TD_CONSTS, False, self.state)
+    self.TD_CONSTS = td_learning(terminal_state, self.TD_CONSTS, self.state)
     self.sync_td_consts() # reflect the new TD_CONSTS in the game.
 
     self.state = state
