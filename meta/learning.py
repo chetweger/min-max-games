@@ -130,8 +130,8 @@ def f1_score(state):
   # Why MIN - MAX ?
   # Because player who call utility does not change state
   # so the state corresponds to the previous player.
-  MAX = turn_str(state.nextPiece[2])
-  MIN = str(state.nextPiece[2])
+  MIN = state.MIN
+  MAX = state.MAX
   return state.score[MIN] - state.score[MAX]
 
 def getActive(state):
@@ -150,8 +150,8 @@ def f2_center(state):
   '''Relative number of ACTIVE center
   pieces
   '''
-  MAX = turn_str(state.nextPiece[2])
-  MIN = str(state.nextPiece[2])
+  MIN = state.MIN
+  MAX = state.MAX
   center = {MIN: 0, MAX: 0,}
   activeBoards = getActive(state)
   for board in activeBoards:
@@ -166,8 +166,8 @@ def f3_corner(state):
   '''Relative number of ACTIVE corner
   pieces
   '''
-  MAX = turn_str(state.nextPiece[2])
-  MIN = str(state.nextPiece[2])
+  MIN = state.MIN
+  MAX = state.MAX
   cornerCount = {MIN: 0, MAX: 0,}
   activeBoards = getActive(state)
   for board in activeBoards:
@@ -183,8 +183,8 @@ def f4_side(state):
   '''Relative number of ACTIVE side
   pieces
   '''
-  MAX = turn_str(state.nextPiece[2])
-  MIN = str(state.nextPiece[2])
+  MIN = state.MIN
+  MAX = state.MAX
   sideCount = {MIN: 0, MAX: 0,}
   activeBoards = getActive(state)
   for board in activeBoards:
@@ -247,8 +247,8 @@ def f5_blocking(inputState):
   # b/c i modify state
   state = State()
   state.copyThis(inputState)
-  MAX = turn_str(state.nextPiece[2])
-  MIN = str(state.nextPiece[2])
+  MIN = state.MIN
+  MAX = state.MAX
   blocking = {'1': 0, '2': 0, }
 
   # we count activeBoards as ALLL boards:
@@ -285,8 +285,8 @@ def f6_potential(inputState):
   # b/c i modify state
   state = State()
   state.copyThis(inputState)
-  MAX = turn_str(state.nextPiece[2])
-  MIN = str(state.nextPiece[2])
+  MIN = state.MIN
+  MAX = state.MAX
   potential = {'1': 0, '2': 0, }
   activeBoards = getActive(state)
   activeBoardsTranspose = transposeBoards(activeBoards)
@@ -418,6 +418,8 @@ def ab(state, constants, depth_limit=3):
   '''
   alpha = Util(-9005.0, State())
   beta  = Util(9005.0, State())
+  state.MAX = str(state.nextPiece[2])
+  state.MIN = str(turn(state.nextPiece[2]))
   next_state = maxH(state, 0, depth_limit, alpha, beta, constants)
   return next_state
 
@@ -429,15 +431,6 @@ def turn(integer):
     return 2
   else:
     return 1
-
-def turn_str(integer):
-  """Same turn but
-  returns a string
-  """
-  if(integer == 1):
-    return '2'
-  else:
-    return '1'
 
 class Util:
   def __init__(self, value, state):
@@ -539,6 +532,8 @@ class State:
     self.nextPiece = other.nextPiece[:3]
     self.score['1'] = other.score['1']
     self.score['2'] = other.score['2']
+    self.MAX = other.MAX
+    self.MIN = other.MIN
 
   def genChildren(self, child): #list of states
     aL = range(DIMENSION)  # originally I thought I might generalize this to any-dimensional meta
