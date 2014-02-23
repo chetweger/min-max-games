@@ -475,6 +475,7 @@ class State:
         print buf
       print row
     print buf
+    return ""
 
   def printerComplicated(self):
     '''Used for debugging...
@@ -497,7 +498,7 @@ class State:
   def printInfo(self):
     '''Prints the current state.
     '''
-    print "boards are:\n", self.printer(), "You are playing into board column", self.nextPiece[1], "row", self.nextPiece[0], "\nNext player is ", self.nextPiece[2]
+    print "boards are:\n",self.printer(),"You are playing into board column", self.nextPiece[1], "row", self.nextPiece[0], "\nNext player is ", self.nextPiece[2]
 
 
   def copyBoards(self, otherState):
@@ -561,24 +562,18 @@ class State:
     yield None
 
 def playAI():
-  '''Face the AI in meta-ttt '''
-  print messageWelcome
-  global TD_CONSTS
-  TD_CONSTS = load_TD_CONSTS()
-  playUntilExit()
-
-def playUntilExit():
   """Play successive games until the user decides to stop. """
+  print messageWelcome
+  playUntilExit()
   while True:
-    firstPlayer = getFirstPlayer()
-    if firstPlayer == 0:
+    first_player = getFirstPlayer()
+    if first_player == 0:
       print messageGoodbye
       return
-    playMeta(firstPlayer)
+    playMeta(first_player)
 
 def getFirstPlayer():
-  """ Get the first player, or an indication to stop. """
-  dim = 3
+  """Get the first player, or an indication to stop. """
   while True:
     response = raw_input(messageChoosePlayer)
     if response == "1":
@@ -590,15 +585,15 @@ def getFirstPlayer():
     else:
       print messageTryAgain
 
-def playMeta(firstPlayer):
+def playMeta(first_player):
   '''Play the game, given first player, or stop.
   '''
   print "Should only happen once"
   state = State()
-  if firstPlayer == userFirst:
+  if first_player == userFirst:
     user_turn(state) # starts user which calls ai and then continues to switch back and forth... until over
 
-  elif firstPlayer == computerFirst:
+  elif first_player == computerFirst:
     computer_turn(state)
   else:
     assert False # Should never happen
@@ -671,20 +666,17 @@ def computer_turn(state, user_first):
   user_turn(state, user_first)
 
 def load_TD_CONSTS():
-  global TD_CONSTS
   try:
     f = open(CURRENT_DIR + '/' + "td.txt")
-    lines = f.readlines()
-    assert len(lines) == 1
-    TD_CONSTS = eval(lines[0])
+    content = f.read()
+    TD_CONSTS = eval(content)
     print "Succesfully loaded file \"td.txt\""
   except:
     print "ERROR FILE MISSING!!\nFile \"td.txt\" not found.\nYou can run \"trainAI()\" to create this file."
     # if td.txt does not exist, create it!
     writeTo = open(CURRENT_DIR + '/' "td.txt", 'w+')
-    writeTo.write(str(TD_CONSTS))
+    writeTo.write(str({'c1':1, 'c2':1, 'c3':1, 'c4':1, 'c5':1, 'c6':1}))
     writeTo.close()
-
   return TD_CONSTS
 
 def trainAI():
