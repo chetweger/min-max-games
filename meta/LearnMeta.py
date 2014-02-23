@@ -138,8 +138,8 @@ class GridWidget(AbsolutePanel):
       self.remove(self.train_dumb)
       print "here!!!!"
 
-      self.dumb_ai_int = 2
-      self.td_ai_int = 1
+      self.dumb_ai_str = '2'
+      self.td_ai_str = '1'
 
       self.state.nextPiece = [1, 1, 1]
       Timer(250, notify=self.td_ai_turn)
@@ -153,8 +153,8 @@ class GridWidget(AbsolutePanel):
       self.remove(self.train_dumb)
       print "here!!!!"
 
-      self.dumb_ai_int = 1
-      self.td_ai_int = 2
+      self.dumb_ai_str = '1'
+      self.td_ai_str = '2'
 
       self.state.nextPiece = [1, 1, 1]
       Timer(250, notify=self.dumb_ai_turn)
@@ -187,12 +187,13 @@ class GridWidget(AbsolutePanel):
   def dumb_ai_turn(self):
     print "\n\nNaive AIs turn which plays the piece: ", self.state.nextPiece[2]
     print "next piece is ", self.state.nextPiece
+    print "MIN", self.td_ai_str
+    print "MAX", self.dumb_ai_str
+    print "TD_CONSTS", self.TD_CONSTS
     (expectedUtility, nextState) = ab(self.state,
                                       self.TD_CONSTS,
-                                      False,
-                                      optional_args={'TD_CONSTS': self.TD_CONSTS,
-                                                     'MIN': self.td_ai_int,
-                                                     'MAX': self.dumb_ai_int,
+                                      optional_args={'MIN': self.td_ai_str,
+                                                     'MAX': self.dumb_ai_str,
                                                      'depthLimit': self.depthLimit},
                                      )
     self.state = nextState
@@ -210,9 +211,8 @@ class GridWidget(AbsolutePanel):
     (expectedUtility, state) = ab(self.state,
                                   self.TD_CONSTS,
                                   False,
-                                  optional_args={'TD_CONSTS': self.TD_CONSTS,
-                                                 'MIN': self.dumb_ai_int,
-                                                 'MAX': self.td_ai_int,
+                                  optional_args={'MIN': self.dumb_ai_str,
+                                                 'MAX': self.td_ai_str,
                                                  'depthLimit': self.depthLimit},
                                  )
     terminal_state = expectedUtility.terminal

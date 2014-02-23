@@ -16,18 +16,20 @@ if __name__ == '__main__':
   import os
   global CURRENT_DIR
   CURRENT_DIR = os.getcwd()
+  import sys
+  import subprocess
 
 DIMENSION = 3
 WAIT = 5
 userFirst = 1
 computerFirst = 2
-MIN = "1"
-MAX = "2"
+#MIN = "1"
+#MAX = "2"
 # standard function constants based on conjecture
 # and limited gameplay experience
 ALPHA = 0.005
-CONSTS = {'c1': 1, 'c2': 1, 'c3': 1, 'c4': 1, 'c5': 1, 'c6': 1}
-TD_CONSTS = {'c1': 1, 'c2': 1, 'c3': 1, 'c4': 1, 'c5': 1, 'c6': 1}
+#CONSTS = {'c1': 1, 'c2': 1, 'c3': 1, 'c4': 1, 'c5': 1, 'c6': 1}
+#TD_CONSTS = {'c1': 1, 'c2': 1, 'c3': 1, 'c4': 1, 'c5': 1, 'c6': 1}
 
 messageComputersTurn   = "Computer's turn."
 messageChoosePlayer    = "Which player goes first? (1 = you, 2 = computer, 0 = stop) "
@@ -39,29 +41,22 @@ messageYouWin      = "User wins."
 messageCompWin       = "Computer Wins"
 
 def train():
+  """Trains the AI indefinitely.
+  """
   while True:
-    print "Press anything to stop training.  The trainer will finish the current round before exiting."
-    try:
-      trainAI()
-    except:
-      writeTo = open(CURRENT_DIR + '/' "td.txt", 'w+')
-      writeTo.write(str(TD_CONSTS))
-      writeTo.close()
-      print 'failed'
+    subprocess.call(['cp', 'td2.txt', 'td.txt'])
+    trainAI()
 
-
-'''
-returns true we have [DIMENSION] in a row
-'''
 def hasRow(listDict):
+  '''returns true we have [DIMENSION] in a row
+  '''
   cells = map((lambda x: x['cell']), listDict)
   listAnd = reduce( (lambda x,y: x & y), cells) #should be NON zero if 1's matching exists
   return bool(listAnd)
 
-'''
-returns true if a board (DIMENSION X DIMENSION) has been won
-'''
 def isWin(board):
+  '''returns true if a board (DIMENSION X DIMENSION) has been won
+  '''
   for row in board:
     if hasRow(row):
       return True
@@ -77,43 +72,19 @@ def isWin(board):
     return True
   return False
 
-'''
-Determines if the current board is full.
-'''
 def isFull(board):
+  '''Determines if the current board is full.
+  '''
   for row in board:
     for cell in row:
       if cell['cell'] == 0:
         return False
   return True
 
-'''
-Determines if the game is over!
-If over, prints message and exits program.
-'''
-def checkOver(state):
-  for rowBoards in state.boards:
-    for board in rowBoards:
-      if (not isFull(board)) and (not isWin(board)):
-        return #
-  if state.score['1'] == state.score['2']:
-    print "Game Over.\nBoth players tied at", state.score['2'], "points."
-  elif state.score['1'] > state.score['2']:
-    print "Game Over.\nPlayer 1 won with", state.score['1'], "points versus", state.score['2'], "points for player 2!"
-  elif state.score['1'] < state.score['2']:
-    print "Game Over.\nPlayer 2 won with", state.score['2'], "points versus", state.score['1'], "points for player 1"
-  print "Final board position was:"
-  state.printInfo()
-  writeTo = open(CURRENT_DIR + '/' "td.txt", 'w+')
-  writeTo.write(str(TD_CONSTS))
-  writeTo.close()
-  print "Game over."
-
-'''
-Determines if the game is over!
-If over, prints message and returns True else False.
-'''
 def isOver(state):
+  '''Determines if the game is over!
+  If over, prints message and returns True else False.
+  '''
   for rowBoards in state.boards:
     for board in rowBoards:
       if (not isFull(board)) and (not isWin(board)):
@@ -129,7 +100,7 @@ def isOver(state):
   return True
 
 ''' the utility function! '''
-def utility(state, constants, sub):
+def utility(state, constants):
   f1 = f1_score(state) * constants['c1']
   f2 = f2_center(state) * constants['c2']
   f3 = f3_corner(state) * constants['c3']
@@ -137,41 +108,31 @@ def utility(state, constants, sub):
   f5 = f5_blocking(state) * constants['c5']
   f6 = f6_potential(state) * constants['c6']
   return_value = (f1 + f2 + f3 + f4 + f5 + f6)
-  state.printInfo()
-  print 'return value is ', return_value
-  if sub:
-    return - return_value
-  else:
-    return return_value
+  return - return_value
 
-''' the utility function plus dictionary for TD learning! '''
-def subUtil(state, constants, sub):
+def sub_utility(state, constants):
+  '''The utility function plus dictionary for TD learning! '''
   f1 = f1_score(state) * constants['c1']
   f2 = f2_center(state) * constants['c2']
   f3 = f3_corner(state) * constants['c3']
   f4 = f4_side(state) * constants['c4']
   f5 = f5_blocking(state) * constants['c5']
   f6 = f6_potential(state) * constants['c6']
-  if sub:
-    return [-f1, -f2, -f3, -f4, -f5, -f6]
-  else:
-    return [f1, f2, f3, f4, f5, f6]
+  return [-f1, -f2, -f3, -f4, -f5, -f6]
 
 
-'''
-Calculated by subtracting score of current player
-from score of opponent.
-'''
 def f1_score(state):
+  '''Calculated by subtracting score of current player
+  from score of opponent.
+  '''
   # Why MIN - MAX ?
   # Because player who call utility does not change state
   # so the state corresponds to the previous player.
-  return state.score[MIN] - state.score[MAX]
+  return state.score[state.min_player] - state.score[state.max_player]
 
-'''
-Returns all the boards that have not been won yet.
-'''
 def getActive(state):
+  '''Returns all the boards that have not been won yet.
+  '''
   active_boards = []
   for line_boards in state.boards:
     for board in line_boards:
@@ -181,12 +142,12 @@ def getActive(state):
   return active_boards
 
 
-'''
-Relative number of ACTIVE center
-pieces
-'''
 def f2_center(state):
-  MIN='1';MAX='2'
+  '''Relative number of ACTIVE center
+  pieces
+  '''
+  MIN = state.min_player
+  MAX = state.max_player
   center = {MIN: 0, MAX: 0,}
   activeBoards = getActive(state)
   for board in activeBoards:
@@ -196,11 +157,12 @@ def f2_center(state):
       center[MAX] += 1
   return center[MIN] - center[MAX]
 
-'''
-Relative number of ACTIVE corner
-pieces
-'''
 def f3_corner(state):
+  '''Relative number of ACTIVE corner
+  pieces
+  '''
+  MIN = state.min_player
+  MAX = state.max_player
   cornerCount = {MIN: 0, MAX: 0,}
   activeBoards = getActive(state)
   for board in activeBoards:
@@ -212,11 +174,12 @@ def f3_corner(state):
         cornerCount[MAX] += 1
   return cornerCount[MIN] - cornerCount[MAX]
 
-'''
-Relative number of ACTIVE side
-pieces
-'''
 def f4_side(state):
+  '''Relative number of ACTIVE side
+  pieces
+  '''
+  MIN = state.min_player
+  MAX = state.max_player
   sideCount = {MIN: 0, MAX: 0,}
   activeBoards = getActive(state)
   for board in activeBoards:
@@ -228,10 +191,9 @@ def f4_side(state):
         sideCount[MAX] += 1
   return sideCount[MIN] - sideCount[MAX]
 
-'''
-returns true if 2 is blocked by 1 in a row
-'''
 def hasBlock(listDict):
+  '''returns true if 2 is blocked by 1 in a row
+  '''
   cells = map((lambda x: x['cell']), listDict)
   cells = sorted(cells)
   if cells == [1, 2, 2]:
@@ -241,10 +203,9 @@ def hasBlock(listDict):
   else:
     return None
 
-'''
-returns true we have [DIMENSION] in a row
-'''
 def hasPotential(listDict):
+  '''returns true we have [DIMENSION] in a row
+  '''
   cells = map((lambda x: x['cell']), listDict)
   cells = sorted(cells)
   if cells == [0, 2, 2]:
@@ -254,10 +215,9 @@ def hasPotential(listDict):
   else:
     return None
 
-'''
-gets the transpose of each board in a list of boards
-'''
 def transposeBoards(lBoards):
+  '''gets the transpose of each board in a list of boards
+  '''
   newList = []
   for board in lBoards:
     newBoard = []
@@ -266,24 +226,24 @@ def transposeBoards(lBoards):
     newList += [newBoard]
   return newList
 
-'''
-like getActive but gets all boards instead
-'''
 def getAllBoards(state):
+  '''like getActive but gets all boards instead
+  '''
   active_boards = []
   for line_boards in state.boards:
     for board in line_boards:
       active_boards += [board]
   return active_boards
 
-'''
-Counts the relative number of blocking positions.
-'''
 def f5_blocking(inputState):
+  '''Counts the relative number of blocking positions.
+  '''
   # why this line?
   # b/c i modify state
   state = State()
   state.copyThis(inputState)
+  MIN = state.min_player
+  MAX = state.max_player
   blocking = {'1': 0, '2': 0, }
 
   # we count activeBoards as ALLL boards:
@@ -313,14 +273,15 @@ def f5_blocking(inputState):
         blocking[MIN] += 1
   return blocking[MIN] - blocking[MAX]
 
-'''
-Counts the relative number of potential positions.
-'''
 def f6_potential(inputState):
+  '''Counts the relative number of potential positions.
+  '''
   # why this line?
   # b/c i modify state
   state = State()
   state.copyThis(inputState)
+  MIN = state.min_player
+  MAX = state.max_player
   potential = {'1': 0, '2': 0, }
   activeBoards = getActive(state)
   activeBoardsTranspose = transposeBoards(activeBoards)
@@ -347,28 +308,31 @@ def f6_potential(inputState):
         potential[MIN] += 1
   return potential[MIN] - potential[MAX]
 
-'''
-alpha-beta helper
-'''
-def minH(state, depth, maxDepth, a, b, constants, sub):
+def minH(state, depth, depth_limit, alpha, beta, constants):
+  '''Finds the best move for MIN player by looking for the lowest
+  utility value.
+  '''
 
   value = Util(9001.0, State())
-  s = State()
+  s = State() # min_player=state.min_player, max_player=state.max_player
   gen = state.genChildren(s)
   nextS = gen.next()
 
-  if (depth == maxDepth) or (nextS == None):
-    return Util(utility(state, constants, sub), state)
+  if (depth == depth_limit) or (nextS == None):
+    return Util(utility(state, constants), state)
 
-  iterations = 0
-  copy_in = State()
+  copy_in = State() # min_player=state.min_player, max_player=state.max_player
   while nextS != None:
     copy_in.copyThis(nextS)
-    value = min_util([value, maxH(copy_in, depth+1, maxDepth, a, b, constants, sub)])
-    assert type(value) == type(a)
-    if value.value <= a.value:
-      return Util(-9001.0, State()) # we don't want to choose this!
-    b = min_util([b, value])
+
+    # next_state = maxH(state, depth_limit, alpha, beta, constants, MIN, MAX)
+    next_value = maxH(copy_in, depth + 1, depth_limit, alpha, beta, constants)
+
+    value = min_util([value, next_value])
+    assert type(value) == type(alpha)
+    if value.value <= alpha.value:
+      return Util(-9001.0, State()) # we don't want to choose this!min_player=state.min_player, max_player=state.max_player
+    beta = min_util([beta, value])
     nextS = gen.next()
   return value
 
@@ -383,6 +347,9 @@ def get_max(copy_to_me, choice1, choice2):
     copy_to_me[0] = choice2[0]
 
 def max_util(utils):
+  '''Defines a max function for the Util class
+  because pyjs max function is broken.
+  '''
   max_u = Util(-102323, None)
   for util in utils:
     if util.value > max_u.value:
@@ -396,98 +363,58 @@ def min_util(utils):
       max_u = util
   return max_u
 
-'''
-called by ab
-The minmax alpha-beta prunning algorithm as described by Norvig p. 170
-'''
-def maxH(state, depth, maxDepth, a, b, constants, sub):
+def maxH(state, depth, depth_limit, a, b, constants):
+  '''called by ab
+  The minmax alpha-beta prunning algorithm as described by Norvig p. 170
+  '''
 
-  value = Util(-9001.0, State())
-  s = State()
+  value = Util(-9001.0, State()) # min_player=state.min_player, max_player=state.max_player
+  s = State()  #min_player=state.min_player, max_player=state.max_player
   gen = state.genChildren(s)
   nextS = gen.next()
 
-  if (depth == maxDepth):
-    return Util(utility(state, constants, sub), state)
+  if (depth == depth_limit):
+    return Util(utility(state, constants), state)
 
   if not nextS:
-    assert depth > 0
-    return Util(utility(state, constants, sub), state)
+    return Util(utility(state, constants), state)
 
   if depth == 0:
-    iteration = 0
 
-    highestSoFar = State()
+    highestSoFar = State() # min_player=state.min_player, max_player=state.max_player
     highestSoFar.copyThis(nextS)
 
-    min_h = minH(nextS, depth+1, maxDepth, a, b, constants, sub)
+    min_h = minH(nextS, depth + 1, depth_limit, a, b, constants)
     value = [min_h, highestSoFar]
     while nextS != None:
-      iteration += 1
-      min_h = minH(nextS, depth+1, maxDepth, a, b, constants, sub)
+      min_h = minH(nextS, depth + 1, depth_limit, a, b, constants)
       assert type(value) == type([min_h, nextS])
       get_max( value, value, [min_h, nextS] )
       if value[0].value >= b.value:
-        return (Util(9001.0, State()), value[1]) # we don't want to select this
+        return (Util(9001.0, State()), value[1]) # we don't want to select this  min_player=state.min_player, max_player=state.max_player
       a = max_util([a, value[0]])
       nextS = gen.next()
     return value
   else:
-    copy_in = State()
+    copy_in = State()  #min_player=state.min_player, max_player=state.max_player
     while nextS != None:
       copy_in.copyThis(nextS)
-      value = max_util([value, minH(copy_in, depth+1, maxDepth, a, b, constants, sub)])
+      value = max_util([value, minH(copy_in, depth + 1, depth_limit, a, b, constants)])
       assert type(value) == type(b)
       if value.value >= b.value:
-        return Util(9001.0, State()) # don't want to select this (another option is implied)
+        return Util(9001.0, State()) # don't want to select this (another option is implied)  min_player=state.min_player, max_player=state.max_player
       a = max_util([a, value])
       nextS = gen.next()
     return value
 
-'''
-Could the current player force a win?
-return move if yes; None if not
-'''
-def getWin(state):
-  a = State()
-  cG = state.genChildren(a)
-  nextS = cG.next()
-  while nextS != None:
-    if isWin(nextS):
-      return nextS
-    nextS = cG.next()
-  return None
-
-'''
-Checks if a win exists
-Then calls helper
-'''
-def ab(state, constants, sub, optional_args={}):
-  print "I have been called lol"
-  depthLimit = 2
-  if optional_args:
-    global TD_CONSTS
-    global MIN
-    global MAX
-    TD_CONSTS = optional_args['TD_CONSTS']
-    print 'td constants passed are', TD_CONSTS
-    MIN = optional_args['MIN']
-    MAX = optional_args['MAX']
-    depthLimit = optional_args['depthLimit']
-
-  farthestDepth = 1
-  duration = 0
-  while (farthestDepth < depthLimit): # duration < WAIT and
-    new = State()
-    new.copyThis(state)
-    nextState = maxH(new, 0, farthestDepth, Util(-9005.0, State()), Util(9005.0, State()), constants, sub)
-    '''
-    print "\n*"
-    print state.printInfo()
-    print "\n*"
-    '''
-    farthestDepth += 1
-  return nextState
+def ab(state, constants, depth_limit=5):
+  '''The minmax alpha-beta prunning algorithm as described by Norvig p. 170
+  '''
+  alpha = Util(-9005.0, State()) #  min_player=state.min_player, max_player=state.max_player
+  beta  = Util(9005.0, State())  #  min_player=state.min_player, max_player=state.max_player
+  print 'debugging state in ab ', state.min_player
+  next_state = maxH(state, 0, depth_limit, alpha, beta, constants)
+  return next_state
 
 def turn(integer):
   if(integer == 1): return 2
@@ -495,7 +422,9 @@ def turn(integer):
 
 class Util:
   def __init__(self, value, state):
-    '''Rather than using an integer, we use the util object!'''
+    '''Rather than using an integer, we use the util object!  This allows us
+    to save the terminal state for temporal difference learning
+    '''
     self.value = value
     self.terminal = state
   def __ge__(self, other):
@@ -510,7 +439,8 @@ class Util:
 class State:
 # state represents the board, next piece to be played, and other relevant info
   def __init__(self):
-    """ Construct a new board."""
+    """Construct a new board.
+    """
     self.boards = [[[[ {"cell": 0, "x": x, "y": y, "x_board": x_board, "y_board": y_board}
                for x in range(DIMENSION)] for y in range(DIMENSION)]
                for x_board in range(DIMENSION)] for y_board in range(DIMENSION)]
@@ -525,10 +455,9 @@ class State:
         self.boards[0][0][a][b]['cell'] = board[a][b]
     return isWin (self.boards[0][0])
 
-  '''
-  Determine if coordinate entered is on an empty square
-  '''
   def isUnoccupied(self, y, x):
+    '''Determine if coordinate entered is on an empty square
+    '''
     return self.boards[self.nextPiece[0]][self.nextPiece[1]][y][x]['cell'] == 0
 
 
@@ -548,6 +477,8 @@ class State:
     print buf
 
   def printerComplicated(self):
+    '''Used for debugging...
+    '''
     length = DIMENSION**2*8 + 3
     buf = ['-' for x in range(length)]
     buf = ''.join(buf)
@@ -564,10 +495,14 @@ class State:
 
 
   def printInfo(self):
+    '''Prints the current state.
+    '''
     print "boards are:\n", self.printer(), "You are playing into board column", self.nextPiece[1], "row", self.nextPiece[0], "\nNext player is ", self.nextPiece[2]
 
 
   def copyBoards(self, otherState):
+    '''Copies otherState onto self!
+    '''
     rangeBoards = range(len(otherState.boards))
     for y_board in rangeBoards:
       for x_board in rangeBoards:
@@ -584,6 +519,9 @@ class State:
     self.nextPiece = other.nextPiece[:3]
     self.score['1'] = other.score['1']
     self.score['2'] = other.score['2']
+    self.max_player = other.max_player
+    self.min_player = other.min_player
+    assert other.max_player
 
   def genChildren(self, child): #list of states
     aL = range(DIMENSION)  # originally I thought I might generalize this to any-dimensional meta
@@ -605,7 +543,6 @@ class State:
                   child.boards[a][b][c][d]['cell'] = self.nextPiece[2]
                   if isWin(child.boards[a][b]):
                     child.score[str(self.nextPiece[2])] += 1
-                  child.printer
                   yield child
     else:
       #print "Two"
@@ -623,76 +560,52 @@ class State:
             yield child
     yield None
 
-''' Face the AI in meta-ttt '''
 def playAI():
+  '''Face the AI in meta-ttt '''
   print messageWelcome
   global TD_CONSTS
   TD_CONSTS = load_TD_CONSTS()
   playUntilExit()
 
 def playUntilExit():
-  """ Play successive games until the user decides to stop. """
+  """Play successive games until the user decides to stop. """
   while True:
     firstPlayer = getFirstPlayer()
     if firstPlayer == 0:
       print messageGoodbye
       return
-    playTrio(firstPlayer)
+    playMeta(firstPlayer)
 
 def getFirstPlayer():
   """ Get the first player, or an indication to stop. """
-  while True:
-    dim = raw_input("Enter the dimension of the game \n")
-    if dim.isdigit():
-      global DIMENSION
-      DIMENSION = int(dim)
-      break
-    else:
-      print messageTryAgain
+  dim = 3
   while True:
     response = raw_input(messageChoosePlayer)
     if response == "1":
-      SUBTRACT = True
-      return 1
+      return userFirst
     elif response == "2":
-      SUBTRACT = False
       return 2
     elif response == "0":
       return 0
     else:
       print messageTryAgain
 
-'''
-Play the game, given first player, or stop.
-'''
-def playTrio(firstPlayer):
+def playMeta(firstPlayer):
+  '''Play the game, given first player, or stop.
+  '''
   print "Should only happen once"
   state = State()
   if firstPlayer == userFirst:
-
-    while True:
-      if userTurn(state) == 0:
-        break
-      if computerTurn(state) == 0:
-        break
+    user_turn(state) # starts user which calls ai and then continues to switch back and forth... until over
 
   elif firstPlayer == computerFirst:
-
-    state.nextPiece[2] = 2
-
-    while True:
-      if computerTurn(state) == 0:
-        break
-      if userTurn(state) == 0:
-        break
-
+    computer_turn(state)
   else:
-    assert "Should never happen"
+    assert False # Should never happen
 
-'''
-Simulate one round of play with the user starting.
-'''
-def userTurn(state):
+def user_turn(state, user_first):
+  '''Simulate one round of play with the user starting.
+  '''
   print messageUsersTurn
   print state.printInfo()
   checkOver(state)
@@ -739,31 +652,23 @@ def userTurn(state):
   print "Your move was:"
   state.printInfo()
   print "Scores: Player 1: ", state.score['1'], " Player 2: ", state.score['2']
-  computerTurn(state)
+  computer_turn(state)
 
 
-'''
-Plays meta-ttt using learned TD_CONSTS data
-'''
-def computerTurn(state):
+def computer_turn(state, user_first):
+  '''Plays meta-ttt using learned TD_CONSTS data
+  '''
   global TD_CONSTS
   print messageComputersTurn
   print "AI using following constants:\n", TD_CONSTS
   checkOver(state)
   print state.printInfo()
-  (expectedUtility, nextState) = ab(state, TD_CONSTS, True)
+  (expectedUtility, nextState) = ab(state, TD_CONSTS)
   print "Expected utility is: ", expectedUtility
 
   state = copy.deepcopy(nextState)
   print "Scores: Player 1: ", state.score['1'], " Player 2: ", state.score['2']
-  userTurn(state)
-
-def normalize (tdConsts):
-  norm = reduce( (lambda x,y: x+y), CONSTS.values())
-  tot = reduce( (lambda x,y: x+y), tdConsts.values())
-  for i in range(len(tdConsts)):
-    tdConsts['c' + str(i+1)] = tdConsts['c' + str(i+1)] / tot * norm
-  return tdConsts
+  user_turn(state, user_first)
 
 def load_TD_CONSTS():
   global TD_CONSTS
@@ -782,23 +687,21 @@ def load_TD_CONSTS():
 
   return TD_CONSTS
 
-'''
-Learns TD data by playing learning_TD_AI against naiveAI
-'''
 def trainAI():
+  '''Improves the TD_CONSTS by playing learning_TD_AI against naive_AI
+  '''
   print "Starting AI training!"
-  global TD_CONSTS
   TD_CONSTS = load_TD_CONSTS()
   print "TD_CONSTS is currently:\n", TD_CONSTS
   savedConsts = copy.copy(TD_CONSTS)
-  a = State()
-  learning_TD_AI(a)
+  starting_state = State()
+  learning_TD_AI(starting_state, TD_CONSTS)
   # figure out how much TD_CONSTS has been update
   # (should learning continue?)
   saved = savedConsts.values()
   td = TD_CONSTS.values()
-  diffList = [ abs(saved[i] - td[i]) for i in range(len(TD_CONSTS))]
-  change = reduce( (lambda x, y: x+y), diffList )
+  diff_list = [ abs(saved[i] - td[i]) for i in range(len(TD_CONSTS))]
+  change = reduce( (lambda x, y: x+y), diff_list )
   print "TD_CONSTS update to:\n", TD_CONSTS, "\nNet change was: ", change
   print "Finished training!"
   writeTo = open(CURRENT_DIR + '/' "td.txt", 'w+')
@@ -806,64 +709,70 @@ def trainAI():
   writeTo.close()
   return TD_CONSTS
 
-def td_learning(terminal_state, TD_CONSTS, SUBTRACT, prevState):
-  # modify temporal difference:
-  changeTotalUtility = utility(terminal_state, TD_CONSTS, SUBTRACT) - utility(prevState, TD_CONSTS, SUBTRACT)
-  sub1 = subUtil(terminal_state, TD_CONSTS, SUBTRACT)
-  sub2 = subUtil(prevState, TD_CONSTS, SUBTRACT)
-  changeSubUtil = [ (sub1[i] - sub2[i]) for i in range(len(sub1)) ]
+def normalize(TD_CONSTS):
+  norm = reduce((lambda x,y: x+y), TD_CONSTS.values())
+  tot = reduce((lambda x,y: x+y), TD_CONSTS.values())
   for i in range(len(TD_CONSTS)):
-    TD_CONSTS['c' + str(i+1)] += ALPHA * changeTotalUtility * (changeSubUtil[i]) * (-1)
+    TD_CONSTS['c' + str(i+1)] = TD_CONSTS['c' + str(i+1)] / tot * norm
+  return TD_CONSTS
+
+def td_learning(terminal_state, TD_CONSTS, prev_state):
+  '''This function modifies TD_CONSTS according to the temporal difference algorithm.
+  '''
+  change_total_utility = utility(terminal_state, TD_CONSTS) - utility(prev_state, TD_CONSTS)
+  sub1 = sub_utility(terminal_state, TD_CONSTS)
+  sub2 = sub_utility(prev_state, TD_CONSTS)
+  change_sub_utility = [ (sub1[i] - sub2[i]) for i in range(len(sub1)) ]
+  for i in range(len(TD_CONSTS)):
+    TD_CONSTS['c' + str(i+1)] += ALPHA * change_total_utility * (change_sub_utility[i]) * (-1)
 
   # normalize
   TD_CONSTS = normalize(TD_CONSTS)
   return TD_CONSTS
 
-def learning_TD_AI(prevState):
+def learning_TD_AI(prev_state, TD_CONSTS):
   # if over, return to trainer:
-  if isOver(prevState):
-    return
-  global TD_CONSTS
-  print "\n\nTD AI player starting turn. TD AI places the piece:", prevState.nextPiece[2]
+  if isOver(prev_state):
+    return True
+  print "\n\nTD AI player starting turn. TD AI places the piece:", prev_state.nextPiece[2]
   print "TD_CONSTS after being adjusted are: ", TD_CONSTS
 
 
-  # print, alpha-beta search etc.:
-  SUBTRACT = False
-  tuple_expected = ab(prevState, TD_CONSTS, SUBTRACT)
-  try:
-    (expectedUtility, state) =  tuple_expected
-  except:
-    print tuple_expected
-    assert False
+  prev_state.min_player = '2' # because learning_TD_AI goes first, min is '2', and
+  prev_state.max_player = '1' #                                    max is '1'
+  (expectedUtility, state) = ab(prev_state, TD_CONSTS)
   terminal_state = expectedUtility.terminal
+
   print "Scores: Player 1: ", state.score['1'], " Player 2: ", state.score['2']
   state.printInfo()
 
-  TD_CONSTS = td_learning(terminal_state, TD_CONSTS, SUBTRACT, prevState)
+  TD_CONSTS = td_learning(terminal_state, TD_CONSTS, prev_state)
 
   print "TD_CONSTS after being adjusted are: ", TD_CONSTS
-  naiveAI(state)
+  return naive_AI(state, TD_CONSTS)
 
-def naiveAI(state):
+def naive_AI(state, TD_CONSTS):
+  '''A naive/dumb ai that does not modify the TD_CONSTS
+  but still uses them when calling ab()
+  '''
   #global CONSTS
   if isOver(state):
-    return
+    return True
   print "\n\nNaive AIs turn which plays the piece: ", state.nextPiece[2]
-  SUBTRACT = True
-  checkOver(state)
-  (expectedUtility, nextState) = ab(state, TD_CONSTS, SUBTRACT)
+
+  state.min_player = '1' # because naive_AI goes second, min is '1', and
+  state.max_player = '2' #                               max is '2'
+  (expectedUtility, nextState) = ab(state, TD_CONSTS)
   state = copy.deepcopy(nextState)
   print "Scores: Player 1: ", state.score['1'], " Player 2: ", state.score['2']
   state.printInfo()
-  learning_TD_AI(state)
+  return learning_TD_AI(state, TD_CONSTS)
 
 print README
 
-'''
-Test for f1_score
-'''
 def test1():
+  '''Test for f1_score
+  '''
   a = State()
   a.boards[0][0][0][0]['cell'] = 1
   a.boards[0][0][1][1]['cell'] = 1
@@ -872,15 +781,13 @@ def test1():
   a.nextPiece[2] = 1
   a.printInfo()
   a.nextPiece[2] = 1
-  SUBTRACT = False
-  b = ab(a, CONSTS, SUBTRACT)[1]
-  print utility(b, CONSTS, SUBTRACT)
+  b = ab(a, CONSTS)[1]
+  print utility(b, CONSTS)
   b.printInfo()
 
-'''
-Test for f2_center
-'''
 def test2():
+  '''Test for f2_center
+  '''
   a = State()
   a.nextPiece[0] = 1
   a.nextPiece[1] = 1
@@ -888,10 +795,9 @@ def test2():
   b = ab(a, CONSTS)[1]
   b.printInfo()
 
-'''
-Test for f1_score
-'''
 def test3():
+  '''Test for f1_score
+  '''
   a = State()
   a.boards[0][0][1][0]['cell'] = 1
   a.boards[0][0][0][0]['cell'] = 2

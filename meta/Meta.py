@@ -142,8 +142,8 @@ class GridWidget(AbsolutePanel):
         del(self.ai_first) # remove all traces
 
         self.state = ab(self.state, self.TD_CONSTS, False,
-          optional_args={'TD_CONSTS': self.TD_CONSTS,
-            'MIN': self.min_player, 'MAX': self.max_player,
+          optional_args={ 'MIN': self.min_player,
+            'MAX': self.max_player,
             'depthLimit': self.depthLimit})[1]
         self.state_to_grid()
 
@@ -170,8 +170,8 @@ class GridWidget(AbsolutePanel):
         #self.state.player = next_player(self.state.player)
 
         self.state = ab(self.state, self.TD_CONSTS, True,
-          optional_args={'TD_CONSTS': self.TD_CONSTS,
-            'MIN': self.min_player, 'MAX': self.max_player,
+          optional_args={ 'MIN': self.min_player,
+            'MAX': self.max_player,
             'depthLimit': self.depthLimit})[1]
         self.state_to_grid()
         self.check_win()
