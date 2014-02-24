@@ -1,12 +1,26 @@
 import pyjd # this is dummy in pyjs
+
 """
-bugs:
-  score not updated
-  crashes in learn.py due to only a few possible positions being left on the board:
-    it is therefore possible to move, and game is not over, but a search of the ply depth more than a depth of one
-    will terminate.
-  ai moving first loses badly (why?) <-- understand (don't want to kill other three)
-  fix bug where available positions are not shown correctly (everything shows up as "ai could player here")
+additional features:
+  fix bugs...
+  ability to reset TD_CONSTS
+  ability to continue training td_ai another iteration # is_over prints nothing...
+  dumb_ai has its own CONSTS, and the user can adjust them
+  ability to show graph of evolution of TD_CONSTS
+
+integration with website:
+  mandatory (tonight)
+    TD_CONSTANTS can be transfered to and from playAI <--> trainAI
+    link from resume page to playAI and trainAI pages
+    import resume (base changes off of template)
+    prepare email to pagewoo, rubicon, rocketfuel, and
+  optional
+    2 videos:
+      "the power of stocastic matrices"
+      "temporal difference learning with meta ttt"
+    forward email to chen
+    research promoting my project
+
 """
 
 from pyjamas.ui.Button import Button
@@ -25,7 +39,7 @@ from pyjamas import logging
 
 log = logging.getConsoleLogger()
 
-from learning import State, ab, isWin, isFull, turn, is_over, normalize, td_learning
+from learning import State, ab, is_win, is_full, turn, is_over, normalize, td_learning
 
 INCREMENT_AMOUNT = .05
 
@@ -33,10 +47,10 @@ class GridWidget(AbsolutePanel):
 
   def __init__(self):
     self.state = State()
-    self.game_over = False
-    # {'c3': 0.767944, 'c2': 1.049451, 'c1': 3.074038, 'c6': 0.220823, 'c5': 0.281883, 'c4': 0.605861}
-    self.TD_CONSTS ={'c3': 1., 'c2': 1.3, 'c1': 3.074038, 'c6': 0.220823, 'c5': 0.281883, 'c4': 0.605861} #{'c3': 1., 'c2': 1., 'c1': 1., 'c6': 1., 'c5': 1., 'c4': 1.}
-    self.CONSTS = {'c3': 1., 'c2': 1., 'c1': 1., 'c6': 1., 'c5': 1., 'c4': 1.}
+    self.TD_CONSTS = {'c3': 1., 'c2': 1., 'c1': 1., 'c6': 1., 'c5': 1., 'c4': 1.}
+    self.CONSTS   =  {'c3': 1., 'c2': 1., 'c1': 1., 'c6': 1., 'c5': 1., 'c4': 1.}
+    self.BEST_CONSTANTS = {'c3': 0.767944, 'c2': 1.049451, 'c1': 3.074038, 'c6': 0.220823, 'c5': 0.281883, 'c4': 0.605861}
+    self.ONES_CONSTS = {'c3': 1., 'c2': 1., 'c1': 1., 'c6': 1., 'c5': 1., 'c4': 1.}
     AbsolutePanel.__init__(self)
 
 
@@ -56,6 +70,7 @@ class GridWidget(AbsolutePanel):
 
     self.decrease_depth = Button("Decrease ply search depth.", self)
     self.add(self.decrease_depth)
+
 
     self.depth_label = Label("Current depth is " + str(self.depth_limit) +".")
     self.add(self.depth_label)
@@ -81,6 +96,8 @@ class GridWidget(AbsolutePanel):
     self.init_contstants_adj_grid()
     self.add(self.adj_grid)
 
+    self.reset_constants = Button("Reset all of Learning AI's constants to 1.", self)
+    self.add(self.reset_constants)
 
     self.state_to_grid()
 
@@ -116,6 +133,10 @@ class GridWidget(AbsolutePanel):
         self.g.setWidget(y_board, x_board, g)
 
   def onClick(self, sender):
+    if sender == self.reset_constants:
+      self.TD_CONSTS = self.ONES_CONSTS
+      self.sync_td_consts()
+
     if sender == self.increase_depth:
       self.depth_limit += 1
       self.depth_label.setText("Current depth is " + str(self.depth_limit) +".")
@@ -143,12 +164,13 @@ class GridWidget(AbsolutePanel):
       print "Done training."
 
     if sender == self.train_dumb:
-
+      '''
       self.remove(self.decrease_depth)
       self.remove(self.increase_depth)
       self.remove(self.train_td)
       self.remove(self.train_dumb)
       print "here!!!!"
+      '''
 
       self.dumb_ai_str = '1'
       self.td_ai_str = '2'
@@ -170,6 +192,7 @@ class GridWidget(AbsolutePanel):
     p2_score = self.state.score['2']
     print "scores are ", p1_score, p2_score
     self.score_label.setText("Learning AI: %d | Dumb AI: %d" % (p1_score, p2_score))
+    self.state.printInfo()
     if is_over(self.state):
       if p1_score > p2_score:
         msg = "AI 1 won the game."
@@ -179,7 +202,6 @@ class GridWidget(AbsolutePanel):
         msg = "Game ends in a tie."
       game_over_message = Label(msg)
       self.add(game_over_message)
-      self.game_over = True
       return True
     else:
       return False
@@ -195,8 +217,9 @@ class GridWidget(AbsolutePanel):
     print "Scores: Player 1: ", self.state.score['1'], " Player 2: ", self.state.score['2']
     self.state.printInfo()
 
-    print "Is over ", self.check_is_win()
-    if not self.check_is_win():
+    over = self.check_is_win()
+    print "back in dumb"
+    if not over:
       self.pause_update = Timer(250, notify=self.td_ai_turn)
     else:
       return True
@@ -220,8 +243,10 @@ class GridWidget(AbsolutePanel):
 
     print "TD_CONSTS after being adjusted are: ", self.TD_CONSTS
 
-    print "Is over ", self.check_is_win()
-    if not self.check_is_win():
+    over = self.check_is_win()
+    print "back in td"
+    print "Is over ", over
+    if not over:
       return Timer(250, notify=self.dumb_ai_turn)
     else:
       return True
@@ -231,9 +256,9 @@ class GridWidget(AbsolutePanel):
     board = self.state.boards
     piece = list(self.state.next_piece)
     playable = True
-    if isWin(board[piece[0]][piece[1]]) or isFull(board[piece[0]][piece[1]]):
+    if is_win(board[piece[0]][piece[1]]) or is_full(board[piece[0]][piece[1]]):
       playable = False
-    if (not isWin(board[y_board][x_board])) and (not isFull(board[y_board][x_board])):
+    if (not is_win(board[y_board][x_board])) and (not is_full(board[y_board][x_board])):
       if not playable:
         return True
       if playable:

@@ -11,11 +11,23 @@ trainAI()
 
 You can start a new game of meta_tic-tac-toe with:
 playAI()'''
+
+# belongs in is_over lol
+"""
+if state.score['1'] == state.score['2']:
+  print "Game Over.\nBoth players tied at", state.score['2'], "points."
+elif state.score['1'] > state.score['2']:
+  print "Game Over.\nPlayer 1 won with", state.score['1'], "points versus", state.score['2'], "points for player 2!"
+elif state.score['1'] < state.score['2']:
+  print "Game Over.\nPlayer 2 won with", state.score['2'], "points versus", state.score['1'], "points for player 1"
+print "Final board position was:"
+state.printInfo()
+"""
 if __name__ == '__main__':
   import copy
   import os
-  global CURRENT_DIR
-  CURRENT_DIR = os.getcwd()
+  global CWD
+  CWD = os.getcwd()
   import sys
   import subprocess
 
@@ -57,6 +69,8 @@ def has_row(listDict):
 def is_win(board):
   '''returns true if a board (DIMENSION X DIMENSION) has been won
   '''
+  print "\ntype of board is ", type(board), len(board), board
+  print "board is ", board
   for row in board:
     if has_row(row):
       return True
@@ -85,19 +99,16 @@ def is_over(state):
   '''Determines if the game is over!
   If over, prints message and returns True else False.
   '''
-  for rowBoards in state.boards:
-    for board in rowBoards:
-      if (not is_full(board)) and (not is_win(board)):
-        return False
-  if state.score['1'] == state.score['2']:
-    print "Game Over.\nBoth players tied at", state.score['2'], "points."
-  elif state.score['1'] > state.score['2']:
-    print "Game Over.\nPlayer 1 won with", state.score['1'], "points versus", state.score['2'], "points for player 2!"
-  elif state.score['1'] < state.score['2']:
-    print "Game Over.\nPlayer 2 won with", state.score['2'], "points versus", state.score['1'], "points for player 1"
-  print "Final board position was:"
+  print "Arrived in is_over"
   state.printInfo()
-  return True
+  for rowBoards in state.boards:
+    print "First level"
+    for board in rowBoards:
+      print "Second level", board
+      if (not is_win(board)) and (not is_full(board)):
+        return False
+  print "Out of the loop"
+  return "asdf"
 
 def utility(state, constants):
   '''Finds the utility of a state which is a product
@@ -414,7 +425,7 @@ def max_search(state, depth, depth_limit, a, b, constants):
       nextS = gen.next()
     return value
 
-def ab(state, constants, depth_limit=6):
+def ab(state, constants, depth_limit=1):
   '''The minmax alpha-beta prunning algorithm as described by Norvig p. 170.
   ab is essentially a wrapper around max_search.
   '''
@@ -687,14 +698,14 @@ def computer_turn(state, TD_CONSTS):
 
 def load_TD_CONSTS():
   try:
-    f = open(CURRENT_DIR + '/' + "td.txt")
+    f = open(CWD + '/' + "td.txt")
     content = f.read()
     TD_CONSTS = eval(content)
     print "Succesfully loaded file \"td.txt\""
   except:
     print "ERROR FILE MISSING!!\nFile \"td.txt\" not found.\nYou can run \"trainAI()\" to create this file."
     # if td.txt does not exist, create it!
-    writeTo = open(CURRENT_DIR + '/' "td.txt", 'w+')
+    writeTo = open(CWD + '/' "td.txt", 'w+')
     writeTo.write(str({'c1':1, 'c2':1, 'c3':1, 'c4':1, 'c5':1, 'c6':1}))
     writeTo.close()
   return TD_CONSTS
@@ -716,14 +727,14 @@ def trainAI():
   change = reduce( (lambda x, y: x+y), diff_list )
   print "TD_CONSTS update to:\n", TD_CONSTS, "\nNet change was: ", change
   print "Finished training!"
-  writeTo = open(CURRENT_DIR + '/' "td.txt", 'w+')
+  writeTo = open(CWD + '/' "td.txt", 'w+')
   writeTo.write(str(TD_CONSTS))
   writeTo.close()
   return TD_CONSTS
 
 def normalize(TD_CONSTS):
-  norm = reduce((lambda x,y: x+y), TD_CONSTS.values())
-  tot = reduce((lambda x,y: x+y), TD_CONSTS.values())
+  norm = 6.0
+  tot = sum(TD_CONSTS.values())
   for i in range(len(TD_CONSTS)):
     TD_CONSTS['c' + str(i+1)] = TD_CONSTS['c' + str(i+1)] / tot * norm
   return TD_CONSTS
@@ -763,7 +774,6 @@ def naive_AI(state, TD_CONSTS):
   '''A naive/dumb ai that does not modify the TD_CONSTS
   but still uses them when calling ab()
   '''
-  #global CONSTS
   if is_over(state):
     return True
   print "\n\nNaive AIs turn which plays the piece: ", state.next_piece[2]

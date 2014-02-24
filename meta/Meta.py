@@ -24,7 +24,7 @@ from pyjamas import logging
 
 log = logging.getConsoleLogger()
 
-from learning import State, ab, isWin, isFull, turn, is_over, normalize
+from learning import State, ab, is_win, is_full, turn, is_over, normalize
 
 INCREMENT_AMOUNT = .05
 
@@ -220,9 +220,9 @@ class GridWidget(AbsolutePanel):
     board = self.state.boards
     piece = list(self.state.next_piece)
     playable = True
-    if isWin(board[piece[0]][piece[1]]) or isFull(board[piece[0]][piece[1]]):
+    if is_win(board[piece[0]][piece[1]]) or is_full(board[piece[0]][piece[1]]):
       playable = False
-    if (not isWin(board[y_board][x_board])) and (not isFull(board[y_board][x_board])):
+    if (not is_win(board[y_board][x_board])) and (not is_full(board[y_board][x_board])):
       if not playable:
         return True
       if playable:
@@ -283,7 +283,7 @@ class GridWidget(AbsolutePanel):
                 piece[1] = x_cell
             else:
               assert (g.getText(y_cell, x_cell) == '-')
-    if isWin(self.state.boards[point['y_board']][point['x_board']]):
+    if is_win(self.state.boards[point['y_board']][point['x_board']]):
       self.state.score[str(piece[2])] += 1
 
 def AppInit():
