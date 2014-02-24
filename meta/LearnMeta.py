@@ -25,7 +25,7 @@ from pyjamas import logging
 
 log = logging.getConsoleLogger()
 
-from learning import State, ab, isWin, isFull, turn, isOver, normalize, td_learning
+from learning import State, ab, isWin, isFull, turn, is_over, normalize, td_learning
 
 INCREMENT_AMOUNT = .05
 
@@ -37,7 +37,6 @@ class GridWidget(AbsolutePanel):
     # {'c3': 0.767944, 'c2': 1.049451, 'c1': 3.074038, 'c6': 0.220823, 'c5': 0.281883, 'c4': 0.605861}
     self.TD_CONSTS ={'c3': 1., 'c2': 1.3, 'c1': 3.074038, 'c6': 0.220823, 'c5': 0.281883, 'c4': 0.605861} #{'c3': 1., 'c2': 1., 'c1': 1., 'c6': 1., 'c5': 1., 'c4': 1.}
     self.CONSTS = {'c3': 1., 'c2': 1., 'c1': 1., 'c6': 1., 'c5': 1., 'c4': 1.}
-    optional_args = {'TD_CONSTS': self.TD_CONSTS, 'MAX': '1', 'MIN': 2}
     AbsolutePanel.__init__(self)
 
 
@@ -84,8 +83,6 @@ class GridWidget(AbsolutePanel):
 
 
     self.state_to_grid()
-    self.max_player = '-1'
-    self.min_player = '-1'
 
   def init_contstants_adj_grid(self):
     '''Initializes the grid that allows the TD_CONSTS to be adjusted.
@@ -141,7 +138,7 @@ class GridWidget(AbsolutePanel):
       self.dumb_ai_str = '2'
       self.td_ai_str = '1'
 
-      self.state.nextPiece = [1, 1, 1]
+      self.state.next_piece = [1, 1, 1]
       Timer(250, notify=self.td_ai_turn)
       print "Done training."
 
@@ -156,7 +153,7 @@ class GridWidget(AbsolutePanel):
       self.dumb_ai_str = '1'
       self.td_ai_str = '2'
 
-      self.state.nextPiece = [1, 1, 1]
+      self.state.next_piece = [1, 1, 1]
       Timer(250, notify=self.dumb_ai_turn)
       print "Done training."
 
@@ -167,13 +164,13 @@ class GridWidget(AbsolutePanel):
     for key in td_keys:
       self.adj_labels[key].setText("Constant %d: %f" % (key[1], self.TD_CONSTS[key]))
 
-  def check_win(self):
+  def check_is_win(self):
     self.state_to_grid()
     p1_score = self.state.score['1']
     p2_score = self.state.score['2']
     print "scores are ", p1_score, p2_score
     self.score_label.setText("Learning AI: %d | Dumb AI: %d" % (p1_score, p2_score))
-    if isOver(self.state):
+    if is_over(self.state):
       if p1_score > p2_score:
         msg = "AI 1 won the game."
       elif human_score < ai_score:
@@ -183,12 +180,13 @@ class GridWidget(AbsolutePanel):
       game_over_message = Label(msg)
       self.add(game_over_message)
       self.game_over = True
+      return True
+    else:
+      return False
 
   def dumb_ai_turn(self):
-    print "\n\nNaive AIs turn which plays the piece: ", self.state.nextPiece[2]
-    print "next piece is ", self.state.nextPiece
-    print "MIN", self.td_ai_str
-    print "MAX", self.dumb_ai_str
+    print "\n\nNaive AIs turn which plays the piece: ", self.state.next_piece[2]
+    print "next piece is ", self.state.next_piece
     print "TD_CONSTS", self.TD_CONSTS
     (expectedUtility, nextState) = ab(self.state,
                                       self.TD_CONSTS,
@@ -196,12 +194,15 @@ class GridWidget(AbsolutePanel):
     self.state = nextState
     print "Scores: Player 1: ", self.state.score['1'], " Player 2: ", self.state.score['2']
     self.state.printInfo()
-    self.check_win()
-    self.pause_update = Timer(250, notify=self.td_ai_turn)
-    #return isOver(self.state)
+
+    print "Is over ", self.check_is_win()
+    if not self.check_is_win():
+      self.pause_update = Timer(250, notify=self.td_ai_turn)
+    else:
+      return True
 
   def td_ai_turn(self):
-    print "\n\nTD AI player starting turn. TD AI places the piece:", self.state.nextPiece[2]
+    print "\n\nTD AI player starting turn. TD AI places the piece:", self.state.next_piece[2]
     print "TD_CONSTS after being adjusted are: ", self.TD_CONSTS
 
     # print, alpha-beta search etc.:
@@ -218,14 +219,17 @@ class GridWidget(AbsolutePanel):
     state.printInfo()
 
     print "TD_CONSTS after being adjusted are: ", self.TD_CONSTS
-    self.check_win() # check if game is over and take appropriate action.
-    self.pause_update = Timer(250, notify=self.dumb_ai_turn)
-    #return isOver(self.state)
+
+    print "Is over ", self.check_is_win()
+    if not self.check_is_win():
+      return Timer(250, notify=self.dumb_ai_turn)
+    else:
+      return True
 
   def will_buttons(self, y_board, x_board):
-    # first we determine if the nextPiece points to a playable board.
+    # first we determine if the next_piece points to a playable board.
     board = self.state.boards
-    piece = list(self.state.nextPiece)
+    piece = list(self.state.next_piece)
     playable = True
     if isWin(board[piece[0]][piece[1]]) or isFull(board[piece[0]][piece[1]]):
       playable = False

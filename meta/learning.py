@@ -47,32 +47,32 @@ def train():
     #subprocess.call(['cp', 'td2.txt', 'td.txt'])
     trainAI()
 
-def hasRow(listDict):
+def has_row(listDict):
   '''returns true we have [DIMENSION] in a row
   '''
   cells = map((lambda x: x['cell']), listDict)
   listAnd = reduce( (lambda x,y: x & y), cells) #should be NON zero if 1's matching exists
   return bool(listAnd)
 
-def isWin(board):
+def is_win(board):
   '''returns true if a board (DIMENSION X DIMENSION) has been won
   '''
   for row in board:
-    if hasRow(row):
+    if has_row(row):
       return True
   board_Transpose = zip(*board)
   for column in board_Transpose:
-    if hasRow(column):
+    if has_row(column):
       return True
   zip(*board)
   length = len(board)
   diagonal1 = [board[i][i] for i in range(length)] #returns y=-x diagonal (the trace)
   diagonal2 = [board[i][length-i-1] for i in range(length)] #returns y=x diagonal
-  if (hasRow(diagonal1) or hasRow(diagonal2)):
+  if (has_row(diagonal1) or has_row(diagonal2)):
     return True
   return False
 
-def isFull(board):
+def is_full(board):
   '''Determines if the current board is full.
   '''
   for row in board:
@@ -81,13 +81,13 @@ def isFull(board):
         return False
   return True
 
-def isOver(state):
+def is_over(state):
   '''Determines if the game is over!
   If over, prints message and returns True else False.
   '''
   for rowBoards in state.boards:
     for board in rowBoards:
-      if (not isFull(board)) and (not isWin(board)):
+      if (not is_full(board)) and (not is_win(board)):
         return False
   if state.score['1'] == state.score['2']:
     print "Game Over.\nBoth players tied at", state.score['2'], "points."
@@ -99,8 +99,9 @@ def isOver(state):
   state.printInfo()
   return True
 
-''' the utility function! '''
 def utility(state, constants):
+  '''Finds the utility of a state which is a product
+  of 6 different component sub utility functions.'''
   f1 = f1_score(state) * constants['c1']
   f2 = f2_center(state) * constants['c2']
   f3 = f3_corner(state) * constants['c3']
@@ -108,8 +109,6 @@ def utility(state, constants):
   f5 = f5_blocking(state) * constants['c5']
   f6 = f6_potential(state) * constants['c6']
   return_value = (f1 + f2 + f3 + f4 + f5 + f6)
-  print "return value is ", return_value, "and corresponding state is::"
-  state.printInfo()
   return - return_value
 
 def sub_utility(state, constants):
@@ -134,13 +133,13 @@ def f1_score(state):
   MAX = state.MAX
   return state.score[MIN] - state.score[MAX]
 
-def getActive(state):
+def get_active(state):
   '''Returns all the boards that have not been won yet.
   '''
   active_boards = []
   for line_boards in state.boards:
     for board in line_boards:
-      if (not isWin(board)) and (not isFull(board)):
+      if (not is_win(board)) and (not is_full(board)):
         # copy because i think i might be modifying memory:
         active_boards += [board]
   return active_boards
@@ -153,7 +152,7 @@ def f2_center(state):
   MIN = state.MIN
   MAX = state.MAX
   center = {MIN: 0, MAX: 0,}
-  activeBoards = getActive(state)
+  activeBoards = get_active(state)
   for board in activeBoards:
     if board[1][1]['cell'] == int(MIN):
       center[MIN] += 1
@@ -169,7 +168,7 @@ def f3_corner(state):
   MIN = state.MIN
   MAX = state.MAX
   cornerCount = {MIN: 0, MAX: 0,}
-  activeBoards = getActive(state)
+  activeBoards = get_active(state)
   for board in activeBoards:
     corners = [board[0][0], board[0][2], board[2][0], board[2][2]]
     for corner in corners:
@@ -186,7 +185,7 @@ def f4_side(state):
   MIN = state.MIN
   MAX = state.MAX
   sideCount = {MIN: 0, MAX: 0,}
-  activeBoards = getActive(state)
+  activeBoards = get_active(state)
   for board in activeBoards:
     sides = [board[1][0], board[0][1], board[1][2], board[2][1]]
     for side in sides:
@@ -232,7 +231,7 @@ def transposeBoards(lBoards):
   return newList
 
 def getAllBoards(state):
-  '''like getActive but gets all boards instead
+  '''like get_active but gets all boards instead
   '''
   active_boards = []
   for line_boards in state.boards:
@@ -288,7 +287,7 @@ def f6_potential(inputState):
   MIN = state.MIN
   MAX = state.MAX
   potential = {'1': 0, '2': 0, }
-  activeBoards = getActive(state)
+  activeBoards = get_active(state)
   activeBoardsTranspose = transposeBoards(activeBoards)
   for board in activeBoards:
     for row in board:
@@ -313,7 +312,7 @@ def f6_potential(inputState):
         potential[MIN] += 1
   return potential[MIN] - potential[MAX]
 
-def minH(state, depth, depth_limit, alpha, beta, constants):
+def min_search(state, depth, depth_limit, alpha, beta, constants):
   '''Finds the best move for MIN player by looking for the lowest
   utility value.
   '''
@@ -330,8 +329,8 @@ def minH(state, depth, depth_limit, alpha, beta, constants):
   while nextS != None:
     highest_so_far.copyThis(nextS)
 
-    # next_state = maxH(state, depth_limit, alpha, beta, constants, MIN, MAX)
-    next_value = maxH(highest_so_far, depth + 1, depth_limit, alpha, beta, constants)
+    # next_state = max_search(state, depth_limit, alpha, beta, constants, MIN, MAX)
+    next_value = max_search(highest_so_far, depth + 1, depth_limit, alpha, beta, constants)
 
     value = min_util([value, next_value])
     assert type(value) == type(alpha)
@@ -362,13 +361,16 @@ def max_util(utils):
   return max_u
 
 def min_util(utils):
+  '''Defines a min function for the Util class
+  because pyjs min function is broken.
+  '''
   max_u =  Util(102323, None)
   for util in utils:
     if util.value < max_u.value:
       max_u = util
   return max_u
 
-def maxH(state, depth, depth_limit, a, b, constants):
+def max_search(state, depth, depth_limit, a, b, constants):
   '''called by ab
   The minmax alpha-beta prunning algorithm as described by Norvig p. 170
   '''
@@ -389,10 +391,10 @@ def maxH(state, depth, depth_limit, a, b, constants):
     highest_so_far = State()
     highest_so_far.copyThis(nextS)
 
-    min_h = minH(nextS, depth + 1, depth_limit, a, b, constants)
+    min_h = min_search(nextS, depth + 1, depth_limit, a, b, constants)
     value = [min_h, highest_so_far]
     while nextS != None:
-      min_h = minH(nextS, depth + 1, depth_limit, a, b, constants)
+      min_h = min_search(nextS, depth + 1, depth_limit, a, b, constants)
       assert type(value) == type([min_h, nextS])
       get_max( value, value, [min_h, nextS] )
       if value[0].value >= b.value:
@@ -404,7 +406,7 @@ def maxH(state, depth, depth_limit, a, b, constants):
     highest_so_far = State()
     while nextS != None:
       highest_so_far.copyThis(nextS)
-      value = max_util([value, minH(highest_so_far, depth + 1, depth_limit, a, b, constants)])
+      value = max_util([value, min_search(highest_so_far, depth + 1, depth_limit, a, b, constants)])
       assert type(value) == type(b)
       if value.value >= b.value:
         return Util(9001.0, State())
@@ -412,20 +414,20 @@ def maxH(state, depth, depth_limit, a, b, constants):
       nextS = gen.next()
     return value
 
-def ab(state, constants, depth_limit=3):
+def ab(state, constants, depth_limit=6):
   '''The minmax alpha-beta prunning algorithm as described by Norvig p. 170.
-  ab is essentially a wrapper around maxH.
+  ab is essentially a wrapper around max_search.
   '''
   alpha = Util(-9005.0, State())
   beta  = Util(9005.0, State())
-  state.MAX = str(state.nextPiece[2])
-  state.MIN = str(turn(state.nextPiece[2]))
-  next_state = maxH(state, 0, depth_limit, alpha, beta, constants)
+  state.MAX = str(state.next_piece[2])
+  state.MIN = str(turn(state.next_piece[2]))
+  next_state = max_search(state, 0, depth_limit, alpha, beta, constants)
   return next_state
 
 def turn(integer):
   """Returns next turn
-  (for state.nextPiece[2])
+  (for state.next_piece[2])
   """
   if(integer == 1):
     return 2
@@ -451,29 +453,26 @@ class Util:
 class State:
 # state represents the board, next piece to be played, and other relevant info
   def __init__(self):
-    """Construct a new board.
+    """Construct a new board and other relevant information associated with the state of a game.
     """
     self.boards = [[[[ {"cell": 0, "x": x, "y": y, "x_board": x_board, "y_board": y_board}
                for x in range(DIMENSION)] for y in range(DIMENSION)]
                for x_board in range(DIMENSION)] for y_board in range(DIMENSION)]
-    self.nextPiece = [1,1,1] # next board to be played in {(-1, -1, ?) for any board}
-                             # index 0 points to x, index 1 point to y
-    self.score = {"1": 0, "2": 0}
-
-  def isWinExampleBoard(self, board):
-    length = len(board)
-    for a in range(length):
-      for b in range(length):
-        self.boards[0][0][a][b]['cell'] = board[a][b]
-    return isWin (self.boards[0][0])
+    self.next_piece = [1,1,1] # For a given state, this encodes who is playing next and where.
+                              # index 0 -> vertical component (top->down)
+                              # index 1 -> horizontal component (left->right)
+                              # index 2 -> integer value of next piece to be played (1 or 2)
+    self.score = {"1": 0, "2": 0} # the score of player 1 and player 2
 
   def isUnoccupied(self, y, x):
-    '''Determine if coordinate entered is on an empty square
+    '''Determine if coordinate entered is on an empty square.
     '''
-    return self.boards[self.nextPiece[0]][self.nextPiece[1]][y][x]['cell'] == 0
+    return self.boards[self.next_piece[0]][self.next_piece[1]][y][x]['cell'] == 0
 
 
   def printer(self):
+    '''Prints a state.
+    '''
     length = DIMENSION**2*4 + 1
     buf = ['-' for x in range(length)]
     buf = ''.join(buf)
@@ -510,11 +509,11 @@ class State:
   def printInfo(self):
     '''Prints the current state.
     '''
-    print "boards are:\n",self.printer(),"You are playing into board column", self.nextPiece[1], "row", self.nextPiece[0], "\nNext player is ", self.nextPiece[2]
+    print "boards are:\n",self.printer(),"You are playing into board column", self.next_piece[1], "row", self.next_piece[0], "\nNext player is ", self.next_piece[2]
 
 
   def copyBoards(self, otherState):
-    '''Copies otherState onto self!
+    '''Copies otherState board onto self!
     '''
     rangeBoards = range(len(otherState.boards))
     for y_board in rangeBoards:
@@ -528,53 +527,58 @@ class State:
             self.boards[y_board][x_board][y][x]['y_board'] = otherState.boards[y_board][x_board][y][x]['y_board']
 
   def copyThis(self, other):
+    '''Copies all attrs from other to self
+    '''
     self.copyBoards(other)
-    self.nextPiece = other.nextPiece[:3]
+    self.next_piece = other.next_piece[:3]
     self.score['1'] = other.score['1']
     self.score['2'] = other.score['2']
     self.MAX = other.MAX
     self.MIN = other.MIN
 
-  def genChildren(self, child): #list of states
+  def genChildren(self, child):
+    '''Given a child to copy to, genChildren returns a generator
+    that generates all the possible moves after a given state.
+    '''
     aL = range(DIMENSION)  # originally I thought I might generalize this to any-dimensional meta
     bL = range(DIMENSION)  # tic-tac-toe, but that never happened...
     cL = range(DIMENSION)
     dL = range(DIMENSION)
-    #print "isWin?", isWin(self.boards[self.nextPiece[0]][self.nextPiece[1]])
-    if isWin(self.boards[self.nextPiece[0]][self.nextPiece[1]]) or isFull(self.boards[self.nextPiece[0]][self.nextPiece[1]]):
-      #print "One"
+    if is_win(self.boards[self.next_piece[0]][self.next_piece[1]]) or is_full(self.boards[self.next_piece[0]][self.next_piece[1]]):
       for a in aL:
         for b in bL:
-          if(not isWin(self.boards[a][b])):
+          if(not is_win(self.boards[a][b])):
             for c in cL:
               for d in dL:
                 if(self.boards[a][b][c][d]['cell'] == 0):
                   child.copyThis(self)
-                  nP = turn(self.nextPiece[2])
-                  child.nextPiece = [c,d,nP]
-                  child.boards[a][b][c][d]['cell'] = self.nextPiece[2]
-                  if isWin(child.boards[a][b]):
-                    child.score[str(self.nextPiece[2])] += 1
+                  nP = turn(self.next_piece[2])
+                  child.next_piece = [c,d,nP]
+                  child.boards[a][b][c][d]['cell'] = self.next_piece[2]
+                  if is_win(child.boards[a][b]):
+                    child.score[str(self.next_piece[2])] += 1
                   yield child
     else:
-      #print "Two"
-      a = self.nextPiece[0]
-      b = self.nextPiece[1]
+      a = self.next_piece[0]
+      b = self.next_piece[1]
       for c in cL:
         for d in dL:
           if(self.boards[a][b][c][d]['cell'] == 0):
             child.copyThis(self)
-            nP = turn(self.nextPiece[2])
-            child.nextPiece = [c,d,nP]
-            child.boards[a][b][c][d]['cell'] = self.nextPiece[2]
-            if isWin(child.boards[a][b]):
-              child.score[str(self.nextPiece[2])] += 1
+            nP = turn(self.next_piece[2])
+            child.next_piece = [c,d,nP]
+            child.boards[a][b][c][d]['cell'] = self.next_piece[2]
+            if is_win(child.boards[a][b]):
+              child.score[str(self.next_piece[2])] += 1
             yield child
     yield None
 
-#----------------------------------
-# Command line interface functions.
-#----------------------------------
+#####################################################################
+#                                                                   #
+#            Command line interface functions.                      #
+#                                                                   #
+#####################################################################
+
 
 def playAI():
   """Play successive games until the user decides to stop. """
@@ -618,31 +622,31 @@ def user_turn(state, TD_CONSTS):
   '''
   print messageUsersTurn
   print state.printInfo()
-  if isOver(state):
+  if is_over(state):
     return True
 
-  print "You are playing piece", state.nextPiece[2]
+  print "You are playing piece", state.next_piece[2]
   while True:
-    if isWin(state.boards[state.nextPiece[0]][state.nextPiece[1]]):
+    if is_win(state.boards[state.next_piece[0]][state.next_piece[1]]):
       print "You must select a board to play into"
       x_board = raw_input("Assign column of meta-board to play into")
       y_board = raw_input("Assign row of meta-board to play into")
-      if x_board.isdigit() and y_board.isdigit() and (not isWin(state.boards[int(y_board)][int(x_board)])):
+      if x_board.isdigit() and y_board.isdigit() and (not is_win(state.boards[int(y_board)][int(x_board)])):
         x_board = int(x_board)
         y_board = int(y_board)
         x = raw_input("Assign column of next piece")
         y = raw_input("Assign row of next piece")
 
         # adjust piece b/c this is how isUnoccupied[sic] works...
-        state.nextPiece = [y_board,x_board,state.nextPiece[2]]
+        state.next_piece = [y_board,x_board,state.next_piece[2]]
 
         if x.isdigit() and y.isdigit() and state.isUnoccupied(int(y), int(x)):
           x = int(x)
           y = int(y)
-          state.boards[y_board][x_board][y][x]['cell'] = state.nextPiece[2]
-          if isWin(state.boards[y_board][x_board]):
-            state.score[str(state.nextPiece[2])] += 1
-          state.nextPiece = [y, x, turn(state.nextPiece[2])]
+          state.boards[y_board][x_board][y][x]['cell'] = state.next_piece[2]
+          if is_win(state.boards[y_board][x_board]):
+            state.score[str(state.next_piece[2])] += 1
+          state.next_piece = [y, x, turn(state.next_piece[2])]
           break
       else:
         print messageTryAgain
@@ -653,10 +657,10 @@ def user_turn(state, TD_CONSTS):
       if x.isdigit() and y.isdigit() and state.isUnoccupied(int(y), int(x)):
         x = int(x)
         y = int(y)
-        state.boards[state.nextPiece[0]][state.nextPiece[1]][y][x]['cell'] = state.nextPiece[2]
-        if isWin(state.boards[state.nextPiece[0]][state.nextPiece[1]]):
-          state.score[str(state.nextPiece[2])] += 1
-        state.nextPiece = (y, x, turn(state.nextPiece[2]))
+        state.boards[state.next_piece[0]][state.next_piece[1]][y][x]['cell'] = state.next_piece[2]
+        if is_win(state.boards[state.next_piece[0]][state.next_piece[1]]):
+          state.score[str(state.next_piece[2])] += 1
+        state.next_piece = (y, x, turn(state.next_piece[2]))
         break
       else:
         print messageTryAgain
@@ -671,7 +675,7 @@ def computer_turn(state, TD_CONSTS):
   '''
   print messageComputersTurn
   print "AI using following constants:\n", TD_CONSTS
-  if isOver(state):
+  if is_over(state):
     return True
   print state.printInfo()
   (expectedUtility, nextState) = ab(state, TD_CONSTS)
@@ -739,10 +743,9 @@ def td_learning(terminal_state, TD_CONSTS, prev_state):
   return TD_CONSTS
 
 def learning_TD_AI(prev_state, TD_CONSTS):
-  # if over, return to trainer:
-  if isOver(prev_state):
+  if is_over(prev_state):
     return True
-  print "\n\nTD AI player starting turn. TD AI places the piece:", prev_state.nextPiece[2]
+  print "\n\nTD AI player starting turn. TD AI places the piece:", prev_state.next_piece[2]
   print "TD_CONSTS after being adjusted are: ", TD_CONSTS
 
   (expectedUtility, state) = ab(prev_state, TD_CONSTS)
@@ -761,9 +764,9 @@ def naive_AI(state, TD_CONSTS):
   but still uses them when calling ab()
   '''
   #global CONSTS
-  if isOver(state):
+  if is_over(state):
     return True
-  print "\n\nNaive AIs turn which plays the piece: ", state.nextPiece[2]
+  print "\n\nNaive AIs turn which plays the piece: ", state.next_piece[2]
 
   (expectedUtility, nextState) = ab(state, TD_CONSTS)
   state = copy.deepcopy(nextState)
@@ -772,54 +775,3 @@ def naive_AI(state, TD_CONSTS):
   return learning_TD_AI(state, TD_CONSTS)
 
 print README
-
-#-------------------
-# Testing functions.
-#-------------------
-
-def test1():
-  '''Test for f1_score
-  '''
-  a = State()
-  a.boards[0][0][0][0]['cell'] = 1
-  a.boards[0][0][1][1]['cell'] = 1
-  a.nextPiece[0] = 0
-  a.nextPiece[1] = 0
-  a.nextPiece[2] = 1
-  a.printInfo()
-  a.nextPiece[2] = 1
-  b = ab(a, CONSTS)[1]
-  print utility(b, CONSTS)
-  b.printInfo()
-
-def test2():
-  '''Test for f2_center
-  '''
-  a = State()
-  a.nextPiece[0] = 1
-  a.nextPiece[1] = 1
-  a.printInfo()
-  b = ab(a, CONSTS)[1]
-  b.printInfo()
-
-def test3():
-  '''Test for f1_score
-  '''
-  a = State()
-  a.boards[0][0][1][0]['cell'] = 1
-  a.boards[0][0][0][0]['cell'] = 2
-  #a.boards[0][0][1][1]['cell'] = 1
-  a.nextPiece[0] = 0
-  a.nextPiece[1] = 0
-  a.nextPiece[2] = 2
-  a.printInfo()
-
-  b = ab(a, CONSTS)[1]
-  b.printInfo()
-
-def getState():
-  a = State()
-  a.boards[0][0][2][0]['cell'] = 2
-  a.boards[0][0][0][2]['cell'] = 2
-  a.boards[0][0][1][2]['cell'] = 1
-  a.nextPiece = [0,0,1]

@@ -24,7 +24,7 @@ from pyjamas import logging
 
 log = logging.getConsoleLogger()
 
-from learning import State, ab, isWin, isFull, turn, isOver, normalize
+from learning import State, ab, isWin, isFull, turn, is_over, normalize
 
 INCREMENT_AMOUNT = .05
 
@@ -154,7 +154,7 @@ class GridWidget(AbsolutePanel):
           self.min_player = '1'
           self.remove(self.ai_first)
           del(self.ai_first) # remove all fucking traces
-        #assert self.min_player == str(self.state.nextPiece[2])
+        #assert self.min_player == str(self.state.next_piece[2])
         assert self.state.boards
 
         point = sender.point
@@ -166,7 +166,7 @@ class GridWidget(AbsolutePanel):
         self.grid_to_state(point)
 
         self.check_win()
-        self.state.nextPiece[2] = self.max_player
+        self.state.next_piece[2] = self.max_player
         #self.state.player = next_player(self.state.player)
 
         self.state = ab(self.state, self.TD_CONSTS, True,
@@ -203,7 +203,7 @@ class GridWidget(AbsolutePanel):
       human_score = self.state.score['2']
       ai_score = self.state.score['1']
       self.score_label.setText("Human: %d | AI: %d" % (human_score, ai_score))
-    if isOver(self.state):
+    if is_over(self.state):
       if human_score > ai_score:
         msg = "Congratulations, you won! To increase the difficulty, increase the search depth."
       elif human_score < ai_score:
@@ -216,9 +216,9 @@ class GridWidget(AbsolutePanel):
 
 
   def will_buttons(self, y_board, x_board):
-    # first we determine if the nextPiece points to a playable board.
+    # first we determine if the next_piece points to a playable board.
     board = self.state.boards
-    piece = list(self.state.nextPiece)
+    piece = list(self.state.next_piece)
     playable = True
     if isWin(board[piece[0]][piece[1]]) or isFull(board[piece[0]][piece[1]]):
       playable = False
@@ -276,7 +276,7 @@ class GridWidget(AbsolutePanel):
             elif (g.getText(y_cell, x_cell) == '1') or (g.getText(y_cell, x_cell) == '2'):
               if self.state.boards[y_board][x_board][y_cell][x_cell]['cell'] == 0:
                 self.state.boards[y_board][x_board][y_cell][x_cell]['cell'] = int(g.getText(y_cell, x_cell))
-                piece = self.state.nextPiece
+                piece = self.state.next_piece
                 piece[2] = 1
                 #piece[2] = int(piece[2] == 1) + 1 # next player!
                 piece[0] = y_cell
