@@ -69,7 +69,7 @@ def has_row(listDict):
 def is_win(board):
   '''returns true if a board (DIMENSION X DIMENSION) has been won
   '''
-  print "\ntype of board is ", type(board), len(board), board
+  print "\ntype of board is ", len(board), board
   print "board is ", board
   for row in board:
     if has_row(row):
