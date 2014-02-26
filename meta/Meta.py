@@ -1,14 +1,5 @@
 import pyjd # this is dummy in pyjs
 
-'''
-bugs:
-
-Goals for resume tomorrow:
-1. fix bugs.
-2. then integrate with website immediately
-3. fix bug with constants.
-4. schedule interview with sam.'''
-
 from pyjamas.ui.Button import Button
 from pyjamas.ui.RootPanel import RootPanel
 from pyjamas.ui.Label import Label
@@ -73,7 +64,7 @@ class GridWidget(AbsolutePanel):
     self.adj_grid.setBorderWidth(2)
     self.adj_grid.setCellPadding(9)
     self.adj_grid.setCellSpacing(1)
-    self.init_contstants_adj_grid()
+    self.init_constants_adj_grid()
     self.add(self.adj_grid)
 
     self.state = State()
@@ -82,7 +73,7 @@ class GridWidget(AbsolutePanel):
     self.max_player = '-1'
     self.min_player = '-1'
 
-  def init_contstants_adj_grid(self):
+  def init_constants_adj_grid(self):
     '''Initializes the grid that allows the TD_CONSTS to be adjusted.
     '''
     self.decr_buttons = {}
@@ -141,10 +132,8 @@ class GridWidget(AbsolutePanel):
         self.remove(self.ai_first)
         del(self.ai_first) # remove all traces
 
-        self.state = ab(self.state, self.TD_CONSTS, False,
-          optional_args={ 'MIN': self.min_player,
-            'MAX': self.max_player,
-            'depthLimit': self.depthLimit})[1]
+        self.state = ab(self.state, self.TD_CONSTS, depth_limit=self.depthLimit)[1]
+
         self.state_to_grid()
 
 
@@ -169,10 +158,8 @@ class GridWidget(AbsolutePanel):
         self.state.next_piece[2] = self.max_player
         #self.state.player = next_player(self.state.player)
 
-        self.state = ab(self.state, self.TD_CONSTS, True,
-          optional_args={ 'MIN': self.min_player,
-            'MAX': self.max_player,
-            'depthLimit': self.depthLimit})[1]
+        self.state = ab(self.state, self.TD_CONSTS, depth_limit=self.depthLimit)[1]
+
         self.state_to_grid()
         self.check_win()
 
@@ -184,7 +171,6 @@ class GridWidget(AbsolutePanel):
         self.change_td_const(key, '+')
       if self.decr_buttons[key] == sender:
         self.change_td_const(key, '-')
-      self.TD_CONSTS = normalize(self.TD_CONSTS)
       self.adj_labels[key].setText("Constant %d: %f" % (key[1], self.TD_CONSTS[key]))
 
   def change_td_const(self, key, sign):

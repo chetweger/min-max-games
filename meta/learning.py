@@ -69,8 +69,6 @@ def has_row(listDict):
 def is_win(board):
   '''returns true if a board (DIMENSION X DIMENSION) has been won
   '''
-  print "\ntype of board is ", len(board), board
-  print "board is ", board
   for row in board:
     if has_row(row):
       return True
@@ -99,15 +97,10 @@ def is_over(state):
   '''Determines if the game is over!
   If over, prints message and returns True else False.
   '''
-  print "Arrived in is_over"
-  state.printInfo()
   for rowBoards in state.boards:
-    print "First level"
     for board in rowBoards:
-      print "Second level", board
       if (not is_win(board)) and (not is_full(board)):
         return False
-  print "Out of the loop"
   return "asdf"
 
 def utility(state, constants):
@@ -425,7 +418,7 @@ def max_search(state, depth, depth_limit, a, b, constants):
       nextS = gen.next()
     return value
 
-def ab(state, constants, depth_limit=1):
+def ab(state, constants, depth_limit=6):
   '''The minmax alpha-beta prunning algorithm as described by Norvig p. 170.
   ab is essentially a wrapper around max_search.
   '''

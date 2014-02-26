@@ -2,10 +2,6 @@ import pyjd # this is dummy in pyjs
 
 """
 additional features:
-  fix bugs...
-  ability to reset TD_CONSTS
-  ability to continue training td_ai another iteration # is_over prints nothing...
-  dumb_ai has its own CONSTS, and the user can adjust them
   ability to show graph of evolution of TD_CONSTS
 
 integration with website:
@@ -47,6 +43,7 @@ class GridWidget(AbsolutePanel):
 
   def __init__(self):
     self.state = State()
+    self.game_round = 0
     self.TD_CONSTS = {'c3': 1., 'c2': 1., 'c1': 1., 'c6': 1., 'c5': 1., 'c4': 1.}
     self.CONSTS   =  {'c3': 1., 'c2': 1., 'c1': 1., 'c6': 1., 'c5': 1., 'c4': 1.}
     self.BEST_CONSTANTS = {'c3': 0.767944, 'c2': 1.049451, 'c1': 3.074038, 'c6': 0.220823, 'c5': 0.281883, 'c4': 0.605861}
@@ -54,8 +51,8 @@ class GridWidget(AbsolutePanel):
     AbsolutePanel.__init__(self)
 
 
-    self.depth_limit = 3
-    html = "<a href=\"file:///home/chet/projects/pyjs/meta/output/LearnMeta.html\">Start a new game.</a>" # TODO: make this work for the general case
+    self.depth_limit = 2
+    html = "<a href=\"file:///home/chet/projects/pyjs/meta/output/LearnMeta.html\">Reload game.  Reset everything.</a>" # TODO: make this work for the general case
     self.new_game = HTML(html)
     self.add(self.new_game)
 
@@ -89,11 +86,11 @@ class GridWidget(AbsolutePanel):
 
     # initialize the contstants adjustment grid:
     self.adj_grid = Grid()
-    self.adj_grid.resize(6, 1)
+    self.adj_grid.resize(7, 4)
     self.adj_grid.setBorderWidth(2)
     self.adj_grid.setCellPadding(9)
     self.adj_grid.setCellSpacing(1)
-    self.init_contstants_adj_grid()
+    self.init_constants_adj_grid()
     self.add(self.adj_grid)
 
     self.reset_constants = Button("Reset all of Learning AI's constants to 1.", self)
@@ -101,16 +98,39 @@ class GridWidget(AbsolutePanel):
 
     self.state_to_grid()
 
-  def init_contstants_adj_grid(self):
+
+    explanation = "<div>I can put stuff about temporal difference learning etc. here..</div>"
+    explanation = HTML(explanation)
+    self.add(explanation)
+
+  def init_constants_adj_grid(self):
     '''Initializes the grid that allows the TD_CONSTS to be adjusted.
     '''
     self.decr_buttons = {}
-    self.adj_labels = {}
+    self.adj_learning_labels = {}
+    self.adj_dumb_labels = {}
     self.incr_buttons = {}
     td_keys = ['c1', 'c2', 'c3', 'c4', 'c5', 'c6']
+
+    learning_ai_header = Label("Constant for the learning AI.")
+    self.adj_grid.setWidget(0, 0, learning_ai_header)
+
+    dumb_ai_header = Label("Constants for the dumb AI.")
+    self.adj_grid.setWidget(0, 2, dumb_ai_header)
+
     for i, key in enumerate(td_keys):
-      self.adj_labels[key] = Label("Constant %d: %f" % (key[1], self.TD_CONSTS[key]))
-      self.adj_grid.setWidget(i, 0, self.adj_labels[key])
+      j = i + 1 # off by one because of header...
+      self.adj_learning_labels[key] = Label("Constant %d: %f" % (key[1], self.TD_CONSTS[key]))
+      self.adj_grid.setWidget(j, 0, self.adj_learning_labels[key])
+
+      self.decr_buttons[key] = Button('<', self)
+      self.adj_grid.setWidget(j, 1, self.decr_buttons[key])
+
+      self.adj_dumb_labels[key] = Label("Constant %d: %f" % (key[1], self.CONSTS[key]))
+      self.adj_grid.setWidget(j, 2, self.adj_dumb_labels[key])
+
+      self.incr_buttons[key] = Button('>', self)
+      self.adj_grid.setWidget(j, 3, self.incr_buttons[key])
 
   def init(self):
     '''Initializes the grid on which the game is played.
@@ -133,9 +153,10 @@ class GridWidget(AbsolutePanel):
         self.g.setWidget(y_board, x_board, g)
 
   def onClick(self, sender):
+    self.check_adjusts(sender)
     if sender == self.reset_constants:
       self.TD_CONSTS = self.ONES_CONSTS
-      self.sync_td_consts()
+      self.sync_consts()
 
     if sender == self.increase_depth:
       self.depth_limit += 1
@@ -149,11 +170,7 @@ class GridWidget(AbsolutePanel):
       AppInit()
 
     if sender == self.train_td:
-
-      self.remove(self.decrease_depth)
-      self.remove(self.increase_depth)
-      self.remove(self.train_td)
-      self.remove(self.train_dumb)
+      self.state = State()
       print "here!!!!"
 
       self.dumb_ai_str = '2'
@@ -164,13 +181,7 @@ class GridWidget(AbsolutePanel):
       print "Done training."
 
     if sender == self.train_dumb:
-      '''
-      self.remove(self.decrease_depth)
-      self.remove(self.increase_depth)
-      self.remove(self.train_td)
-      self.remove(self.train_dumb)
-      print "here!!!!"
-      '''
+      self.state = State()
 
       self.dumb_ai_str = '1'
       self.td_ai_str = '2'
@@ -179,28 +190,48 @@ class GridWidget(AbsolutePanel):
       Timer(250, notify=self.dumb_ai_turn)
       print "Done training."
 
-  def sync_td_consts(self):
+  def check_adjusts(self, sender):
+    print "adjusting constant for ", sender
+    td_keys = ['c1', 'c2', 'c3', 'c4', 'c5', 'c6']
+    for key in td_keys:
+      if self.incr_buttons[key] == sender:
+        self.change_td_const(key, '+')
+      if self.decr_buttons[key] == sender:
+        self.change_td_const(key, '-')
+      self.TD_CONSTS = normalize(self.TD_CONSTS)
+      self.adj_learning_labels[key].setText("Constant %d: %f" % (key[1], self.TD_CONSTS[key]))
+    self.sync_consts()
+
+  def change_td_const(self, key, sign):
+    if sign == '+':
+      self.CONSTS[key] += INCREMENT_AMOUNT
+    elif sign == '-':
+      self.CONSTS[key] -= INCREMENT_AMOUNT
+
+  def sync_consts(self):
     """Sync td rates with the current state.
     """
     td_keys = ['c1', 'c2', 'c3', 'c4', 'c5', 'c6']
     for key in td_keys:
-      self.adj_labels[key].setText("Constant %d: %f" % (key[1], self.TD_CONSTS[key]))
+      self.adj_learning_labels[key].setText("Constant %d: %f" % (key[1], self.TD_CONSTS[key]))
+      self.adj_dumb_labels[key].setText("Constant %d: %f" % (key[1], self.CONSTS[key]))
 
   def check_is_win(self):
     self.state_to_grid()
-    p1_score = self.state.score['1']
-    p2_score = self.state.score['2']
+    learning_ai_score = self.state.score[self.td_ai_str]
+    dumb_ai_score = self.state.score[self.dumb_ai_str]
     print "scores are ", p1_score, p2_score
-    self.score_label.setText("Learning AI: %d | Dumb AI: %d" % (p1_score, p2_score))
+    self.score_label.setText("Learning AI(%d): %d | Dumb AI(%d): %d" % (self.td_ai_str, learning_ai_score, self.dumb_ai_str, dumb_ai_score))
     self.state.printInfo()
     if is_over(self.state):
-      if p1_score > p2_score:
-        msg = "AI 1 won the game."
-      elif human_score < ai_score:
-        msg = "AI 2 won the game."
-      elif human_score == ai_score:
-        msg = "Game ends in a tie."
-      game_over_message = Label(msg)
+      if learning_ai_score > dumb_ai_score:
+        msg = "the learning AI won with score %d vs %d." % (learning_ai_score, dumb_ai_score)
+      elif learning_ai_score < dumb_ai_score:
+        msg = "the dumb AI won with score %d vs %d." % (dumb_ai_score, learning_ai_score)
+      elif learning_ai_score == dumb_ai_score:
+        msg = "the game ended in a tie."
+      self.game_round += 1
+      game_over_message = Label("In game round " + str(self.game_round) + ", " + msg)
       self.add(game_over_message)
       return True
     else:
@@ -211,7 +242,7 @@ class GridWidget(AbsolutePanel):
     print "next piece is ", self.state.next_piece
     print "TD_CONSTS", self.TD_CONSTS
     (expectedUtility, nextState) = ab(self.state,
-                                      self.TD_CONSTS,
+                                      self.CONSTS,
                                       depth_limit=self.depth_limit)
     self.state = nextState
     print "Scores: Player 1: ", self.state.score['1'], " Player 2: ", self.state.score['2']
@@ -234,7 +265,7 @@ class GridWidget(AbsolutePanel):
                                   depth_limit=self.depth_limit)
     terminal_state = expectedUtility.terminal
     self.TD_CONSTS = td_learning(terminal_state, self.TD_CONSTS, self.state)
-    self.sync_td_consts() # reflect the new TD_CONSTS in the game.
+    self.sync_consts() # reflect the new TD_CONSTS in the game.
 
     self.state = state
 
