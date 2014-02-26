@@ -4,26 +4,47 @@ min-max-games
 A collection of min-max games written in python and translated into javascript using pyjs/pyjamas.
 
 Summary of contents:
+
   learning.py --> AI for meta tic tac toe with min-max search, and temporal difference learning to learn utility function constants.
+
   test.py --> verification functions for learning.py
+
   td.txt --> a file that holds these constants
+
   td_saved.txt --> another file that holds these constants (best found)
+
   bug --> illustrates a bug I found in the pyjs python to javascript translator/compiler.
+
       see issue:
-         https://github.com/pyjs/pyjs/issues/817
+  
+        https://github.com/pyjs/pyjs/issues/817
+
   ---------------------------------------------------------------------
+
   Meta.py --> the pyjamas user interface for playing the meta tic tac toe AI.
+
   Meta.html --> html stub for this interface
+
   Meta_out --> result of Meta.py being translated to javascript using pyjs
+
   ---------------------------------------------------------------------
+
   LearnMeta.py --> the pyjamas user interface for training the AI to learn the constants
+
   LearnMeta.html --> html stub for this interface
+
   LearnMeta_out --> result of LearnMeta.py being translated to javascript using pyjs
 
 This project is hosted online at the following urls:
+
   TTT.py:
+
     http://chet-weger.herokuapp.com/play_ttt/
+
   Meta.py:
+  
     http://chet-weger.herokuapp.com/play_meta_ttt/
+
   LearnMeta.py:
+
     http://chet-weger.herokuapp.com/learn_meta_ttt/
