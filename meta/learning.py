@@ -451,6 +451,18 @@ class Util:
   def __lt__(self, other):
     return self.value < other.value
 
+def find_last_move(prev_state, current_state):
+  """By comparing two two states, we find the exact position moved in current_state compared to prev_state.
+  This function used in Meta.py and LearningMeta.py.
+  """
+  for i in range(3):
+    for j in range(3):
+      if prev_state.boards[i][j] != current_state.boards[i][j]:
+        return {'x_cell': current_state.next_piece[1],
+                'y_cell': current_state.next_piece[0],
+                'x_board': j,
+                'y_board': i}
+
 class State:
 # state represents the board, next piece to be played, and other relevant info
   def __init__(self):

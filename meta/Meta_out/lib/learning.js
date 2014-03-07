@@ -830,6 +830,27 @@ $pyjs['loaded_modules']['learning'] = function (__mod_name__) {
 		for (var $item in $cls_definition) { $data['__setitem__']($item, $cls_definition[$item]); }
 		return $p['_create_class']('Util', $p['tuple']($bases), $data);
 	})();
+	$m['find_last_move'] = function(prev_state, current_state) {
+		var j,i,$iter35_idx,$iter35_nextval,$iter36_array,$iter36_nextval,$iter36_iter,$iter35_type,$iter36_idx,$iter35_array,$iter35_iter,$iter36_type;
+		$iter35_iter = $p['range'](3);
+		$iter35_nextval=$p['__iter_prepare']($iter35_iter,false);
+		while (typeof($p['__wrapped_next']($iter35_nextval)['$nextval']) != 'undefined') {
+			i = $iter35_nextval['$nextval'];
+			$iter36_iter = $p['range'](3);
+			$iter36_nextval=$p['__iter_prepare']($iter36_iter,false);
+			while (typeof($p['__wrapped_next']($iter36_nextval)['$nextval']) != 'undefined') {
+				j = $iter36_nextval['$nextval'];
+				if ($p['bool'](!$p['op_eq']($p['getattr'](prev_state, 'boards')['__getitem__'](i)['__getitem__'](j), $p['getattr'](current_state, 'boards')['__getitem__'](i)['__getitem__'](j)))) {
+					return $p['dict']([['x_cell', $p['getattr'](current_state, 'next_piece')['__getitem__'](1)], ['y_cell', $p['getattr'](current_state, 'next_piece')['__getitem__'](0)], ['x_board', j], ['y_board', i]]);
+				}
+			}
+		}
+		return null;
+	};
+	$m['find_last_move']['__name__'] = 'find_last_move';
+
+	$m['find_last_move']['__bind_type__'] = 0;
+	$m['find_last_move']['__args__'] = [null,null,['prev_state'],['current_state']];
 	$m['State'] = (function(){
 		var $cls_definition = new Object();
 		var $method;
@@ -842,33 +863,33 @@ $pyjs['loaded_modules']['learning'] = function (__mod_name__) {
 			}
 
 			self['boards'] = function(){
-				var y_board,$iter35_idx,$iter35_nextval,$collcomp8,$iter35_type,$iter35_array,$iter35_iter;
+				var $iter37_idx,$collcomp8,$iter37_type,$iter37_array,y_board,$iter37_iter,$iter37_nextval;
 	$collcomp8 = $p['list']();
-			$iter35_iter = $p['range']($m['DIMENSION']);
-			$iter35_nextval=$p['__iter_prepare']($iter35_iter,false);
-			while (typeof($p['__wrapped_next']($iter35_nextval)['$nextval']) != 'undefined') {
-				y_board = $iter35_nextval['$nextval'];
+			$iter37_iter = $p['range']($m['DIMENSION']);
+			$iter37_nextval=$p['__iter_prepare']($iter37_iter,false);
+			while (typeof($p['__wrapped_next']($iter37_nextval)['$nextval']) != 'undefined') {
+				y_board = $iter37_nextval['$nextval'];
 				$collcomp8['append'](function(){
-					var $collcomp9,$iter36_nextval,$iter36_array,$iter36_iter,$iter36_idx,$iter36_type,x_board;
+					var $iter38_iter,$collcomp9,$iter38_idx,$iter38_nextval,$iter38_type,$iter38_array,x_board;
 	$collcomp9 = $p['list']();
-				$iter36_iter = $p['range']($m['DIMENSION']);
-				$iter36_nextval=$p['__iter_prepare']($iter36_iter,false);
-				while (typeof($p['__wrapped_next']($iter36_nextval)['$nextval']) != 'undefined') {
-					x_board = $iter36_nextval['$nextval'];
+				$iter38_iter = $p['range']($m['DIMENSION']);
+				$iter38_nextval=$p['__iter_prepare']($iter38_iter,false);
+				while (typeof($p['__wrapped_next']($iter38_nextval)['$nextval']) != 'undefined') {
+					x_board = $iter38_nextval['$nextval'];
 					$collcomp9['append'](function(){
-						var $iter37_idx,$iter37_type,$iter37_array,$collcomp10,y,$iter37_iter,$iter37_nextval;
+						var $iter39_idx,$collcomp10,$iter39_array,$iter39_type,$iter39_nextval,$iter39_iter,y;
 	$collcomp10 = $p['list']();
-					$iter37_iter = $p['range']($m['DIMENSION']);
-					$iter37_nextval=$p['__iter_prepare']($iter37_iter,false);
-					while (typeof($p['__wrapped_next']($iter37_nextval)['$nextval']) != 'undefined') {
-						y = $iter37_nextval['$nextval'];
+					$iter39_iter = $p['range']($m['DIMENSION']);
+					$iter39_nextval=$p['__iter_prepare']($iter39_iter,false);
+					while (typeof($p['__wrapped_next']($iter39_nextval)['$nextval']) != 'undefined') {
+						y = $iter39_nextval['$nextval'];
 						$collcomp10['append'](function(){
-							var $iter38_iter,$iter38_idx,$iter38_nextval,$collcomp11,x,$iter38_type,$iter38_array;
+							var $iter40_type,$iter40_iter,$iter40_array,$collcomp11,x,$iter40_nextval,$iter40_idx;
 	$collcomp11 = $p['list']();
-						$iter38_iter = $p['range']($m['DIMENSION']);
-						$iter38_nextval=$p['__iter_prepare']($iter38_iter,false);
-						while (typeof($p['__wrapped_next']($iter38_nextval)['$nextval']) != 'undefined') {
-							x = $iter38_nextval['$nextval'];
+						$iter40_iter = $p['range']($m['DIMENSION']);
+						$iter40_nextval=$p['__iter_prepare']($iter40_iter,false);
+						while (typeof($p['__wrapped_next']($iter40_nextval)['$nextval']) != 'undefined') {
+							x = $iter40_nextval['$nextval'];
 							$collcomp11['append']($p['dict']([['cell', 0], ['x', x], ['y', y], ['x_board', x_board], ['y_board', y_board]]));
 						}
 
@@ -907,51 +928,51 @@ $pyjs['loaded_modules']['learning'] = function (__mod_name__) {
 			} else {
 				var self = arguments[0];
 			}
-			var $iter43_type,$iter43_iter,$iter41_idx,$iter45_type,$iter42_array,$iter45_idx,$iter41_type,$mod1,$iter41_nextval,$mod2,$iter41_iter,printRows,$add65,$add64,$iter43_idx,$iter42_idx,$add61,$pow2,$pow1,$add62,$add69,$iter42_nextval,$add68,$iter42_type,board,$mul29,$mul26,$mul25,$iter41_array,$pow4,$add63,$add67,row,$iter45_nextval,$add66,rowBoards,$iter45_array,$pow3,buf,$add60,$iter45_iter,$iter43_array,$add70,i,$add59,j,$iter42_iter,length,$iter43_nextval,$mul31,$mul30,$mul32;
+			var $iter43_type,$iter44_type,$iter43_iter,$iter44_array,$iter45_type,$add68,$iter47_idx,$mod1,$mod2,$iter45_idx,$iter47_iter,printRows,$add65,$add64,$add67,row,$add61,$pow2,$pow1,$add62,$iter44_iter,$add69,length,board,$mul29,$mul26,$iter47_array,$mul25,$iter44_idx,$pow4,$add63,$iter45_nextval,$add66,rowBoards,$iter45_array,$pow3,buf,$add60,$iter45_iter,$iter43_array,$add70,$iter47_type,i,$add59,j,$iter43_idx,$iter47_nextval,$iter44_nextval,$iter43_nextval,$mul31,$mul30,$mul32;
 			length = $p['__op_add']($add59=(typeof ($mul25=(typeof ($pow1=$m['DIMENSION'])==typeof ($pow2=2) && typeof $pow1=='number'?
 				Math['pow']($pow1,$pow2):
 				$p['op_pow']($pow1,$pow2)))==typeof ($mul26=4) && typeof $mul25=='number'?
 				$mul25*$mul26:
 				$p['op_mul']($mul25,$mul26)),$add60=1);
 			buf = function(){
-				var $iter39_idx,$iter39_type,$iter39_array,$iter39_nextval,$collcomp12,$iter39_iter,x;
+				var $iter41_idx,$iter41_type,$collcomp12,x,$iter41_iter,$iter41_array,$iter41_nextval;
 	$collcomp12 = $p['list']();
-			$iter39_iter = $p['range'](length);
-			$iter39_nextval=$p['__iter_prepare']($iter39_iter,false);
-			while (typeof($p['__wrapped_next']($iter39_nextval)['$nextval']) != 'undefined') {
-				x = $iter39_nextval['$nextval'];
+			$iter41_iter = $p['range'](length);
+			$iter41_nextval=$p['__iter_prepare']($iter41_iter,false);
+			while (typeof($p['__wrapped_next']($iter41_nextval)['$nextval']) != 'undefined') {
+				x = $iter41_nextval['$nextval'];
 				$collcomp12['append']('-');
 			}
 
 	return $collcomp12;}();
 			buf = ''['join'](buf);
 			printRows = function(){
-				var $iter40_type,$iter40_iter,col,$collcomp13,$iter40_array,$mul28,$mul27,$iter40_nextval,$iter40_idx;
+				var $iter42_idx,$iter42_array,$iter42_iter,$iter42_nextval,$iter42_type,$collcomp13,$mul28,$mul27,col;
 	$collcomp13 = $p['list']();
-			$iter40_iter = $p['range']((typeof ($mul27=$m['DIMENSION'])==typeof ($mul28=$m['DIMENSION']) && typeof $mul27=='number'?
+			$iter42_iter = $p['range']((typeof ($mul27=$m['DIMENSION'])==typeof ($mul28=$m['DIMENSION']) && typeof $mul27=='number'?
 				$mul27*$mul28:
 				$p['op_mul']($mul27,$mul28)));
-			$iter40_nextval=$p['__iter_prepare']($iter40_iter,false);
-			while (typeof($p['__wrapped_next']($iter40_nextval)['$nextval']) != 'undefined') {
-				col = $iter40_nextval['$nextval'];
+			$iter42_nextval=$p['__iter_prepare']($iter42_iter,false);
+			while (typeof($p['__wrapped_next']($iter42_nextval)['$nextval']) != 'undefined') {
+				col = $iter42_nextval['$nextval'];
 				$collcomp13['append']('|');
 			}
 
 	return $collcomp13;}();
-			$iter41_iter = $p['zip']($p['getattr'](self, 'boards'), $p['range']($m['DIMENSION']));
-			$iter41_nextval=$p['__iter_prepare']($iter41_iter,false);
-			while (typeof($p['__wrapped_next']($iter41_nextval)['$nextval']) != 'undefined') {
-				var $tupleassign1 = $p['__ass_unpack']($iter41_nextval['$nextval'], 2, null);
+			$iter43_iter = $p['zip']($p['getattr'](self, 'boards'), $p['range']($m['DIMENSION']));
+			$iter43_nextval=$p['__iter_prepare']($iter43_iter,false);
+			while (typeof($p['__wrapped_next']($iter43_nextval)['$nextval']) != 'undefined') {
+				var $tupleassign1 = $p['__ass_unpack']($iter43_nextval['$nextval'], 2, null);
 				rowBoards = $tupleassign1[0];
 				i = $tupleassign1[1];
-				$iter42_iter = rowBoards;
-				$iter42_nextval=$p['__iter_prepare']($iter42_iter,false);
-				while (typeof($p['__wrapped_next']($iter42_nextval)['$nextval']) != 'undefined') {
-					board = $iter42_nextval['$nextval'];
-					$iter43_iter = $p['zip'](board, $p['range']($m['DIMENSION']));
-					$iter43_nextval=$p['__iter_prepare']($iter43_iter,false);
-					while (typeof($p['__wrapped_next']($iter43_nextval)['$nextval']) != 'undefined') {
-						var $tupleassign2 = $p['__ass_unpack']($iter43_nextval['$nextval'], 2, null);
+				$iter44_iter = rowBoards;
+				$iter44_nextval=$p['__iter_prepare']($iter44_iter,false);
+				while (typeof($p['__wrapped_next']($iter44_nextval)['$nextval']) != 'undefined') {
+					board = $iter44_nextval['$nextval'];
+					$iter45_iter = $p['zip'](board, $p['range']($m['DIMENSION']));
+					$iter45_nextval=$p['__iter_prepare']($iter45_iter,false);
+					while (typeof($p['__wrapped_next']($iter45_nextval)['$nextval']) != 'undefined') {
+						var $tupleassign2 = $p['__ass_unpack']($iter45_nextval['$nextval'], 2, null);
 						row = $tupleassign2[0];
 						j = $tupleassign2[1];
 						printRows['__setitem__']($p['__op_add']($add69=(typeof ($mul31=i)==typeof ($mul32=$m['DIMENSION']) && typeof $mul31=='number'?
@@ -959,12 +980,12 @@ $pyjs['loaded_modules']['learning'] = function (__mod_name__) {
 							$p['op_mul']($mul31,$mul32)),$add70=j), $p['__op_add']($add67=$p['__op_add']($add65=$p['__op_add']($add63=printRows['__getitem__']($p['__op_add']($add61=(typeof ($mul29=i)==typeof ($mul30=$m['DIMENSION']) && typeof $mul29=='number'?
 							$mul29*$mul30:
 							$p['op_mul']($mul29,$mul30)),$add62=j)),$add64=' '),$add66=$p['str'](function(){
-							var $iter44_idx,$iter44_type,$iter44_array,$iter44_iter,$collcomp14,$iter44_nextval,x;
+							var $iter46_array,$iter46_iter,$iter46_nextval,$collcomp14,$iter46_idx,x,$iter46_type;
 	$collcomp14 = $p['list']();
-						$iter44_iter = row;
-						$iter44_nextval=$p['__iter_prepare']($iter44_iter,false);
-						while (typeof($p['__wrapped_next']($iter44_nextval)['$nextval']) != 'undefined') {
-							x = $iter44_nextval['$nextval'];
+						$iter46_iter = row;
+						$iter46_nextval=$p['__iter_prepare']($iter46_iter,false);
+						while (typeof($p['__wrapped_next']($iter46_nextval)['$nextval']) != 'undefined') {
+							x = $iter46_nextval['$nextval'];
 							$collcomp14['append'](x['__getitem__']('cell'));
 						}
 
@@ -972,12 +993,12 @@ $pyjs['loaded_modules']['learning'] = function (__mod_name__) {
 					}
 				}
 			}
-			$iter45_iter = $p['zip']($p['range']((typeof ($pow3=$m['DIMENSION'])==typeof ($pow4=2) && typeof $pow3=='number'?
+			$iter47_iter = $p['zip']($p['range']((typeof ($pow3=$m['DIMENSION'])==typeof ($pow4=2) && typeof $pow3=='number'?
 				Math['pow']($pow3,$pow4):
 				$p['op_pow']($pow3,$pow4))), printRows);
-			$iter45_nextval=$p['__iter_prepare']($iter45_iter,false);
-			while (typeof($p['__wrapped_next']($iter45_nextval)['$nextval']) != 'undefined') {
-				var $tupleassign3 = $p['__ass_unpack']($iter45_nextval['$nextval'], 2, null);
+			$iter47_nextval=$p['__iter_prepare']($iter47_iter,false);
+			while (typeof($p['__wrapped_next']($iter47_nextval)['$nextval']) != 'undefined') {
+				var $tupleassign3 = $p['__ass_unpack']($iter47_nextval['$nextval'], 2, null);
 				i = $tupleassign3[0];
 				row = $tupleassign3[1];
 				if ($p['bool']($p['op_eq']((typeof ($mod1=i)==typeof ($mod2=$m['DIMENSION']) && typeof $mod1=='number'?
@@ -998,51 +1019,51 @@ $pyjs['loaded_modules']['learning'] = function (__mod_name__) {
 			} else {
 				var self = arguments[0];
 			}
-			var $add82,$add81,$add80,$iter49_array,$mod4,$mod3,$add79,printRows,$pow7,$pow6,$pow5,$iter51_array,$iter48_nextval,$iter50_idx,$iter48_iter,$mul40,$iter51_iter,$iter51_nextval,$pow8,$iter49_iter,board,$iter50_nextval,row,$iter49_idx,$iter49_nextval,$iter48_type,$iter48_idx,rowBoards,$iter51_idx,buf,$mul37,$iter50_iter,$add76,$add77,$add74,$add75,$add72,$add73,$add71,i,j,$iter50_type,$add78,$iter48_array,length,$mul39,$mul38,$mul34,$iter50_array,$iter49_type,$mul33,$iter51_type;
+			var $iter53_idx,$iter53_iter,$mod4,$add82,$add81,$add80,$iter52_nextval,$mod3,$iter52_array,printRows,$pow7,$pow6,$pow5,$iter51_array,$iter52_iter,$iter50_idx,$mul40,$iter51_iter,$iter51_nextval,$pow8,board,$iter50_nextval,$iter53_nextval,row,$iter53_type,$iter53_array,$iter52_type,rowBoards,$iter51_idx,$iter52_idx,buf,$mul37,$iter50_iter,$add76,$add77,$add74,$add75,$add72,$add73,$add71,i,j,$iter50_type,$add78,$add79,length,$mul39,$mul38,$mul34,$iter50_array,$mul33,$iter51_type;
 			length = $p['__op_add']($add71=(typeof ($mul33=(typeof ($pow5=$m['DIMENSION'])==typeof ($pow6=2) && typeof $pow5=='number'?
 				Math['pow']($pow5,$pow6):
 				$p['op_pow']($pow5,$pow6)))==typeof ($mul34=8) && typeof $mul33=='number'?
 				$mul33*$mul34:
 				$p['op_mul']($mul33,$mul34)),$add72=3);
 			buf = function(){
-				var $iter46_array,$iter46_iter,$iter46_nextval,$collcomp15,$iter46_idx,x,$iter46_type;
+				var $iter48_nextval,$iter48_iter,$iter48_type,$collcomp15,$iter48_idx,x,$iter48_array;
 	$collcomp15 = $p['list']();
-			$iter46_iter = $p['range'](length);
-			$iter46_nextval=$p['__iter_prepare']($iter46_iter,false);
-			while (typeof($p['__wrapped_next']($iter46_nextval)['$nextval']) != 'undefined') {
-				x = $iter46_nextval['$nextval'];
+			$iter48_iter = $p['range'](length);
+			$iter48_nextval=$p['__iter_prepare']($iter48_iter,false);
+			while (typeof($p['__wrapped_next']($iter48_nextval)['$nextval']) != 'undefined') {
+				x = $iter48_nextval['$nextval'];
 				$collcomp15['append']('-');
 			}
 
 	return $collcomp15;}();
 			buf = ''['join'](buf);
 			printRows = function(){
-				var $iter47_idx,$iter47_type,$collcomp16,$iter47_nextval,$mul35,$iter47_array,$mul36,col,$iter47_iter;
+				var $iter49_type,$iter49_array,col,$iter49_iter,$collcomp16,$mul35,$mul36,$iter49_idx,$iter49_nextval;
 	$collcomp16 = $p['list']();
-			$iter47_iter = $p['range']((typeof ($mul35=$m['DIMENSION'])==typeof ($mul36=$m['DIMENSION']) && typeof $mul35=='number'?
+			$iter49_iter = $p['range']((typeof ($mul35=$m['DIMENSION'])==typeof ($mul36=$m['DIMENSION']) && typeof $mul35=='number'?
 				$mul35*$mul36:
 				$p['op_mul']($mul35,$mul36)));
-			$iter47_nextval=$p['__iter_prepare']($iter47_iter,false);
-			while (typeof($p['__wrapped_next']($iter47_nextval)['$nextval']) != 'undefined') {
-				col = $iter47_nextval['$nextval'];
+			$iter49_nextval=$p['__iter_prepare']($iter49_iter,false);
+			while (typeof($p['__wrapped_next']($iter49_nextval)['$nextval']) != 'undefined') {
+				col = $iter49_nextval['$nextval'];
 				$collcomp16['append']('|');
 			}
 
 	return $collcomp16;}();
-			$iter48_iter = $p['zip']($p['getattr'](self, 'boards'), $p['range']($m['DIMENSION']));
-			$iter48_nextval=$p['__iter_prepare']($iter48_iter,false);
-			while (typeof($p['__wrapped_next']($iter48_nextval)['$nextval']) != 'undefined') {
-				var $tupleassign4 = $p['__ass_unpack']($iter48_nextval['$nextval'], 2, null);
+			$iter50_iter = $p['zip']($p['getattr'](self, 'boards'), $p['range']($m['DIMENSION']));
+			$iter50_nextval=$p['__iter_prepare']($iter50_iter,false);
+			while (typeof($p['__wrapped_next']($iter50_nextval)['$nextval']) != 'undefined') {
+				var $tupleassign4 = $p['__ass_unpack']($iter50_nextval['$nextval'], 2, null);
 				rowBoards = $tupleassign4[0];
 				i = $tupleassign4[1];
-				$iter49_iter = rowBoards;
-				$iter49_nextval=$p['__iter_prepare']($iter49_iter,false);
-				while (typeof($p['__wrapped_next']($iter49_nextval)['$nextval']) != 'undefined') {
-					board = $iter49_nextval['$nextval'];
-					$iter50_iter = $p['zip'](board, $p['range']($m['DIMENSION']));
-					$iter50_nextval=$p['__iter_prepare']($iter50_iter,false);
-					while (typeof($p['__wrapped_next']($iter50_nextval)['$nextval']) != 'undefined') {
-						var $tupleassign5 = $p['__ass_unpack']($iter50_nextval['$nextval'], 2, null);
+				$iter51_iter = rowBoards;
+				$iter51_nextval=$p['__iter_prepare']($iter51_iter,false);
+				while (typeof($p['__wrapped_next']($iter51_nextval)['$nextval']) != 'undefined') {
+					board = $iter51_nextval['$nextval'];
+					$iter52_iter = $p['zip'](board, $p['range']($m['DIMENSION']));
+					$iter52_nextval=$p['__iter_prepare']($iter52_iter,false);
+					while (typeof($p['__wrapped_next']($iter52_nextval)['$nextval']) != 'undefined') {
+						var $tupleassign5 = $p['__ass_unpack']($iter52_nextval['$nextval'], 2, null);
 						row = $tupleassign5[0];
 						j = $tupleassign5[1];
 						printRows['__setitem__']($p['__op_add']($add81=(typeof ($mul39=i)==typeof ($mul40=$m['DIMENSION']) && typeof $mul39=='number'?
@@ -1053,12 +1074,12 @@ $pyjs['loaded_modules']['learning'] = function (__mod_name__) {
 					}
 				}
 			}
-			$iter51_iter = $p['zip']($p['range']((typeof ($pow7=$m['DIMENSION'])==typeof ($pow8=2) && typeof $pow7=='number'?
+			$iter53_iter = $p['zip']($p['range']((typeof ($pow7=$m['DIMENSION'])==typeof ($pow8=2) && typeof $pow7=='number'?
 				Math['pow']($pow7,$pow8):
 				$p['op_pow']($pow7,$pow8))), printRows);
-			$iter51_nextval=$p['__iter_prepare']($iter51_iter,false);
-			while (typeof($p['__wrapped_next']($iter51_nextval)['$nextval']) != 'undefined') {
-				var $tupleassign6 = $p['__ass_unpack']($iter51_nextval['$nextval'], 2, null);
+			$iter53_nextval=$p['__iter_prepare']($iter53_iter,false);
+			while (typeof($p['__wrapped_next']($iter53_nextval)['$nextval']) != 'undefined') {
+				var $tupleassign6 = $p['__ass_unpack']($iter53_nextval['$nextval'], 2, null);
 				i = $tupleassign6[0];
 				row = $tupleassign6[1];
 				if ($p['bool']($p['op_eq']((typeof ($mod3=i)==typeof ($mod4=$m['DIMENSION']) && typeof $mod3=='number'?
@@ -1092,24 +1113,24 @@ $pyjs['loaded_modules']['learning'] = function (__mod_name__) {
 				var self = arguments[0];
 				otherState = arguments[1];
 			}
-			var $iter53_idx,$iter52_nextval,$iter52_array,$iter52_iter,$iter55_nextval,$iter55_iter,$iter54_idx,$iter55_type,$iter53_nextval,$iter54_nextval,x_board,$iter54_type,$iter53_type,$iter54_iter,$iter53_array,$iter52_type,$iter55_array,$iter52_idx,y_board,$iter55_idx,$iter54_array,$iter53_iter,rangeBoards,y,x;
+			var $iter56_array,$iter57_idx,$iter54_idx,$iter57_iter,$iter55_iter,$iter55_nextval,$iter55_type,$iter54_nextval,x_board,$iter54_type,$iter54_iter,$iter56_idx,$iter55_array,$iter56_type,$iter56_nextval,$iter56_iter,y_board,$iter55_idx,$iter57_type,$iter54_array,rangeBoards,$iter57_array,y,x,$iter57_nextval;
 			rangeBoards = $p['range']($p['len']($p['getattr'](otherState, 'boards')));
-			$iter52_iter = rangeBoards;
-			$iter52_nextval=$p['__iter_prepare']($iter52_iter,false);
-			while (typeof($p['__wrapped_next']($iter52_nextval)['$nextval']) != 'undefined') {
-				y_board = $iter52_nextval['$nextval'];
-				$iter53_iter = rangeBoards;
-				$iter53_nextval=$p['__iter_prepare']($iter53_iter,false);
-				while (typeof($p['__wrapped_next']($iter53_nextval)['$nextval']) != 'undefined') {
-					x_board = $iter53_nextval['$nextval'];
-					$iter54_iter = rangeBoards;
-					$iter54_nextval=$p['__iter_prepare']($iter54_iter,false);
-					while (typeof($p['__wrapped_next']($iter54_nextval)['$nextval']) != 'undefined') {
-						y = $iter54_nextval['$nextval'];
-						$iter55_iter = rangeBoards;
-						$iter55_nextval=$p['__iter_prepare']($iter55_iter,false);
-						while (typeof($p['__wrapped_next']($iter55_nextval)['$nextval']) != 'undefined') {
-							x = $iter55_nextval['$nextval'];
+			$iter54_iter = rangeBoards;
+			$iter54_nextval=$p['__iter_prepare']($iter54_iter,false);
+			while (typeof($p['__wrapped_next']($iter54_nextval)['$nextval']) != 'undefined') {
+				y_board = $iter54_nextval['$nextval'];
+				$iter55_iter = rangeBoards;
+				$iter55_nextval=$p['__iter_prepare']($iter55_iter,false);
+				while (typeof($p['__wrapped_next']($iter55_nextval)['$nextval']) != 'undefined') {
+					x_board = $iter55_nextval['$nextval'];
+					$iter56_iter = rangeBoards;
+					$iter56_nextval=$p['__iter_prepare']($iter56_iter,false);
+					while (typeof($p['__wrapped_next']($iter56_nextval)['$nextval']) != 'undefined') {
+						y = $iter56_nextval['$nextval'];
+						$iter57_iter = rangeBoards;
+						$iter57_nextval=$p['__iter_prepare']($iter57_iter,false);
+						while (typeof($p['__wrapped_next']($iter57_nextval)['$nextval']) != 'undefined') {
+							x = $iter57_nextval['$nextval'];
 							$p['getattr'](self, 'boards')['__getitem__'](y_board)['__getitem__'](x_board)['__getitem__'](y)['__getitem__'](x)['__setitem__']('cell', $p['getattr'](otherState, 'boards')['__getitem__'](y_board)['__getitem__'](x_board)['__getitem__'](y)['__getitem__'](x)['__getitem__']('cell'));
 							$p['getattr'](self, 'boards')['__getitem__'](y_board)['__getitem__'](x_board)['__getitem__'](y)['__getitem__'](x)['__setitem__']('x', $p['getattr'](otherState, 'boards')['__getitem__'](y_board)['__getitem__'](x_board)['__getitem__'](y)['__getitem__'](x)['__getitem__']('x'));
 							$p['getattr'](self, 'boards')['__getitem__'](y_board)['__getitem__'](x_board)['__getitem__'](y)['__getitem__'](x)['__setitem__']('y', $p['getattr'](otherState, 'boards')['__getitem__'](y_board)['__getitem__'](x_board)['__getitem__'](y)['__getitem__'](x)['__getitem__']('y'));
@@ -1148,7 +1169,7 @@ $pyjs['loaded_modules']['learning'] = function (__mod_name__) {
 				var self = arguments[0];
 				child = arguments[1];
 			}
-			var $add89,$add88,$iter61_type,$add83,$iter64_iter,$iter60_array,$add87,$add86,$add85,$add84,$iter61_iter,$iter63_array,$iter66_iter,$iter65_array,$iter67_idx,$augexpr1,$augexpr3,$augexpr2,$augexpr4,$augsub4,$augsub3,$augsub2,$augsub1,$iter56_iter,$iter58_idx,$iter58_nextval,dL,d,$iter65_idx,$iter59_type,$iter64_idx,$iter66_type,$iter62_nextval,$iter56_idx,$iter61_idx,$iter66_nextval,$iter57_iter,$iter67_iter,$iter60_type,$iter65_type,$iter62_idx,$iter65_nextval,$iter59_array,$iter56_nextval,$iter58_iter,$iter63_iter,c,bL,$iter59_nextval,$iter56_array,$iter62_array,$iter64_nextval,$iter57_idx,cL,$iter67_type,$iter64_type,$iter60_nextval,$iter67_nextval,$iter58_array,$iter56_type,$iter66_idx,$iter62_type,b,$iter57_type,$iter59_idx,$iter57_nextval,$iter66_array,$iter61_array,$iter67_array,$iter64_array,nP,$iter61_nextval,$iter59_iter,aL,$iter60_idx,$or5,$or7,$or6,$iter58_type,$add90,$or8,$iter63_idx,$iter65_iter,a,$iter62_iter,$iter60_iter,$iter63_type,$iter57_array,$iter63_nextval;
+			var $add89,$add88,$iter61_type,$add83,$iter64_iter,$iter60_array,$add87,$add86,$add85,$add84,$iter61_iter,$iter63_array,$iter66_iter,$iter65_array,$iter67_idx,$augexpr1,$augexpr3,$augexpr2,$augexpr4,$augsub4,$augsub3,$augsub2,$augsub1,b,$iter58_idx,$iter58_nextval,dL,d,$iter65_idx,$iter68_iter,$iter59_type,$iter64_idx,$iter66_type,$iter62_nextval,$iter61_idx,$iter66_nextval,$iter67_iter,$iter60_type,$iter65_type,$iter62_idx,$iter69_array,$iter68_type,$iter65_nextval,$iter59_array,$iter58_iter,$iter63_iter,c,$iter69_idx,bL,$iter59_nextval,$iter62_array,$iter68_idx,$iter64_nextval,cL,$iter67_type,$iter64_type,$iter60_nextval,$iter67_nextval,$iter58_array,$iter66_idx,$iter62_type,$iter68_array,$iter68_nextval,$iter59_idx,$iter69_nextval,$iter66_array,$iter61_array,$iter67_array,$iter64_array,nP,$iter69_iter,$iter61_nextval,$iter59_iter,$iter69_type,aL,$iter60_idx,$or5,$or7,$or6,$iter58_type,$add90,$or8,$iter63_idx,$iter65_iter,a,$iter62_iter,$iter60_iter,$iter63_type,$iter63_nextval;
 var $generator_state = [0], $generator_exc = [null], $yield_value = null, $exc = null, $is_executing=false;
 			var $generator = function () {};
 			$generator['next'] = function (noStop) {
@@ -1251,8 +1272,8 @@ var $generator_state = [0], $generator_exc = [null], $yield_value = null, $exc =
 						$generator_state[1]=1;
 						if (typeof $generator_state[2] == 'undefined' || $generator_state[2] === 0) {
 							for (var $i = 2 ; $i < ($generator_state['length']<4?4:$generator_state['length']); $i++) $generator_state[$i]=0;
-							$iter62_iter = aL;
-							$iter62_nextval=$p['__iter_prepare']($iter62_iter,false);
+							$iter64_iter = aL;
+							$iter64_nextval=$p['__iter_prepare']($iter64_iter,false);
 							$generator_state[2]=1;
 						}
 						if ($generator_state[2] == 1) {
@@ -1260,12 +1281,12 @@ var $generator_state = [0], $generator_exc = [null], $yield_value = null, $exc =
 							$generator_state[2]=2;
 						}
 						if ($generator_state[2] == 2) {
-							for (;($generator_state[3] > 0 || typeof($p['__wrapped_next']($iter62_nextval)['$nextval']) != 'undefined');$generator_state[3] = 0) {
+							for (;($generator_state[3] > 0 || typeof($p['__wrapped_next']($iter64_nextval)['$nextval']) != 'undefined');$generator_state[3] = 0) {
 								if (typeof $generator_state[3] == 'undefined' || $generator_state[3] === 0) {
 									for (var $i = 3 ; $i < ($generator_state['length']<5?5:$generator_state['length']); $i++) $generator_state[$i]=0;
-									a = $iter62_nextval['$nextval'];
-									$iter63_iter = bL;
-									$iter63_nextval=$p['__iter_prepare']($iter63_iter,false);
+									a = $iter64_nextval['$nextval'];
+									$iter65_iter = bL;
+									$iter65_nextval=$p['__iter_prepare']($iter65_iter,false);
 									$generator_state[3]=1;
 								}
 								if ($generator_state[3] == 1) {
@@ -1273,10 +1294,10 @@ var $generator_state = [0], $generator_exc = [null], $yield_value = null, $exc =
 									$generator_state[3]=2;
 								}
 								if ($generator_state[3] == 2) {
-									for (;($generator_state[4] > 0 || typeof($p['__wrapped_next']($iter63_nextval)['$nextval']) != 'undefined');$generator_state[4] = 0) {
+									for (;($generator_state[4] > 0 || typeof($p['__wrapped_next']($iter65_nextval)['$nextval']) != 'undefined');$generator_state[4] = 0) {
 										if (typeof $generator_state[4] == 'undefined' || $generator_state[4] === 0) {
 											for (var $i = 4 ; $i < ($generator_state['length']<6?6:$generator_state['length']); $i++) $generator_state[$i]=0;
-											b = $iter63_nextval['$nextval'];
+											b = $iter65_nextval['$nextval'];
 											$generator_state[6] = 0;
 											$generator_state[4]=1;
 										}
@@ -1285,8 +1306,8 @@ var $generator_state = [0], $generator_exc = [null], $yield_value = null, $exc =
 												$generator_state[5]=1;
 												if (typeof $generator_state[6] == 'undefined' || $generator_state[6] === 0) {
 													for (var $i = 6 ; $i < ($generator_state['length']<8?8:$generator_state['length']); $i++) $generator_state[$i]=0;
-													$iter64_iter = cL;
-													$iter64_nextval=$p['__iter_prepare']($iter64_iter,false);
+													$iter66_iter = cL;
+													$iter66_nextval=$p['__iter_prepare']($iter66_iter,false);
 													$generator_state[6]=1;
 												}
 												if ($generator_state[6] == 1) {
@@ -1294,12 +1315,12 @@ var $generator_state = [0], $generator_exc = [null], $yield_value = null, $exc =
 													$generator_state[6]=2;
 												}
 												if ($generator_state[6] == 2) {
-													for (;($generator_state[7] > 0 || typeof($p['__wrapped_next']($iter64_nextval)['$nextval']) != 'undefined');$generator_state[7] = 0) {
+													for (;($generator_state[7] > 0 || typeof($p['__wrapped_next']($iter66_nextval)['$nextval']) != 'undefined');$generator_state[7] = 0) {
 														if (typeof $generator_state[7] == 'undefined' || $generator_state[7] === 0) {
 															for (var $i = 7 ; $i < ($generator_state['length']<9?9:$generator_state['length']); $i++) $generator_state[$i]=0;
-															c = $iter64_nextval['$nextval'];
-															$iter65_iter = dL;
-															$iter65_nextval=$p['__iter_prepare']($iter65_iter,false);
+															c = $iter66_nextval['$nextval'];
+															$iter67_iter = dL;
+															$iter67_nextval=$p['__iter_prepare']($iter67_iter,false);
 															$generator_state[7]=1;
 														}
 														if ($generator_state[7] == 1) {
@@ -1307,10 +1328,10 @@ var $generator_state = [0], $generator_exc = [null], $yield_value = null, $exc =
 															$generator_state[7]=2;
 														}
 														if ($generator_state[7] == 2) {
-															for (;($generator_state[8] > 0 || typeof($p['__wrapped_next']($iter65_nextval)['$nextval']) != 'undefined');$generator_state[8] = 0) {
+															for (;($generator_state[8] > 0 || typeof($p['__wrapped_next']($iter67_nextval)['$nextval']) != 'undefined');$generator_state[8] = 0) {
 																if (typeof $generator_state[8] == 'undefined' || $generator_state[8] === 0) {
 																	for (var $i = 8 ; $i < ($generator_state['length']<10?10:$generator_state['length']); $i++) $generator_state[$i]=0;
-																	d = $iter65_nextval['$nextval'];
+																	d = $iter67_nextval['$nextval'];
 																	$generator_state[10] = 0;
 																	$generator_state[8]=1;
 																}
@@ -1395,8 +1416,8 @@ var $generator_state = [0], $generator_exc = [null], $yield_value = null, $exc =
 							for (var $i = 2 ; $i < ($generator_state['length']<4?4:$generator_state['length']); $i++) $generator_state[$i]=0;
 							a = $p['getattr'](self, 'next_piece')['__getitem__'](0);
 							b = $p['getattr'](self, 'next_piece')['__getitem__'](1);
-							$iter66_iter = cL;
-							$iter66_nextval=$p['__iter_prepare']($iter66_iter,false);
+							$iter68_iter = cL;
+							$iter68_nextval=$p['__iter_prepare']($iter68_iter,false);
 							$generator_state[2]=1;
 						}
 						if ($generator_state[2] == 1) {
@@ -1404,12 +1425,12 @@ var $generator_state = [0], $generator_exc = [null], $yield_value = null, $exc =
 							$generator_state[2]=2;
 						}
 						if ($generator_state[2] == 2) {
-							for (;($generator_state[3] > 0 || typeof($p['__wrapped_next']($iter66_nextval)['$nextval']) != 'undefined');$generator_state[3] = 0) {
+							for (;($generator_state[3] > 0 || typeof($p['__wrapped_next']($iter68_nextval)['$nextval']) != 'undefined');$generator_state[3] = 0) {
 								if (typeof $generator_state[3] == 'undefined' || $generator_state[3] === 0) {
 									for (var $i = 3 ; $i < ($generator_state['length']<5?5:$generator_state['length']); $i++) $generator_state[$i]=0;
-									c = $iter66_nextval['$nextval'];
-									$iter67_iter = dL;
-									$iter67_nextval=$p['__iter_prepare']($iter67_iter,false);
+									c = $iter68_nextval['$nextval'];
+									$iter69_iter = dL;
+									$iter69_nextval=$p['__iter_prepare']($iter69_iter,false);
 									$generator_state[3]=1;
 								}
 								if ($generator_state[3] == 1) {
@@ -1417,10 +1438,10 @@ var $generator_state = [0], $generator_exc = [null], $yield_value = null, $exc =
 									$generator_state[3]=2;
 								}
 								if ($generator_state[3] == 2) {
-									for (;($generator_state[4] > 0 || typeof($p['__wrapped_next']($iter67_nextval)['$nextval']) != 'undefined');$generator_state[4] = 0) {
+									for (;($generator_state[4] > 0 || typeof($p['__wrapped_next']($iter69_nextval)['$nextval']) != 'undefined');$generator_state[4] = 0) {
 										if (typeof $generator_state[4] == 'undefined' || $generator_state[4] === 0) {
 											for (var $i = 4 ; $i < ($generator_state['length']<6?6:$generator_state['length']); $i++) $generator_state[$i]=0;
-											d = $iter67_nextval['$nextval'];
+											d = $iter69_nextval['$nextval'];
 											$generator_state[6] = 0;
 											$generator_state[4]=1;
 										}
@@ -1687,12 +1708,12 @@ var $generator_state = [0], $generator_exc = [null], $yield_value = null, $exc =
 		saved = savedConsts['values']();
 		td = TD_CONSTS['values']();
 		diff_list = function(){
-			var $iter68_array,$sub26,$sub25,i,$iter68_iter,$iter68_nextval,$collcomp17,$iter68_idx,$iter68_type;
+			var $iter70_array,$iter70_idx,$sub26,$iter70_type,$sub25,i,$collcomp17,$iter70_nextval,$iter70_iter;
 	$collcomp17 = $p['list']();
-		$iter68_iter = $p['range']($p['len'](TD_CONSTS));
-		$iter68_nextval=$p['__iter_prepare']($iter68_iter,false);
-		while (typeof($p['__wrapped_next']($iter68_nextval)['$nextval']) != 'undefined') {
-			i = $iter68_nextval['$nextval'];
+		$iter70_iter = $p['range']($p['len'](TD_CONSTS));
+		$iter70_nextval=$p['__iter_prepare']($iter70_iter,false);
+		while (typeof($p['__wrapped_next']($iter70_nextval)['$nextval']) != 'undefined') {
+			i = $iter70_nextval['$nextval'];
 			$collcomp17['append']($p['abs']($p['__op_sub']($sub25=saved['__getitem__'](i),$sub26=td['__getitem__'](i))));
 		}
 
@@ -1718,13 +1739,13 @@ var $generator_state = [0], $generator_exc = [null], $yield_value = null, $exc =
 	$m['trainAI']['__bind_type__'] = 0;
 	$m['trainAI']['__args__'] = [null,null];
 	$m['normalize'] = function(TD_CONSTS) {
-		var $mul42,$add105,$iter69_idx,$iter69_iter,$add106,i,$add108,$iter69_type,$mul41,tot,$add111,$div2,$add112,$add109,$iter69_nextval,$add107,$iter69_array,$div1,norm,$add110;
+		var $iter71_nextval,$iter71_iter,$add105,$mul42,$add107,$add106,i,$add108,$add112,$mul41,tot,$add111,$iter71_array,$add109,$iter71_idx,$div2,$iter71_type,$add110,$div1,norm;
 		norm = 6.0;
 		tot = $p['sum'](TD_CONSTS['values']());
-		$iter69_iter = $p['range']($p['len'](TD_CONSTS));
-		$iter69_nextval=$p['__iter_prepare']($iter69_iter,false);
-		while (typeof($p['__wrapped_next']($iter69_nextval)['$nextval']) != 'undefined') {
-			i = $iter69_nextval['$nextval'];
+		$iter71_iter = $p['range']($p['len'](TD_CONSTS));
+		$iter71_nextval=$p['__iter_prepare']($iter71_iter,false);
+		while (typeof($p['__wrapped_next']($iter71_nextval)['$nextval']) != 'undefined') {
+			i = $iter71_nextval['$nextval'];
 			TD_CONSTS['__setitem__']($p['__op_add']($add111='c',$add112=$p['str']($p['__op_add']($add109=i,$add110=1))), (typeof ($mul41=(typeof ($div1=TD_CONSTS['__getitem__']($p['__op_add']($add107='c',$add108=$p['str']($p['__op_add']($add105=i,$add106=1)))))==typeof ($div2=tot) && typeof $div1=='number' && $div2 !== 0?
 				$div1/$div2:
 				$p['op_div']($div1,$div2)))==typeof ($mul42=norm) && typeof $mul41=='number'?
@@ -1738,25 +1759,25 @@ var $generator_state = [0], $generator_exc = [null], $yield_value = null, $exc =
 	$m['normalize']['__bind_type__'] = 0;
 	$m['normalize']['__args__'] = [null,null,['TD_CONSTS']];
 	$m['td_learning'] = function(terminal_state, TD_CONSTS, prev_state) {
-		var $sub27,$add118,$add116,$add117,$sub28,$add115,$add113,$iter71_type,$iter71_iter,$mul48,$mul44,$mul45,$mul46,$mul47,$mul43,change_sub_utility,$add114,$iter71_nextval,sub2,$augexpr7,sub1,$augsub7,$iter71_array,i,change_total_utility,$iter71_idx;
+		var $sub27,$add118,$add116,$add117,$sub28,$add115,$add113,$mul48,$iter73_iter,$mul44,$mul45,$mul46,$mul47,$mul43,change_sub_utility,$add114,sub2,$augexpr7,sub1,$augsub7,$iter73_array,i,$iter73_idx,change_total_utility,$iter73_nextval,$iter73_type;
 		change_total_utility = $p['__op_sub']($sub27=$m['utility'](terminal_state, TD_CONSTS),$sub28=$m['utility'](prev_state, TD_CONSTS));
 		sub1 = $m['sub_utility'](terminal_state, TD_CONSTS);
 		sub2 = $m['sub_utility'](prev_state, TD_CONSTS);
 		change_sub_utility = function(){
-			var $iter70_array,$sub30,$iter70_type,i,$sub29,$iter70_idx,$iter70_nextval,$iter70_iter,$collcomp18;
+			var $sub30,$iter72_array,$iter72_type,i,$sub29,$iter72_iter,$collcomp18,$iter72_idx,$iter72_nextval;
 	$collcomp18 = $p['list']();
-		$iter70_iter = $p['range']($p['len'](sub1));
-		$iter70_nextval=$p['__iter_prepare']($iter70_iter,false);
-		while (typeof($p['__wrapped_next']($iter70_nextval)['$nextval']) != 'undefined') {
-			i = $iter70_nextval['$nextval'];
+		$iter72_iter = $p['range']($p['len'](sub1));
+		$iter72_nextval=$p['__iter_prepare']($iter72_iter,false);
+		while (typeof($p['__wrapped_next']($iter72_nextval)['$nextval']) != 'undefined') {
+			i = $iter72_nextval['$nextval'];
 			$collcomp18['append']($p['__op_sub']($sub29=sub1['__getitem__'](i),$sub30=sub2['__getitem__'](i)));
 		}
 
 	return $collcomp18;}();
-		$iter71_iter = $p['range']($p['len'](TD_CONSTS));
-		$iter71_nextval=$p['__iter_prepare']($iter71_iter,false);
-		while (typeof($p['__wrapped_next']($iter71_nextval)['$nextval']) != 'undefined') {
-			i = $iter71_nextval['$nextval'];
+		$iter73_iter = $p['range']($p['len'](TD_CONSTS));
+		$iter73_nextval=$p['__iter_prepare']($iter73_iter,false);
+		while (typeof($p['__wrapped_next']($iter73_nextval)['$nextval']) != 'undefined') {
+			i = $iter73_nextval['$nextval'];
 			var $augsub7 = $p['__op_add']($add115='c',$add116=$p['str']($p['__op_add']($add113=i,$add114=1)));
 			var $augexpr7 = TD_CONSTS;
 			$augexpr7['__setitem__']($augsub7, $p['__op_add']($add117=$augexpr7['__getitem__']($augsub7),$add118=(typeof ($mul47=(typeof ($mul45=(typeof ($mul43=$m['ALPHA'])==typeof ($mul44=change_total_utility) && typeof $mul43=='number'?

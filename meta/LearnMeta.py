@@ -35,7 +35,7 @@ from pyjamas import logging
 
 log = logging.getConsoleLogger()
 
-from learning import State, ab, is_win, is_full, turn, is_over, normalize, td_learning
+from learning import State, ab, is_win, is_full, turn, is_over, normalize, td_learning, find_last_move
 
 INCREMENT_AMOUNT = .05
 
@@ -298,7 +298,7 @@ class GridWidget(AbsolutePanel):
         return (y_board == piece[0]) and (x_board == piece[1])
     return False
 
-  def state_to_grid(self):
+  def state_to_grid(self, prev_x_board=-1, prev_y_board=-1, prev_x_cell=-1, prev_y_cell=-1):
     board = self.state.boards
     for y_board in range(3):
       for x_board in range(3):

@@ -1,24 +1,3 @@
-def import_libs():
-  import pyjd # this is dummy in pyjs
-
-  from pyjamas.ui.Button import Button
-  from pyjamas.ui.RootPanel import RootPanel
-  from pyjamas.ui.Label import Label
-  from pyjamas.ui.Grid import Grid
-  from pyjamas.ui.CellFormatter import CellFormatter
-  from pyjamas.ui.RowFormatter import RowFormatter
-  from pyjamas.ui.HTML import HTML
-  from pyjamas.ui.CheckBox import CheckBox
-  from pyjamas.ui.AbsolutePanel import AbsolutePanel
-  from pyjamas import Window
-  from pyjamas.ui.CSS import StyleSheetCssFile
-  from pyjamas.ui.CSS import StyleSheetCssText
-
-  from pyjamas import logging
-
-  log = logging.getConsoleLogger()
-
-  from learning import State, ab, is_win, is_full, turn, is_over, normalize
 import pyjd # this is dummy in pyjs
 
 from pyjamas.ui.Button import Button
@@ -31,14 +10,12 @@ from pyjamas.ui.HTML import HTML
 from pyjamas.ui.CheckBox import CheckBox
 from pyjamas.ui.AbsolutePanel import AbsolutePanel
 from pyjamas import Window
-from pyjamas.ui.CSS import StyleSheetCssFile
-from pyjamas.ui.CSS import StyleSheetCssText
 
 from pyjamas import logging
 
 log = logging.getConsoleLogger()
 
-from learning import State, ab, is_win, is_full, turn, is_over, normalize
+from learning import State, ab, is_win, is_full, turn, is_over, normalize, find_last_move
 
 INCREMENT_AMOUNT = .05
 
@@ -48,6 +25,7 @@ class GridWidget(AbsolutePanel):
 
     self.state = State()
     self.game_over = False
+    self.last_ai_placement = {}
     self.TD_CONSTS = {'c3': 0.767944, 'c2': 1.049451, 'c1': 3.074038, 'c6': 0.220823, 'c5': 0.281883, 'c4': 0.605861}
     optional_args = {'TD_CONSTS': self.TD_CONSTS, 'MAX': '1', 'MIN': 2}
     AbsolutePanel.__init__(self)
@@ -78,7 +56,7 @@ class GridWidget(AbsolutePanel):
     self.new_game = Button("New game", self)
     self.add(self.new_game)
 
-    self.score_label = Label("Human: %d | AI: %d"% (0,0))
+    self.score_label = Label("CURRENT SCORE: Human: %d | AI: %d"% (0,0))
     self.add(self.score_label)
 
     # initialize the board grid:
@@ -269,11 +247,11 @@ The <a href="http://chet-weger.herokuapp.com/learn_meta_ttt/">training regime</a
   def onClick(self, sender):
     if sender == self.increase_depth:
       self.depthLimit += 1
-      self.depth_label.setText("""AI will search to a <a href="#depth_explanation">depth</a> of """ + str(self.depthLimit) +".")
+      self.depth_label.setHTML("""AI will search to a <a href="#depth_explanation">depth</a> of """ + str(self.depthLimit) +".")
 
     if sender == self.decrease_depth:
       self.depthLimit -= 1
-      self.depth_label.setText("""AI will search to a <a href="#depth_explanation">depth</a> of """ + str(self.depthLimit) +".")
+      self.depth_label.setHTML("""AI will search to a <a href="#depth_explanation">depth</a> of """ + str(self.depthLimit) +".")
 
     if sender == self.new_game:
       self.start_new_game()
@@ -289,9 +267,14 @@ The <a href="http://chet-weger.herokuapp.com/learn_meta_ttt/">training regime</a
 
         self.ai_first.setVisible(False) # can't go first any more so we make it invisible...
 
-        self.state = ab(self.state, self.TD_CONSTS, depth_limit=self.depthLimit)[1]
+        new_state = ab(self.state, self.TD_CONSTS, depth_limit=self.depthLimit)[1]
+        last_position = find_last_move(self.state, new_state)
+        self.state = new_state
 
-        self.state_to_grid()
+        self.state_to_grid(prev_x_board=last_position['x_board'],
+                           prev_y_board=last_position['y_board'],
+                           prev_x_cell=last_position['x_cell'],
+                           prev_y_cell=last_position['y_cell'],)
 
 
       if hasattr(sender, 'point'):
@@ -300,31 +283,29 @@ The <a href="http://chet-weger.herokuapp.com/learn_meta_ttt/">training regime</a
           self.min_player = '1'
           self.ai_first.setVisible(False) # can't go first any more so we make it invisible...
 
-        assert self.state.boards
 
         point = sender.point
 
 
         g = self.g.getWidget(point['y_board'], point['x_board'])
-        if self.human_first:
-          g.setText(point['y_cell'], point['x_cell'], str(self.min_player))
-        else:
-          g.setText(point['y_cell'], point['x_cell'], str(self.max_player))
+        g.setText(point['y_cell'], point['x_cell'], str(self.min_player))
 
         self.grid_to_state(point)
 
         self.check_win()
 
-        if self.human_first:
-          self.state.next_piece[2] = self.max_player
-        else:
-          self.state.next_piece[2] = self.min_player
+        self.state.next_piece[2] = self.max_player
 
-        #self.state.player = next_player(self.state.player)
+        new_state = ab(self.state, self.TD_CONSTS, depth_limit=self.depthLimit)[1]
+        last_position = find_last_move(self.state, new_state)
+        self.state = new_state
 
-        self.state = ab(self.state, self.TD_CONSTS, depth_limit=self.depthLimit)[1]
+        self.state_to_grid(prev_x_board=last_position['x_board'],
+                           prev_y_board=last_position['y_board'],
+                           prev_x_cell=last_position['x_cell'],
+                           prev_y_cell=last_position['y_cell'],)
 
-        self.state_to_grid()
+
         self.check_win()
 
 
@@ -344,19 +325,11 @@ The <a href="http://chet-weger.herokuapp.com/learn_meta_ttt/">training regime</a
       self.TD_CONSTS[key] -= INCREMENT_AMOUNT
 
   def check_win(self):
-    self.state_to_grid()
-    self.depth_label.setText("""AI will search to a <a href="#depth_explanation">depth</a> of """ + str(self.depthLimit) +".")
+    self.depth_label.setHTML("""AI will search to a <a href="#depth_explanation">depth</a> of """ + str(self.depthLimit) +".")
     self.check_adjusts(None)
-    if self.human_first:
-      print "Human went first"
-      human_score = self.state.score['1']
-      ai_score = self.state.score['2']
-      self.score_label.setText("Human: %d | AI: %d" % (human_score, ai_score))
-    else:
-      print "AI went first"
-      human_score = self.state.score['1']
-      ai_score = self.state.score['2']
-      self.score_label.setText("Human: %d | AI: %d" % (human_score, ai_score))
+    human_score = self.state.score[str(self.min_player)]
+    ai_score = self.state.score[str(self.max_player)]
+    self.score_label.setText("CURRENT SCORE: Human(%d): %d | AI(%d): %d" % (self.min_player, human_score, self.max_player, ai_score))
     if is_over(self.state):
       if human_score > ai_score:
         msg = "Congratulations, you won! To increase the difficulty, increase the search depth."
@@ -385,7 +358,7 @@ The <a href="http://chet-weger.herokuapp.com/learn_meta_ttt/">training regime</a
         return (y_board == piece[0]) and (x_board == piece[1])
     return False
 
-  def state_to_grid(self):
+  def state_to_grid(self, prev_x_board=-1, prev_y_board=-1, prev_x_cell=-1, prev_y_cell=-1):
     board = self.state.boards
     for y_board in range(3):
       for x_board in range(3):
@@ -408,17 +381,26 @@ The <a href="http://chet-weger.herokuapp.com/learn_meta_ttt/">training regime</a
                 else:
                   b = Button('Play %d here.' % (self.state.next_piece[2]), self)
                 b.point = {'x_cell':x_cell, 'y_cell':y_cell, 'y_board': y_board, 'x_board': x_board}
-                g.setWidget(y_cell, x_cell, b)
               else:
-                g.setText(y_cell, x_cell, '-')
+                b = HTML('-')
 
             elif board[y_board][x_board][y_cell][x_cell]['cell'] == 1:
-              g.setText(y_cell, x_cell, '1')
+              if (prev_x_cell == x_cell and
+                  prev_y_cell == y_cell and
+                  prev_y_board == y_board and
+                  prev_x_board == x_board):
+                b = HTML('<p style="backgound-color:red;color:red">1</p>')
+              else:
+                b = HTML('1')
             elif board[y_board][x_board][y_cell][x_cell]['cell'] == 2:
-              g.setText(y_cell, x_cell, '2')
-            else:
-              print 'a'
-              #assert False
+              if (prev_x_cell == x_cell and
+                  prev_y_cell == y_cell and
+                  prev_y_board == y_board and
+                  prev_x_board == x_board):
+                b = HTML('<p style="backgound-color:red;color:red">2</p>')
+              else:
+                b = HTML('2')
+            g.setWidget(y_cell, x_cell, b)
 
         self.add(g)
         self.g.setWidget(y_board, x_board, g)
@@ -436,14 +418,12 @@ The <a href="http://chet-weger.herokuapp.com/learn_meta_ttt/">training regime</a
               if self.state.boards[y_board][x_board][y_cell][x_cell]['cell'] == 0:
                 self.state.boards[y_board][x_board][y_cell][x_cell]['cell'] = int(g.getText(y_cell, x_cell))
                 piece = self.state.next_piece
-                piece[2] = 1
-                #piece[2] = int(piece[2] == 1) + 1 # next player!
                 piece[0] = y_cell
                 piece[1] = x_cell
             else:
               assert (g.getText(y_cell, x_cell) == '-')
     if is_win(self.state.boards[point['y_board']][point['x_board']]):
-      self.state.score[str(piece[2])] += 1
+      self.state.score[str(self.min_player)] += 1
 
 
 if __name__ == '__main__':

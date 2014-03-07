@@ -8,36 +8,6 @@ $pyjs['loaded_modules']['Meta'] = function (__mod_name__) {
 	$m['__name__'] = __mod_name__;
 
 
-	$m['import_libs'] = function() {
-		var CheckBox,Label,Window,ab,normalize,log,turn,StyleSheetCssText,RowFormatter,RootPanel,is_over,HTML,Grid,StyleSheetCssFile,is_win,Button,pyjd,CellFormatter,logging,State,is_full,AbsolutePanel;
-		pyjd = $p['___import___']('pyjd', null);
-		Button = $p['___import___']('pyjamas.ui.Button.Button', null, null, false);
-		RootPanel = $p['___import___']('pyjamas.ui.RootPanel.RootPanel', null, null, false);
-		Label = $p['___import___']('pyjamas.ui.Label.Label', null, null, false);
-		Grid = $p['___import___']('pyjamas.ui.Grid.Grid', null, null, false);
-		CellFormatter = $p['___import___']('pyjamas.ui.CellFormatter.CellFormatter', null, null, false);
-		RowFormatter = $p['___import___']('pyjamas.ui.RowFormatter.RowFormatter', null, null, false);
-		HTML = $p['___import___']('pyjamas.ui.HTML.HTML', null, null, false);
-		CheckBox = $p['___import___']('pyjamas.ui.CheckBox.CheckBox', null, null, false);
-		AbsolutePanel = $p['___import___']('pyjamas.ui.AbsolutePanel.AbsolutePanel', null, null, false);
-		Window = $p['___import___']('pyjamas.Window', null, null, false);
-		StyleSheetCssFile = $p['___import___']('pyjamas.ui.CSS.StyleSheetCssFile', null, null, false);
-		StyleSheetCssText = $p['___import___']('pyjamas.ui.CSS.StyleSheetCssText', null, null, false);
-		logging = $p['___import___']('pyjamas.logging', null, null, false);
-		log = logging['getConsoleLogger']();
-		State = $p['___import___']('learning.State', null, null, false);
-		ab = $p['___import___']('learning.ab', null, null, false);
-		is_win = $p['___import___']('learning.is_win', null, null, false);
-		is_full = $p['___import___']('learning.is_full', null, null, false);
-		turn = $p['___import___']('learning.turn', null, null, false);
-		is_over = $p['___import___']('learning.is_over', null, null, false);
-		normalize = $p['___import___']('learning.normalize', null, null, false);
-		return null;
-	};
-	$m['import_libs']['__name__'] = 'import_libs';
-
-	$m['import_libs']['__bind_type__'] = 0;
-	$m['import_libs']['__args__'] = [null,null];
 	$m['pyjd'] = $p['___import___']('pyjd', null);
 	$m['Button'] = $p['___import___']('pyjamas.ui.Button.Button', null, null, false);
 	$m['RootPanel'] = $p['___import___']('pyjamas.ui.RootPanel.RootPanel', null, null, false);
@@ -49,8 +19,6 @@ $pyjs['loaded_modules']['Meta'] = function (__mod_name__) {
 	$m['CheckBox'] = $p['___import___']('pyjamas.ui.CheckBox.CheckBox', null, null, false);
 	$m['AbsolutePanel'] = $p['___import___']('pyjamas.ui.AbsolutePanel.AbsolutePanel', null, null, false);
 	$m['Window'] = $p['___import___']('pyjamas.Window', null, null, false);
-	$m['StyleSheetCssFile'] = $p['___import___']('pyjamas.ui.CSS.StyleSheetCssFile', null, null, false);
-	$m['StyleSheetCssText'] = $p['___import___']('pyjamas.ui.CSS.StyleSheetCssText', null, null, false);
 	$m['logging'] = $p['___import___']('pyjamas.logging', null, null, false);
 	$m['log'] = $m['logging']['getConsoleLogger']();
 	$m['State'] = $p['___import___']('learning.State', null, null, false);
@@ -60,6 +28,7 @@ $pyjs['loaded_modules']['Meta'] = function (__mod_name__) {
 	$m['turn'] = $p['___import___']('learning.turn', null, null, false);
 	$m['is_over'] = $p['___import___']('learning.is_over', null, null, false);
 	$m['normalize'] = $p['___import___']('learning.normalize', null, null, false);
+	$m['find_last_move'] = $p['___import___']('learning.find_last_move', null, null, false);
 	$m['INCREMENT_AMOUNT'] = 0.05;
 	$m['GridWidget'] = (function(){
 		var $cls_definition = new Object();
@@ -74,6 +43,7 @@ $pyjs['loaded_modules']['Meta'] = function (__mod_name__) {
 			var $add2,$add3,$add1,optional_args,$add4,explanation;
 			self['state'] = $m['State']();
 			self['game_over'] = false;
+			self['last_ai_placement'] = $p['dict']([]);
 			self['TD_CONSTS'] = $p['dict']([['c3', 0.767944], ['c2', 1.049451], ['c1', 3.074038], ['c6', 0.220823], ['c5', 0.281883], ['c4', 0.605861]]);
 			optional_args = $p['dict']([['TD_CONSTS', $p['getattr'](self, 'TD_CONSTS')], ['MAX', '1'], ['MIN', 2]]);
 			$m['AbsolutePanel']['__init__'](self);
@@ -97,7 +67,7 @@ $pyjs['loaded_modules']['Meta'] = function (__mod_name__) {
 			self['depth_grid']['setWidget'](0, 2, $p['getattr'](self, 'increase_depth'));
 			self['new_game'] = $m['Button']('New game', self);
 			self['add']($p['getattr'](self, 'new_game'));
-			self['score_label'] = $m['Label']($p['sprintf']('Human: %d | AI: %d', $p['tuple']([0, 0])));
+			self['score_label'] = $m['Label']($p['sprintf']('CURRENT SCORE: Human: %d | AI: %d', $p['tuple']([0, 0])));
 			self['add']($p['getattr'](self, 'score_label'));
 			self['g'] = $m['Grid']();
 			self['g']['resize'](3, 3);
@@ -221,14 +191,14 @@ $pyjs['loaded_modules']['Meta'] = function (__mod_name__) {
 				var self = arguments[0];
 				sender = arguments[1];
 			}
-			var $and2,g,point,$and1,$add14,$add15,$add16,$add10,$add7,$add12,$add13,$sub2,$add8,$add9,$sub1,$add11;
+			var $and2,last_position,g,point,new_state,$and1,$add14,$add15,$add16,$add10,$add7,$add12,$add13,$sub2,$add8,$add9,$sub1,$add11;
 			if ($p['bool']($p['op_eq'](sender, $p['getattr'](self, 'increase_depth')))) {
 				self['depthLimit'] = $p['__op_add']($add7=$p['getattr'](self, 'depthLimit'),$add8=1);
-				self['depth_label']['setText']($p['__op_add']($add11=$p['__op_add']($add9='AI will search to a <a href="#depth_explanation">depth</a> of ',$add10=$p['str']($p['getattr'](self, 'depthLimit'))),$add12='.'));
+				self['depth_label']['setHTML']($p['__op_add']($add11=$p['__op_add']($add9='AI will search to a <a href="#depth_explanation">depth</a> of ',$add10=$p['str']($p['getattr'](self, 'depthLimit'))),$add12='.'));
 			}
 			if ($p['bool']($p['op_eq'](sender, $p['getattr'](self, 'decrease_depth')))) {
 				self['depthLimit'] = $p['__op_sub']($sub1=$p['getattr'](self, 'depthLimit'),$sub2=1);
-				self['depth_label']['setText']($p['__op_add']($add15=$p['__op_add']($add13='AI will search to a <a href="#depth_explanation">depth</a> of ',$add14=$p['str']($p['getattr'](self, 'depthLimit'))),$add16='.'));
+				self['depth_label']['setHTML']($p['__op_add']($add15=$p['__op_add']($add13='AI will search to a <a href="#depth_explanation">depth</a> of ',$add14=$p['str']($p['getattr'](self, 'depthLimit'))),$add16='.'));
 			}
 			if ($p['bool']($p['op_eq'](sender, $p['getattr'](self, 'new_game')))) {
 				self['start_new_game']();
@@ -243,8 +213,10 @@ $pyjs['loaded_modules']['Meta'] = function (__mod_name__) {
 					self['min_player'] = '2';
 					$p['getattr']($p['getattr'](self, 'state'), 'next_piece')['__setitem__'](2, $p['getattr'](self, 'max_player'));
 					self['ai_first']['setVisible'](false);
-					self['state'] = $pyjs_kwargs_call(null, $m['ab'], null, null, [{'depth_limit':$p['getattr'](self, 'depthLimit')}, $p['getattr'](self, 'state'), $p['getattr'](self, 'TD_CONSTS')])['__getitem__'](1);
-					self['state_to_grid']();
+					new_state = $pyjs_kwargs_call(null, $m['ab'], null, null, [{'depth_limit':$p['getattr'](self, 'depthLimit')}, $p['getattr'](self, 'state'), $p['getattr'](self, 'TD_CONSTS')])['__getitem__'](1);
+					last_position = $m['find_last_move']($p['getattr'](self, 'state'), new_state);
+					self['state'] = new_state;
+					$pyjs_kwargs_call(self, 'state_to_grid', null, null, [{'prev_x_board':last_position['__getitem__']('x_board'), 'prev_y_board':last_position['__getitem__']('y_board'), 'prev_x_cell':last_position['__getitem__']('x_cell'), 'prev_y_cell':last_position['__getitem__']('y_cell')}]);
 				}
 				if ($p['bool']($p['hasattr'](sender, 'point'))) {
 					if ($p['bool']($p['op_eq']($p['getattr'](self, 'min_player'), (typeof ($usub2=1)=='number'?
@@ -254,27 +226,16 @@ $pyjs['loaded_modules']['Meta'] = function (__mod_name__) {
 						self['min_player'] = '1';
 						self['ai_first']['setVisible'](false);
 					}
-					if (!( $p['getattr']($p['getattr'](self, 'state'), 'boards') )) {
-					   throw $p['AssertionError']();
-					 }
 					point = $p['getattr'](sender, 'point');
 					g = self['g']['getWidget'](point['__getitem__']('y_board'), point['__getitem__']('x_board'));
-					if ($p['bool']($p['getattr'](self, 'human_first'))) {
-						g['setText'](point['__getitem__']('y_cell'), point['__getitem__']('x_cell'), $p['str']($p['getattr'](self, 'min_player')));
-					}
-					else {
-						g['setText'](point['__getitem__']('y_cell'), point['__getitem__']('x_cell'), $p['str']($p['getattr'](self, 'max_player')));
-					}
+					g['setText'](point['__getitem__']('y_cell'), point['__getitem__']('x_cell'), $p['str']($p['getattr'](self, 'min_player')));
 					self['grid_to_state'](point);
 					self['check_win']();
-					if ($p['bool']($p['getattr'](self, 'human_first'))) {
-						$p['getattr']($p['getattr'](self, 'state'), 'next_piece')['__setitem__'](2, $p['getattr'](self, 'max_player'));
-					}
-					else {
-						$p['getattr']($p['getattr'](self, 'state'), 'next_piece')['__setitem__'](2, $p['getattr'](self, 'min_player'));
-					}
-					self['state'] = $pyjs_kwargs_call(null, $m['ab'], null, null, [{'depth_limit':$p['getattr'](self, 'depthLimit')}, $p['getattr'](self, 'state'), $p['getattr'](self, 'TD_CONSTS')])['__getitem__'](1);
-					self['state_to_grid']();
+					$p['getattr']($p['getattr'](self, 'state'), 'next_piece')['__setitem__'](2, $p['getattr'](self, 'max_player'));
+					new_state = $pyjs_kwargs_call(null, $m['ab'], null, null, [{'depth_limit':$p['getattr'](self, 'depthLimit')}, $p['getattr'](self, 'state'), $p['getattr'](self, 'TD_CONSTS')])['__getitem__'](1);
+					last_position = $m['find_last_move']($p['getattr'](self, 'state'), new_state);
+					self['state'] = new_state;
+					$pyjs_kwargs_call(self, 'state_to_grid', null, null, [{'prev_x_board':last_position['__getitem__']('x_board'), 'prev_y_board':last_position['__getitem__']('y_board'), 'prev_x_cell':last_position['__getitem__']('x_cell'), 'prev_y_cell':last_position['__getitem__']('y_cell')}]);
 					self['check_win']();
 				}
 			}
@@ -337,21 +298,11 @@ $pyjs['loaded_modules']['Meta'] = function (__mod_name__) {
 				var self = arguments[0];
 			}
 			var $add21,$add20,$add22,ai_score,human_score,msg,$add19;
-			self['state_to_grid']();
-			self['depth_label']['setText']($p['__op_add']($add21=$p['__op_add']($add19='AI will search to a <a href="#depth_explanation">depth</a> of ',$add20=$p['str']($p['getattr'](self, 'depthLimit'))),$add22='.'));
+			self['depth_label']['setHTML']($p['__op_add']($add21=$p['__op_add']($add19='AI will search to a <a href="#depth_explanation">depth</a> of ',$add20=$p['str']($p['getattr'](self, 'depthLimit'))),$add22='.'));
 			self['check_adjusts'](null);
-			if ($p['bool']($p['getattr'](self, 'human_first'))) {
-				$p['printFunc'](['Human went first'], 1);
-				human_score = $p['getattr']($p['getattr'](self, 'state'), 'score')['__getitem__']('1');
-				ai_score = $p['getattr']($p['getattr'](self, 'state'), 'score')['__getitem__']('2');
-				self['score_label']['setText']($p['sprintf']('Human: %d | AI: %d', $p['tuple']([human_score, ai_score])));
-			}
-			else {
-				$p['printFunc'](['AI went first'], 1);
-				human_score = $p['getattr']($p['getattr'](self, 'state'), 'score')['__getitem__']('1');
-				ai_score = $p['getattr']($p['getattr'](self, 'state'), 'score')['__getitem__']('2');
-				self['score_label']['setText']($p['sprintf']('Human: %d | AI: %d', $p['tuple']([human_score, ai_score])));
-			}
+			human_score = $p['getattr']($p['getattr'](self, 'state'), 'score')['__getitem__']($p['str']($p['getattr'](self, 'min_player')));
+			ai_score = $p['getattr']($p['getattr'](self, 'state'), 'score')['__getitem__']($p['str']($p['getattr'](self, 'max_player')));
+			self['score_label']['setText']($p['sprintf']('CURRENT SCORE: Human(%d): %d | AI(%d): %d', $p['tuple']([$p['getattr'](self, 'min_player'), human_score, $p['getattr'](self, 'max_player'), ai_score])));
 			if ($p['bool']($m['is_over']($p['getattr'](self, 'state')))) {
 				if ($p['bool'](($p['cmp'](human_score, ai_score) == 1))) {
 					msg = 'Congratulations, you won! To increase the difficulty, increase the search depth.';
@@ -402,13 +353,21 @@ $pyjs['loaded_modules']['Meta'] = function (__mod_name__) {
 		}
 	, 1, [null,null,['self'],['y_board'],['x_board']]);
 		$cls_definition['will_buttons'] = $method;
-		$method = $pyjs__bind_method2('state_to_grid', function() {
+		$method = $pyjs__bind_method2('state_to_grid', function(prev_x_board, prev_y_board, prev_x_cell, prev_y_cell) {
 			if (this['__is_instance__'] === true) {
 				var self = this;
 			} else {
 				var self = arguments[0];
+				prev_x_board = arguments[1];
+				prev_y_board = arguments[2];
+				prev_x_cell = arguments[3];
+				prev_y_cell = arguments[4];
 			}
-			var will_make_buttons,$iter10_nextval,y_cell,$iter8_iter,$iter10_iter,$iter9_iter,$iter9_nextval,$iter9_idx,board,$iter7_type,$iter9_type,x_board,$iter8_idx,$iter7_iter,$iter8_type,$iter10_idx,$iter8_nextval,$iter7_idx,y_board,b,$iter7_nextval,g,$iter7_array,$iter8_array,$iter10_array,x_cell,$iter10_type,$iter9_array;
+			if (typeof prev_x_board == 'undefined') prev_x_board=arguments['callee']['__args__'][3][1];
+			if (typeof prev_y_board == 'undefined') prev_y_board=arguments['callee']['__args__'][4][1];
+			if (typeof prev_x_cell == 'undefined') prev_x_cell=arguments['callee']['__args__'][5][1];
+			if (typeof prev_y_cell == 'undefined') prev_y_cell=arguments['callee']['__args__'][6][1];
+			var will_make_buttons,$iter10_nextval,y_cell,$iter8_iter,$iter10_iter,$iter9_iter,$iter9_nextval,$iter9_idx,board,$iter7_type,$iter9_type,x_board,$and8,$and9,$iter8_idx,x_cell,$iter7_iter,$iter8_type,$iter10_idx,$and7,$and12,$and13,$and10,$and11,$iter8_nextval,$and14,$iter7_idx,y_board,b,$iter7_nextval,g,$iter7_array,$iter8_array,$iter10_array,$iter10_type,$iter9_array;
 			board = $p['getattr']($p['getattr'](self, 'state'), 'boards');
 			$iter7_iter = $p['range'](3);
 			$iter7_nextval=$p['__iter_prepare']($iter7_iter,false);
@@ -443,21 +402,28 @@ $pyjs['loaded_modules']['Meta'] = function (__mod_name__) {
 										b = $m['Button']($p['sprintf']('Play %d here.', $p['getattr']($p['getattr'](self, 'state'), 'next_piece')['__getitem__'](2)), self);
 									}
 									b['point'] = $p['dict']([['x_cell', x_cell], ['y_cell', y_cell], ['y_board', y_board], ['x_board', x_board]]);
-									g['setWidget'](y_cell, x_cell, b);
 								}
 								else {
-									g['setText'](y_cell, x_cell, '-');
+									b = $m['HTML']('-');
 								}
 							}
 							else if ($p['bool']($p['op_eq'](board['__getitem__'](y_board)['__getitem__'](x_board)['__getitem__'](y_cell)['__getitem__'](x_cell)['__getitem__']('cell'), 1))) {
-								g['setText'](y_cell, x_cell, '1');
+								if ($p['bool'](($p['bool']($and7=$p['op_eq'](prev_x_cell, x_cell))?($p['bool']($and8=$p['op_eq'](prev_y_cell, y_cell))?($p['bool']($and9=$p['op_eq'](prev_y_board, y_board))?$p['op_eq'](prev_x_board, x_board):$and9):$and8):$and7))) {
+									b = $m['HTML']('<p style="backgound-color:red;color:red">1</p>');
+								}
+								else {
+									b = $m['HTML']('1');
+								}
 							}
 							else if ($p['bool']($p['op_eq'](board['__getitem__'](y_board)['__getitem__'](x_board)['__getitem__'](y_cell)['__getitem__'](x_cell)['__getitem__']('cell'), 2))) {
-								g['setText'](y_cell, x_cell, '2');
+								if ($p['bool'](($p['bool']($and11=$p['op_eq'](prev_x_cell, x_cell))?($p['bool']($and12=$p['op_eq'](prev_y_cell, y_cell))?($p['bool']($and13=$p['op_eq'](prev_y_board, y_board))?$p['op_eq'](prev_x_board, x_board):$and13):$and12):$and11))) {
+									b = $m['HTML']('<p style="backgound-color:red;color:red">2</p>');
+								}
+								else {
+									b = $m['HTML']('2');
+								}
 							}
-							else {
-								$p['printFunc'](['a'], 1);
-							}
+							g['setWidget'](y_cell, x_cell, b);
 						}
 					}
 					self['add'](g);
@@ -466,7 +432,15 @@ $pyjs['loaded_modules']['Meta'] = function (__mod_name__) {
 			}
 			return null;
 		}
-	, 1, [null,null,['self']]);
+	, 1, [null,null,['self'],['prev_x_board', (typeof ($usub4=1)=='number'?
+			-$usub4:
+			$p['op_usub']($usub4))],['prev_y_board', (typeof ($usub5=1)=='number'?
+			-$usub5:
+			$p['op_usub']($usub5))],['prev_x_cell', (typeof ($usub6=1)=='number'?
+			-$usub6:
+			$p['op_usub']($usub6))],['prev_y_cell', (typeof ($usub7=1)=='number'?
+			-$usub7:
+			$p['op_usub']($usub7))]]);
 		$cls_definition['state_to_grid'] = $method;
 		$method = $pyjs__bind_method2('grid_to_state', function(point) {
 			if (this['__is_instance__'] === true) {
@@ -503,7 +477,6 @@ $pyjs['loaded_modules']['Meta'] = function (__mod_name__) {
 								if ($p['bool']($p['op_eq']($p['getattr']($p['getattr'](self, 'state'), 'boards')['__getitem__'](y_board)['__getitem__'](x_board)['__getitem__'](y_cell)['__getitem__'](x_cell)['__getitem__']('cell'), 0))) {
 									$p['getattr']($p['getattr'](self, 'state'), 'boards')['__getitem__'](y_board)['__getitem__'](x_board)['__getitem__'](y_cell)['__getitem__'](x_cell)['__setitem__']('cell', $p['float_int'](g['getText'](y_cell, x_cell)));
 									piece = $p['getattr']($p['getattr'](self, 'state'), 'next_piece');
-									piece['__setitem__'](2, 1);
 									piece['__setitem__'](0, y_cell);
 									piece['__setitem__'](1, x_cell);
 								}
@@ -518,7 +491,7 @@ $pyjs['loaded_modules']['Meta'] = function (__mod_name__) {
 				}
 			}
 			if ($p['bool']($m['is_win']($p['getattr']($p['getattr'](self, 'state'), 'boards')['__getitem__'](point['__getitem__']('y_board'))['__getitem__'](point['__getitem__']('x_board'))))) {
-				var $augsub3 = $p['str'](piece['__getitem__'](2));
+				var $augsub3 = $p['str']($p['getattr'](self, 'min_player'));
 				var $augexpr3 = $p['getattr']($p['getattr'](self, 'state'), 'score');
 				$augexpr3['__setitem__']($augsub3, $p['__op_add']($add23=$augexpr3['__getitem__']($augsub3),$add24=1));
 			}
@@ -546,5 +519,5 @@ $pyjs['loaded_modules']['Meta'] = function (__mod_name__) {
 
 
 /*
-PYJS_DEPS: ['pyjd', 'pyjamas.ui.Button.Button', 'pyjamas', 'pyjamas.ui', 'pyjamas.ui.Button', 'pyjamas.ui.RootPanel.RootPanel', 'pyjamas.ui.RootPanel', 'pyjamas.ui.Label.Label', 'pyjamas.ui.Label', 'pyjamas.ui.Grid.Grid', 'pyjamas.ui.Grid', 'pyjamas.ui.CellFormatter.CellFormatter', 'pyjamas.ui.CellFormatter', 'pyjamas.ui.RowFormatter.RowFormatter', 'pyjamas.ui.RowFormatter', 'pyjamas.ui.HTML.HTML', 'pyjamas.ui.HTML', 'pyjamas.ui.CheckBox.CheckBox', 'pyjamas.ui.CheckBox', 'pyjamas.ui.AbsolutePanel.AbsolutePanel', 'pyjamas.ui.AbsolutePanel', 'pyjamas.Window', 'pyjamas.ui.CSS.StyleSheetCssFile', 'pyjamas.ui.CSS', 'pyjamas.ui.CSS.StyleSheetCssText', 'pyjamas.logging', 'learning.State', 'learning', 'learning.ab', 'learning.is_win', 'learning.is_full', 'learning.turn', 'learning.is_over', 'learning.normalize']
+PYJS_DEPS: ['pyjd', 'pyjamas.ui.Button.Button', 'pyjamas', 'pyjamas.ui', 'pyjamas.ui.Button', 'pyjamas.ui.RootPanel.RootPanel', 'pyjamas.ui.RootPanel', 'pyjamas.ui.Label.Label', 'pyjamas.ui.Label', 'pyjamas.ui.Grid.Grid', 'pyjamas.ui.Grid', 'pyjamas.ui.CellFormatter.CellFormatter', 'pyjamas.ui.CellFormatter', 'pyjamas.ui.RowFormatter.RowFormatter', 'pyjamas.ui.RowFormatter', 'pyjamas.ui.HTML.HTML', 'pyjamas.ui.HTML', 'pyjamas.ui.CheckBox.CheckBox', 'pyjamas.ui.CheckBox', 'pyjamas.ui.AbsolutePanel.AbsolutePanel', 'pyjamas.ui.AbsolutePanel', 'pyjamas.Window', 'pyjamas.logging', 'learning.State', 'learning', 'learning.ab', 'learning.is_win', 'learning.is_full', 'learning.turn', 'learning.is_over', 'learning.normalize', 'learning.find_last_move']
 */
