@@ -143,7 +143,7 @@ def get_active(state):
   active_boards = []
   for line_boards in state.boards:
     for board in line_boards:
-      if (not is_win(board)) and (not is_full(board)):
+      if (not is_full(board)):
         # copy because i think i might be modifying memory:
         active_boards += [board]
   return active_boards
@@ -376,7 +376,7 @@ def min_util(utils):
 
 def max_search(state, depth, depth_limit, a, b, constants):
   '''called by ab
-  The minimax alpha-beta prunning algorithm as described by Norvig p. 170
+  The minmax alpha-beta prunning algorithm as described by Norvig p. 170
   '''
 
   value = Util(-9001.0, State())
@@ -418,8 +418,8 @@ def max_search(state, depth, depth_limit, a, b, constants):
       nextS = gen.next()
     return value
 
-def ab(state, constants, depth_limit=6):
-  '''The minimax alpha-beta prunning algorithm as described by Norvig p. 170.
+def ab(state, constants, depth_limit=3):
+  '''The minmax alpha-beta prunning algorithm as described by Norvig p. 170.
   ab is essentially a wrapper around max_search.
   '''
   alpha = Util(-9005.0, State())
@@ -734,10 +734,6 @@ def normalize(TD_CONSTS):
 
 def td_learning(terminal_state, TD_CONSTS, prev_state):
   '''This function modifies TD_CONSTS according to the temporal difference algorithm.
-  prev_state: the current state that the minimax search has just found a next move for.
-  terminal_state: the state that the minimax search predicts will occur if both players play ideally.  This state is not the state that the ai choses as its next move, but rather the state that the minimax search predicts will occur in the future if both players play ideally.
-
-  Note: the number of moves between prev_state and terminal_state is equal to the number of ply searched, e.g. the depth_limit parameter passed to the minimax search function, ab.
   '''
   change_total_utility = utility(terminal_state, TD_CONSTS) - utility(prev_state, TD_CONSTS)
   sub1 = sub_utility(terminal_state, TD_CONSTS)

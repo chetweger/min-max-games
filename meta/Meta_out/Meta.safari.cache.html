@@ -3221,6 +3221,8 @@ $pyjs['loaded_modules']['Meta'] = function (__mod_name__) {
 	$m['CheckBox'] = $p['___import___']('pyjamas.ui.CheckBox.CheckBox', null, null, false);
 	$m['AbsolutePanel'] = $p['___import___']('pyjamas.ui.AbsolutePanel.AbsolutePanel', null, null, false);
 	$m['Window'] = $p['___import___']('pyjamas.Window', null, null, false);
+	$m['StyleSheetCssFile'] = $p['___import___']('pyjamas.ui.CSS.StyleSheetCssFile', null, null, false);
+	$m['StyleSheetCssText'] = $p['___import___']('pyjamas.ui.CSS.StyleSheetCssText', null, null, false);
 	$m['logging'] = $p['___import___']('pyjamas.logging', null, null, false);
 	$m['log'] = $m['logging']['getConsoleLogger']();
 	$m['State'] = $p['___import___']('learning.State', null, null, false);
@@ -3241,7 +3243,8 @@ $pyjs['loaded_modules']['Meta'] = function (__mod_name__) {
 			} else {
 				var self = arguments[0];
 			}
-			var html,$add2,$add3,$add1,optional_args,$add4;
+			var $add2,$add3,$add1,optional_args,$add4,explanation;
+			self['state'] = $m['State']();
 			self['game_over'] = false;
 			self['TD_CONSTS'] = $p['dict']([['c3', 0.767944], ['c2', 1.049451], ['c1', 3.074038], ['c6', 0.220823], ['c5', 0.281883], ['c4', 0.605861]]);
 			optional_args = $p['dict']([['TD_CONSTS', $p['getattr'](self, 'TD_CONSTS')], ['MAX', '1'], ['MIN', 2]]);
@@ -3250,17 +3253,22 @@ $pyjs['loaded_modules']['Meta'] = function (__mod_name__) {
 			self['human_first'] = true;
 			self['ai_first'] = $m['Button']('AI first.', self);
 			self['add']($p['getattr'](self, 'ai_first'));
-			self['increase_depth'] = $m['Button']('Increase ply search depth.', self);
-			self['add']($p['getattr'](self, 'increase_depth'));
-			self['decrease_depth'] = $m['Button']('Decrease ply search depth.', self);
-			self['add']($p['getattr'](self, 'decrease_depth'));
+			self['increase_depth'] = $m['Button']('Increase search depth.', self);
+			self['decrease_depth'] = $m['Button']('Decrease search depth.', self);
 			self['depth_label'] = $m['Label']($p['__op_add']($add3=$p['__op_add']($add1='Current depth is ',$add2=$p['str']($p['getattr'](self, 'depthLimit'))),$add4='.'));
-			self['add']($p['getattr'](self, 'depth_label'));
+			self['depth_grid'] = $m['Grid']();
+			self['depth_grid']['resize'](1, 3);
+			self['depth_grid']['setBorderWidth'](2);
+			self['depth_grid']['setCellPadding'](9);
+			self['depth_grid']['setCellSpacing'](1);
+			self['add']($p['getattr'](self, 'depth_grid'));
+			self['depth_grid']['setWidget'](0, 0, $p['getattr'](self, 'decrease_depth'));
+			self['depth_grid']['setWidget'](0, 1, $p['getattr'](self, 'depth_label'));
+			self['depth_grid']['setWidget'](0, 2, $p['getattr'](self, 'increase_depth'));
+			self['new_game'] = $m['Button']('New game', self);
+			self['add']($p['getattr'](self, 'new_game'));
 			self['score_label'] = $m['Label']($p['sprintf']('Human: %d | AI: %d', $p['tuple']([0, 0])));
 			self['add']($p['getattr'](self, 'score_label'));
-			html = '<a href="file:///home/chet/projects/pyjs/meta/output/Meta.html">Start a new game.</a>';
-			self['new_game'] = $m['HTML'](html);
-			self['add']($p['getattr'](self, 'new_game'));
 			self['g'] = $m['Grid']();
 			self['g']['resize'](3, 3);
 			self['g']['setBorderWidth'](2);
@@ -3275,10 +3283,12 @@ $pyjs['loaded_modules']['Meta'] = function (__mod_name__) {
 			self['adj_grid']['setCellSpacing'](1);
 			self['init_constants_adj_grid']();
 			self['add']($p['getattr'](self, 'adj_grid'));
-			self['state'] = $m['State']();
 			self['state_to_grid']();
 			self['max_player'] = '-1';
 			self['min_player'] = '-1';
+			explanation = '\n<div class = "container">\n\n<p>\n<h3>Rules of the Game</h3>\nMeta-tic-tac-toe is played on a board consisting of 9 different tic-tac-toe boards, each of which can be won independently.  Boards are won in an identical fashion to tic-tac-toe, and like tic-tac-toe, turns alternate between player one <em>(1\'s)</em> and player two <em>(2\'s)</em>.  Once a board has been won or is full of pieces, neither player can play into it.  The nine boards are arranged in a three by three grid pattern with the coordinate of the previous move determining which board the next player can play into. (Example: a place into the <em>center</em> position of any of the nine tic-tac-toe boards means that the next player must play into the <em>central</em> tic-tac-toe board.)  The first player to move must play into the center board.  If a player is supposed to play into a board which has already been won or is completely full of pieces, he/she instead chooses which of the remaining boards to play into and plays in an empty position in it.  Play is stopped when all individual boards have been won or are completely full of pieces.  At this point, the individual with the most points wins.\n</p>\n\n<p>\n<h3>Turning Python into JavaScript with pyjs/pyjamas</h3>\nThe AI for this game was programmed in python and originally used the python command line interface to allow a human to select moves and play the game.  When I decided to turn the AI into a web app, I had to choose whether the AI would run on the client or the server.  I quickly decided that this computationally intensive task should be put client side which necessitated somehow transforming my python script into javascript.  I realized that I\ncould translate my python code into javascript manually, but a superior solution would be finding an adequate python to javascript compiler/translator.  Pyjs/pyjamas seemed adequate for this job, and it also provides a convenient library for creating a user interface.  Indeed, pyjs/pyjamas has been able to do everything I needed it to do, but if I had to start over again, I would probably not use pyjs/pyjamas.  Due to cryptic or non existent error messages, debugging pyjs/pyjamas is an\narduous process.  Indeed, the most difficult step was translating python into javascript which required a substantial change in my existing implementation to get around a <a href="https://github.com/pyjs/pyjs/issues/817">bug</a>.  Indeed While python CLI AI can perform a minimax search to a depth of 6 ply, the pyjs/pyjamas AI in the same time can only search to a depth of 3.  As a result, the AI for this web app has an inferior skill relative to the command line interface AI.\n</p>\n\n<p>\n<h3>How the AI Works</h3>\nThe AI uses the <a href="http://en.wikipedia.org/wiki/Minimax">minimax</a> search algorithm to find its next move.  Basically the AI looks at all the possible moves that the player MAX can make (player MAX because the current player is trying to maximize the utility of its move), and selects the move with the highest predicted utility.  How does the player MAX calculate the predicted utility of a move or state?  Player MAX makes a recursive call to the minimax algorithm, except,\nthis time the next player will be player MIN who is trying to minimize the utility of the positions.  Player MIN, like player MAX looks at all the possible moves, but choses the move with the lowest predicted utility.  How does player MIN calculate the predicted utility of a move?  Well you can already guess: making a recursive call to the minimax algorithm.  However, at some point these recursive calls must stop, so an additional parameter is passed into the minimax algorithm that\nkeeps track of depth.  When the maximum depth has been reached, the minimax algorithm rather than making a recursive call makes a call to a utility function that assigns a rough estimate of the value of the state.\n</p>\n\n<p>\n<h3>The Utility Function</h3>\nThe utility function looks at a given state and using some heuristics assigns an approximate value to the state.  Oftentimes a utility function is composed of a number of basis functions.  The value of of each basis function is then multiplied by some constant like so:\n<Pre>\ndef utility(state):\n  v1 = basis_1(state) * c1\n  v2 = basis_2(state) * c2\n  .\n  .\n  .\n\n  vn = basis_n(state) * cn\n  return v1 + v2 + ...  + vn\n</Pre>\nFor a more familiar game like chess, one can imagine these basis functions being based on a number of things including the relative number of pieces that each player has.  For instance, if relative number of pawns basis function is multiplied by a constant equal to 1, then the relative number of rooks basis function should be multiplied by a constant equal to 5 according to <a href="http://en.wikipedia.org/wiki/Chess_strategy#Basic_concepts_of_board_evaluation">chess strategy</a>.  In\nthe case of meta tic-tac-toe, my utility function is based on six different base functions:\n<li>\nf1_score - the relative "score" of each player.  This is calculated by subtracting the score of player MIN from the score of player MAX.\n</li>\n<li>\nf2_center - the relative number of center pieces.  This is calculated by subtracting the number of center pieces that MIN has from the number of center pieces that MAX has.\n</li>\n<li>\nf3_corner - the relative number of corner pieces (e.g. top right).\n</li>\n<li>\nf4_side - the relative number of corner pieces (e.g. top middle).\n</li>\n<li>\nf5_blocking - the relative number of blocking positions.  For example any time there are three pieces in a row/column/diagonal that are not all of the same type, that is considered a blocking position.\n</li>\n<li>\nf6_potential - the relative number of potential positions.  Any position that could lead to a three in a row, at the next opportunity is considered a potential position.\n</li>\nSimilar to the chess example, these basis functions should not be weighted equally.  It is easy to understand, for instance, that the weight multiplied by f1_score function should be much larger than the constant multiplied by f4_side.  However, without a lengthy analysis, the precise weighting is difficult to determine.  To determine these constants analytically, I used temporal difference learning.\n</p>\n\n<p>\n<h3>Making the AI Learn Constants Using Temporal Difference Learning</h3>\n<a href="http://en.wikipedia.org/wiki/Temporal_difference_learning">Temporal difference learning</a> works by comparing two evaluations of the utility of a state: one evaluation that is not very ideal and the other evaluation that is somehow closer to the true value.  Then the constants are updated so that if the less ideal evaluation were computed again, it would return a value closer to what the more idea evaluation had returned.  In my case, one evaluation is simply the utility function applied to the current state, and the other evaluation that is somehow\nmore "ideal" is what the minimax search predicts\nwill occur -- in other words, it is the utility function of the state that the minimax search predicts will be played.  (In a sense, temporal difference learning is a little bit like supervised learning except rather than having labeled/training instances, we have these more "ideal" predictions based on using the minimax search.)  Temporal difference learning can be expressed in a few lines of python code:\n<Pre>\ndef td_learning(terminal_state, TD_CONSTS, prev_state):\n  \'\'\'This function modifies TD_CONSTS according to the temporal difference algorithm.\n  TD_CONSTS: the constants multiplied by the basis functions to compute the utility function.\n  prev_state: the current state that the minimax search has just found a next move for.\n  terminal_state: the state that the minimax search predicts will occur\n  if both players play ideally.\n  This state is not the state that the AI choses as its next move, but rather the state that the minimax search predicts will\n  occur in the future if both players play ideally.\n\n  Note: the number of moves between prev_state and terminal_state is equal to the number of ply searched,\n  e.g. the depth_limit parameter passed to the minimax search function, ab.\n  \'\'\'\n  change_total_utility = utility(terminal_state, TD_CONSTS) - utility(prev_state, TD_CONSTS)\n  sub1 = sub_utility(terminal_state, TD_CONSTS)\n  sub2 = sub_utility(prev_state, TD_CONSTS)\n  change_sub_utility = [ (sub1[i] - sub2[i]) for i in range(len(sub1)) ]\n  for i in range(len(TD_CONSTS)):\n    TD_CONSTS[\'c\' + str(i+1)] += ALPHA * change_total_utility * (change_sub_utility[i]) * (-1)\n\n  # normalize\n  TD_CONSTS = normalize(TD_CONSTS)\n  return TD_CONSTS\n</Pre>\nThe training regime for temporal difference learning proceeds by playing a game where the AI makes moves for both sides.  It takes about twenty to thirty games for the training to converge to relatively stable values.\n</p>\n</div>\n    ';
+			explanation = $m['HTML'](explanation);
+			self['add'](explanation);
 			return null;
 		}
 	, 1, [null,null,['self']]);
@@ -3641,10 +3651,20 @@ $pyjs['loaded_modules']['Meta'] = function (__mod_name__) {
 		return $p['_create_class']('GridWidget', $p['tuple']($bases), $data);
 	})();
 	$m['AppInit'] = function() {
-		var g;
-		$m['pyjd']['setup']('./GridTest.html');
+		var $pyjs_try_err,g;
+		$p['printFunc'](['App initialized.', (typeof g == "undefined"?$m['g']:g)], 1);
+		$m['r']['remove']((typeof g == "undefined"?$m['g']:g));
+		try {
+			$p['_del'](g);
+		} catch($pyjs_try_err) {
+			var $pyjs_try_err_name = (typeof $pyjs_try_err['__name__'] == 'undefined' ? $pyjs_try_err['name'] : $pyjs_try_err['__name__'] );
+			$pyjs['__last_exception__'] = {'error': $pyjs_try_err, 'module': $m};
+			if (true) {
+				$p['printFunc'](['whatever'], 1);
+			}
+		}
 		g = $m['GridWidget']();
-		$m['RootPanel']()['add'](g);
+		$m['r']['add'](g);
 		$m['pyjd']['run']();
 		return null;
 	};
@@ -3655,7 +3675,8 @@ $pyjs['loaded_modules']['Meta'] = function (__mod_name__) {
 	if ($p['bool']($p['op_eq']((typeof __name__ == "undefined"?$m['__name__']:__name__), '__main__'))) {
 		$m['pyjd']['setup']('./GridTest.html');
 		$m['g'] = $m['GridWidget']();
-		$m['RootPanel']()['add']($m['g']);
+		$m['r'] = $m['RootPanel']();
+		$m['r']['add']($m['g']);
 		$m['pyjd']['run']();
 	}
 	return this;
@@ -3666,7 +3687,7 @@ $pyjs['loaded_modules']['Meta'] = function (__mod_name__) {
 
 
 /*
-PYJS_DEPS: ['pyjd', 'pyjamas.ui.Button.Button', 'pyjamas', 'pyjamas.ui', 'pyjamas.ui.Button', 'pyjamas.ui.RootPanel.RootPanel', 'pyjamas.ui.RootPanel', 'pyjamas.ui.Label.Label', 'pyjamas.ui.Label', 'pyjamas.ui.Grid.Grid', 'pyjamas.ui.Grid', 'pyjamas.ui.CellFormatter.CellFormatter', 'pyjamas.ui.CellFormatter', 'pyjamas.ui.RowFormatter.RowFormatter', 'pyjamas.ui.RowFormatter', 'pyjamas.ui.HTML.HTML', 'pyjamas.ui.HTML', 'pyjamas.ui.CheckBox.CheckBox', 'pyjamas.ui.CheckBox', 'pyjamas.ui.AbsolutePanel.AbsolutePanel', 'pyjamas.ui.AbsolutePanel', 'pyjamas.Window', 'pyjamas.logging', 'learning.State', 'learning', 'learning.ab', 'learning.is_win', 'learning.is_full', 'learning.turn', 'learning.is_over', 'learning.normalize']
+PYJS_DEPS: ['pyjd', 'pyjamas.ui.Button.Button', 'pyjamas', 'pyjamas.ui', 'pyjamas.ui.Button', 'pyjamas.ui.RootPanel.RootPanel', 'pyjamas.ui.RootPanel', 'pyjamas.ui.Label.Label', 'pyjamas.ui.Label', 'pyjamas.ui.Grid.Grid', 'pyjamas.ui.Grid', 'pyjamas.ui.CellFormatter.CellFormatter', 'pyjamas.ui.CellFormatter', 'pyjamas.ui.RowFormatter.RowFormatter', 'pyjamas.ui.RowFormatter', 'pyjamas.ui.HTML.HTML', 'pyjamas.ui.HTML', 'pyjamas.ui.CheckBox.CheckBox', 'pyjamas.ui.CheckBox', 'pyjamas.ui.AbsolutePanel.AbsolutePanel', 'pyjamas.ui.AbsolutePanel', 'pyjamas.Window', 'pyjamas.ui.CSS.StyleSheetCssFile', 'pyjamas.ui.CSS', 'pyjamas.ui.CSS.StyleSheetCssText', 'pyjamas.logging', 'learning.State', 'learning', 'learning.ab', 'learning.is_win', 'learning.is_full', 'learning.turn', 'learning.is_over', 'learning.normalize']
 */
 
 --></script>
@@ -26450,6 +26471,130 @@ PYJS_DEPS: ['pyjamas.DOM', 'pyjamas', 'pyjamas.ui.Event', 'pyjamas.ui']
 
 --></script>
 <script type="text/javascript"><!--
+/* start module: pyjamas.ui.CSS */
+$pyjs['loaded_modules']['pyjamas.ui.CSS'] = function (__mod_name__) {
+	if($pyjs['loaded_modules']['pyjamas.ui.CSS']['__was_initialized__']) return $pyjs['loaded_modules']['pyjamas.ui.CSS'];
+	if(typeof $pyjs['loaded_modules']['pyjamas.ui'] == 'undefined' || !$pyjs['loaded_modules']['pyjamas.ui']['__was_initialized__']) $p['___import___']('pyjamas.ui', null);
+	var $m = $pyjs['loaded_modules']['pyjamas.ui.CSS'];
+	$m['__repr__'] = function() { return '<module: pyjamas.ui.CSS>'; };
+	$m['__was_initialized__'] = true;
+	if ((__mod_name__ === null) || (typeof __mod_name__ == 'undefined')) __mod_name__ = 'pyjamas.ui.CSS';
+	$m['__name__'] = __mod_name__;
+	$pyjs['loaded_modules']['pyjamas.ui']['CSS'] = $pyjs['loaded_modules']['pyjamas.ui.CSS'];
+
+
+	$m['DOM'] = $p['___import___']('pyjamas.DOM', 'pyjamas.ui', null, false);
+	$m['StyleSheetCssFile'] = (function(){
+		var $cls_definition = new Object();
+		var $method;
+		$cls_definition['__module__'] = 'pyjamas.ui.CSS';
+		$method = $pyjs__bind_method2('__init__', function(cssFile, _doc) {
+			if (this['__is_instance__'] === true) {
+				var self = this;
+			} else {
+				var self = arguments[0];
+				cssFile = arguments[1];
+				_doc = arguments[2];
+			}
+			if (typeof cssFile == 'undefined') cssFile=arguments['callee']['__args__'][3][1];
+			if (typeof _doc == 'undefined') _doc=arguments['callee']['__args__'][4][1];
+
+			self['_e'] = $m['DOM']['createElement']('link');
+			self['_e']['setAttribute']('rel', 'stylesheet');
+			self['_e']['setAttribute']('type', 'text/css');
+			self['_e']['setAttribute']('href', cssFile);
+			if ($p['bool']((_doc === null))) {
+				_doc = $doc;
+			}
+			_doc['getElementsByTagName']('head')['item'](0)['appendChild']($p['getattr'](self, '_e'));
+			return null;
+		}
+	, 1, [null,null,['self'],['cssFile', ''],['_doc', null]]);
+		$cls_definition['__init__'] = $method;
+		$method = $pyjs__bind_method2('remove', function() {
+			if (this['__is_instance__'] === true) {
+				var self = this;
+			} else {
+				var self = arguments[0];
+			}
+			var parent;
+			parent = $m['DOM']['getParent']($p['getattr'](self, '_e'));
+			$m['DOM']['removeChild'](parent, $p['getattr'](self, '_e'));
+			return null;
+		}
+	, 1, [null,null,['self']]);
+		$cls_definition['remove'] = $method;
+		var $bases = new Array(pyjslib['object']);
+		var $data = $p['dict']();
+		for (var $item in $cls_definition) { $data['__setitem__']($item, $cls_definition[$item]); }
+		return $p['_create_class']('StyleSheetCssFile', $p['tuple']($bases), $data);
+	})();
+	$m['setStyleElementText'] = function(el, text) {
+
+		$m['DOM']['appendChild'](el, $doc['createTextNode'](text));
+		return null;
+	};
+	$m['setStyleElementText']['__name__'] = 'setStyleElementText';
+
+	$m['setStyleElementText']['__bind_type__'] = 0;
+	$m['setStyleElementText']['__args__'] = [null,null,['el'],['text']];
+	$m['StyleSheetCssText'] = (function(){
+		var $cls_definition = new Object();
+		var $method;
+		$cls_definition['__module__'] = 'pyjamas.ui.CSS';
+		$method = $pyjs__bind_method2('__init__', function(text, _doc) {
+			if (this['__is_instance__'] === true) {
+				var self = this;
+			} else {
+				var self = arguments[0];
+				text = arguments[1];
+				_doc = arguments[2];
+			}
+			if (typeof text == 'undefined') text=arguments['callee']['__args__'][3][1];
+			if (typeof _doc == 'undefined') _doc=arguments['callee']['__args__'][4][1];
+
+			self['_e'] = $m['DOM']['createElement']('style');
+			self['_e']['setAttribute']('type', 'text/css');
+			$m['setStyleElementText']($p['getattr'](self, '_e'), text);
+			if ($p['bool']((_doc === null))) {
+				_doc = $doc;
+			}
+			_doc['getElementsByTagName']('head')['item'](0)['appendChild']($p['getattr'](self, '_e'));
+			return null;
+		}
+	, 1, [null,null,['self'],['text', ''],['_doc', null]]);
+		$cls_definition['__init__'] = $method;
+		$method = $pyjs__bind_method2('remove', function() {
+			if (this['__is_instance__'] === true) {
+				var self = this;
+			} else {
+				var self = arguments[0];
+			}
+			var parent;
+			parent = $m['DOM']['getParent']($p['getattr'](self, '_e'));
+			$m['DOM']['removeChild'](parent, $p['getattr'](self, '_e'));
+			return null;
+		}
+	, 1, [null,null,['self']]);
+		$cls_definition['remove'] = $method;
+		var $bases = new Array(pyjslib['object']);
+		var $data = $p['dict']();
+		for (var $item in $cls_definition) { $data['__setitem__']($item, $cls_definition[$item]); }
+		return $p['_create_class']('StyleSheetCssText', $p['tuple']($bases), $data);
+	})();
+	return this;
+}; /* end pyjamas.ui.CSS */
+
+
+/* end module: pyjamas.ui.CSS */
+
+
+/*
+PYJS_DEPS: ['pyjamas.DOM', 'pyjamas']
+*/
+
+--></script>
+<script type="text/javascript"><!--
 /* start module: pyjspath */
 $pyjs['loaded_modules']['pyjspath'] = function (__mod_name__) {
 	if($pyjs['loaded_modules']['pyjspath']['__was_initialized__']) return $pyjs['loaded_modules']['pyjspath'];
@@ -33374,7 +33519,7 @@ function prepare_app() {
         };
         wait();
     }
-    wait_for_loading_modules(app_imported, ['pyjamas.ui','pyjamas.ui.FocusWidget','pyjamas.ui.InnerText','pyjamas.logging.handlers','pyjamas.ui.Widget','pyjamas.ui.ClickListener','pyjamas.ui.AbsolutePanel','pyjamas.Location','sys','pyjspath','learning','pyjamas.ui.ChangeListener','pyjamas.ui.Button','pyjamas','pyjamas.ui.RowFormatter','pyjamas.ui.CheckBox','pyjamas.ui.Focus','pyjamas.ui.Label','re','pyjamas.ui.FocusListener','pyjamas.ui.MouseListener','pyjamas.ui.KeyboardListener','pyjamas.ui.Grid','pyjamas.ui.Event','cgi','genericpath','stat','pyjamas.ui.InputListener','pyjamas.ui.DropHandler','string','pyjamas.Window','dynamic','pyjamas.ui.Panel','pyjamas.Factory','pyjd','codecs','pyjamas.EventController','os.path','pyjamas.ui.InnerHTML','pyjamas.ui.ComplexPanel','pyjslib','pyjamas.ui.ButtonBase','logging','traceback','pyjamas.ui.RootPanel','pyjamas.ui.UIObject','pyjamas.DOM','Meta','math','pyjamas.ui.HTMLTable','time','pyjamas.ui.HTML','pyjamas.ui.DragHandler','os','pyjamas.ui.CellFormatter','pyjamas.logging']);
+    wait_for_loading_modules(app_imported, ['pyjamas.ui','pyjamas.ui.FocusWidget','pyjamas.ui.InnerText','pyjamas.logging.handlers','pyjamas.ui.Widget','pyjamas.ui.ClickListener','pyjamas.ui.AbsolutePanel','pyjamas.Location','sys','pyjspath','learning','pyjamas.ui.ChangeListener','pyjamas.ui.Button','pyjamas','pyjamas.ui.RowFormatter','pyjamas.ui.CheckBox','pyjamas.ui.Focus','pyjamas.ui.Label','re','pyjamas.ui.FocusListener','pyjamas.ui.MouseListener','pyjamas.ui.KeyboardListener','pyjamas.ui.Grid','pyjamas.ui.Event','cgi','genericpath','stat','pyjamas.ui.InputListener','pyjamas.ui.DropHandler','string','pyjamas.Window','pyjamas.ui.CSS','dynamic','pyjamas.ui.Panel','pyjamas.Factory','pyjd','codecs','pyjamas.EventController','os.path','pyjamas.ui.InnerHTML','pyjamas.ui.ComplexPanel','pyjslib','pyjamas.ui.ButtonBase','logging','traceback','pyjamas.ui.RootPanel','pyjamas.ui.UIObject','pyjamas.DOM','Meta','math','pyjamas.ui.HTMLTable','time','pyjamas.ui.HTML','pyjamas.ui.DragHandler','os','pyjamas.ui.CellFormatter','pyjamas.logging']);
 }
 
 function pygwtOnLoad(onLoadError, name) {

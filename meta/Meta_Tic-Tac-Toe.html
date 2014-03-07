@@ -1,0 +1,59 @@
+<html> <head>
+<title>Meta Tic-Tac-Toe</title>
+<link rel="stylesheet" href="/media/style_resume.css">
+</head>
+<body>
+
+<div class = "container">
+Chet Weger <br>
+Professor Keller  <br>
+Artificial Intelligence <br>
+
+
+<h3 align="center"> Using Adversarial Search and TD Learning to Play Meta-tic-tac-toe </h3>
+
+<p>
+<h3> Abstract </h3>
+I have successfully <a href="/get_meta/">implemented</a> an interactive AI for the Meta-tic-tac-toe game.  The AI I built is based on alpha-beta min-max search as well as a sophisticated utility function with six basis or sub-utility functions.  In order to build an AI successfully, it was critical to weight these basis functions properly. I planned on using temporal difference learning to find proper wieghtings.  However, I did not succeed in getting temporal difference learning to learn function weights and instead had to modify basis function weights manually through trial and error.
+</p>
+<p>
+<h3> Description of Game </h3>
+Meta-tic-tac-toe is played on a board consisting of 9 different tic-tac-toe boards, each of which can be won independently.  Boards are won in an identical fashion to tic-tac-toe, and like tic-tac-toe, turns alternate between player one <em>(1's)</em> and player two <em>(2's)</em>.  Once a board has been won or is full of pieces, neither player can play into it.  The nine boards are arranged in a three by three grid pattern with the coordinate of the previous move determining which board the next player can play into. (Example: a place into the <em>center</em> position of any of the nine tic-tac-toe boards means that the next player must play into the <em>central</em> tic-tac-toe board.)  The first player to move must play into the center board.  If a player is supposed to play into a board which has already been won or is completely full of pieces, he/she instead chooses which of the remaining boards to play into and plays in an empty position in it.  Play is stopped when all individual boards have been won or are completely full of pieces.  At this point, the individual with the most points wins.
+</p>
+<p>
+<h3> Strategies in Meta-tic-tac-toe and Basis Functions </h3>
+My AI implementation for Meta-tic-tac-toe draws heavily on common sense strategies that most human players would quickly learn to use after some practice playing the game.  Obviously, a human would want to have a higher score than the opponent and the first basis function measures just that, the difference in score between the current player and the opponent.  Another strategy is to try to place pieces in the center or the corner in preference to the sides.  This strategy is reflected in my second, third, and fourth basis functions which measure the relative number of <em>active</em> pieces in the center, corner, and sides respectively.  Lastly, having two pieces in a row or blocking two pieces in a row make up the fundamental of tic-tac-toe tactics.  My fifth and sixth utility functions measure the relative number (between players) of these positions.
+</p>
+<p>
+<h3> Discussion of Temporal Difference Learning </h3>
+The objective of temporal difference learning is to learn a better prediction (or in my case utility) function by analyzing the difference between the predicted value of successor states.  A fundamental assumption of temporal difference learning is that predictions based on states that exist farther into the future are more accurate about the overall utility of a state.  Therefore, weights are updated so that past states would have a closer utility to that of their successor state.
+</p>
+<p>
+<h3> <a href="/get_meta/">Implementation</a> </h3>
+I built a robust and difficult to beat AI for Meta-tic-tac-toe, although I failed to implement temporal difference learning successfully.  I set effective weights for my utility function through trial and error.  My code is available here.  To run the [file], enter the python interactive terminal and execfile([file]).  A README will then be printed in the terminal.
+</p>
+<p>
+<h3> Improvements </h3>
+The most obvious improvement to my program would be to somehow get the temporal difference learning to work.  Here are what I consider to be the two most likely reasons my TD learning is not effective:
+<li>
+The true utility function is sufficiently non-linear that it precludes temporal difference learning from converging to a value.  Although temporal difference learning is guaranteed to converge for linear utility functions, the true utility functions describing Meta-tic-tac-toe are likely to be quite complicated. (As a stop-gap measure to prevent values from diverging to infinity, I currently normalize values at every iteration.  However, some basis values continue to get a much larger value than expected.)
+</li>
+<li>
+To obtain estimates of board utility positions, I simply used the utility function to evaluate the current state and its previous state as opposed to comparing utility function values returned by the min-max algorithm.  My approach, in other words, is different in this respect than the approach used by Samuel in his checkers program.    This change should be fairly easy to implement.  In fact, my min-max search already returns utility values (of best predicted state), so all I need in addition is the break down of these values into the basis functions.
+</li>
+</p>
+<p>
+	Improvements not related to min-max search include adding additional basis functions.  One notable addition would be a basis function that would take into account the notion of clustering or density of pieces on a board.  A human player of Meta-tic-tac-toe will note that it is not advantageous to cluster too many pieces on a single board even if that board is eventually won.  (And conversely, it may be advantageous to force another player into placing a bunch of pieces in a single board especially if that board is already tied!)  My current implementation does, in fact, measuring clustering indirectly by counting blocking positions and not counting the utilities of pieces on won or full boards.  However, a direct measure in addition would likely be superior.  
+	</p>
+<p>
+	Finally, translation to javascript to enable embedding in a web browser would make my program much more convenient to users.  Tools such as  pyjs (python to javascript) exist to help this translation.
+
+</p>
+<p>
+<h3> Bibliography </h3>
+Russell and Norvig: Artificial Intelligence A Modern Approach (Third Edition). Prentice Hall(2010).<br>
+Sutton: Learning to Predict by the Methods of Temporal Differences. Kluwer (1988).<br>
+</div>
+
+</body>
+</html>

@@ -52,8 +52,8 @@ class GridWidget(AbsolutePanel):
 
 
     self.depth_limit = 2
-    html = "<a href=\"file:///home/chet/projects/pyjs/meta/output/LearnMeta.html\">Reload game.  Reset everything.</a>" # TODO: make this work for the general case
-    self.new_game = HTML(html)
+
+    self.new_game = Button("New game", self)
     self.add(self.new_game)
 
     self.train_td = Button("Begin game.  Learning AI first!", self)
@@ -63,17 +63,19 @@ class GridWidget(AbsolutePanel):
     self.add(self.train_dumb)
 
     self.increase_depth = Button("Increase ply search depth.", self)
-    self.add(self.increase_depth)
-
     self.decrease_depth = Button("Decrease ply search depth.", self)
-    self.add(self.decrease_depth)
-
-
     self.depth_label = Label("Current depth is " + str(self.depth_limit) +".")
-    self.add(self.depth_label)
-
     self.score_label = Label("Learning AI: %d | Dumb AI: %d"% (0,0))
-    self.add(self.score_label)
+
+    self.depth_grid = Grid()
+    self.depth_grid.resize(1, 3)
+    self.depth_grid.setBorderWidth(2)
+    self.depth_grid.setCellPadding(9)
+    self.depth_grid.setCellSpacing(1)
+    self.add(self.depth_grid)
+    self.depth_grid.setWidget(0, 0, self.decrease_depth)
+    self.depth_grid.setWidget(0, 1, self.depth_label)
+    self.depth_grid.setWidget(0, 2, self.increase_depth)
 
     # initialize the board grid:
     self.g=Grid()
@@ -333,13 +335,20 @@ class GridWidget(AbsolutePanel):
 
 def AppInit():
   #GridWidget()
-  pyjd.setup("./GridTest.html")
+  #pyjd.setup("./GridTest.html")
+  r.remove(g)
+  try:
+    del(g)
+  except:
+    # try except statement necessary to get around pyjs limitations
+    print "wow so hacky"
   g = GridWidget()
-  RootPanel().add(g)
+  r.add(g)
   pyjd.run()
 
 if __name__ == '__main__':
   pyjd.setup("./GridTest.html")
   g = GridWidget()
-  RootPanel().add(g)
+  r = RootPanel()
+  r.add(g)
   pyjd.run()
