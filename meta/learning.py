@@ -32,9 +32,6 @@ if __name__ == '__main__':
   import subprocess
 
 DIMENSION = 3
-WAIT = 5
-userFirst = 1
-computerFirst = 2
 #MIN = "1"
 #MAX = "2"
 # standard function constants based on conjecture
@@ -59,12 +56,12 @@ def train():
     #subprocess.call(['cp', 'td2.txt', 'td.txt'])
     trainAI()
 
-def has_row(listDict):
+def has_row(list_dict):
   '''returns true we have [DIMENSION] in a row
   '''
-  cells = map((lambda x: x['cell']), listDict)
-  listAnd = reduce( (lambda x,y: x & y), cells) #should be NON zero if 1's matching exists
-  return bool(listAnd)
+  cells = map((lambda x: x['cell']), list_dict)
+  list_and = reduce( (lambda x,y: x & y), cells) #should be NON zero if 1's matching exists
+  return bool(list_and)
 
 def is_win(board):
   '''returns true if a board (DIMENSION X DIMENSION) has been won
@@ -199,7 +196,7 @@ def f4_side(state):
         sideCount[MAX] += 1
   return sideCount[MIN] - sideCount[MAX]
 
-def hasBlock(listDict):
+def has_block(listDict):
   '''returns true if 2 is blocked by 1 in a row
   '''
   cells = map((lambda x: x['cell']), listDict)
@@ -260,7 +257,7 @@ def f5_blocking(inputState):
   activeBoardsTranspose = transposeBoards(activeBoards)
   for board in activeBoards:
     for row in board:
-      getblock = hasBlock(row)
+      getblock = has_block(row)
       if getblock == MAX:
         blocking[MAX] += 1
       elif getblock == MIN:
@@ -274,7 +271,7 @@ def f5_blocking(inputState):
     board = list(board)
     board += [diagonal1, diagonal2]
     for row in board:
-      getBlock = hasBlock(row)
+      getBlock = has_block(row)
       if getBlock == MAX:
         blocking[MAX] += 1
       elif getBlock == MIN:

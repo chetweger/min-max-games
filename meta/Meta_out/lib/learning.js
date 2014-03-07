@@ -17,9 +17,6 @@ $pyjs['loaded_modules']['learning'] = function (__mod_name__) {
 		$m['subprocess'] = $p['___import___']('subprocess', null);
 	}
 	$m['DIMENSION'] = 3;
-	$m['WAIT'] = 5;
-	$m['userFirst'] = 1;
-	$m['computerFirst'] = 2;
 	$m['ALPHA'] = 0.005;
 	$m['messageComputersTurn'] = "Computer's turn.";
 	$m['messageChoosePlayer'] = 'Which player goes first? (1 = you, 2 = computer, 0 = stop) ';
@@ -40,8 +37,8 @@ $pyjs['loaded_modules']['learning'] = function (__mod_name__) {
 
 	$m['train']['__bind_type__'] = 0;
 	$m['train']['__args__'] = [null,null];
-	$m['has_row'] = function(listDict) {
-		var cells,listAnd,$lambda2,$lambda1;
+	$m['has_row'] = function(list_dict) {
+		var list_and,cells,$lambda1,$lambda2;
 		var 		$lambda1 = function(x) {
 
 			return x['__getitem__']('cell');
@@ -50,7 +47,7 @@ $pyjs['loaded_modules']['learning'] = function (__mod_name__) {
 
 		$lambda1['__bind_type__'] = 0;
 		$lambda1['__args__'] = [null,null,['x']];
-		cells = $p['map']($lambda1, listDict);
+		cells = $p['map']($lambda1, list_dict);
 		var 		$lambda2 = function(x, y) {
 
 			return (x)&(y);
@@ -59,13 +56,13 @@ $pyjs['loaded_modules']['learning'] = function (__mod_name__) {
 
 		$lambda2['__bind_type__'] = 0;
 		$lambda2['__args__'] = [null,null,['x'],['y']];
-		listAnd = $p['reduce']($lambda2, cells);
-		return $p['bool'](listAnd);
+		list_and = $p['reduce']($lambda2, cells);
+		return $p['bool'](list_and);
 	};
 	$m['has_row']['__name__'] = 'has_row';
 
 	$m['has_row']['__bind_type__'] = 0;
-	$m['has_row']['__args__'] = [null,null,['listDict']];
+	$m['has_row']['__args__'] = [null,null,['list_dict']];
 	$m['is_win'] = function(board) {
 		var $iter2_nextval,$iter1_nextval,$iter1_type,$iter2_iter,$iter1_idx,column,diagonal1,length,$iter1_iter,$iter2_idx,diagonal2,$iter1_array,$or2,board_Transpose,$iter2_type,row,$or1,$iter2_array;
 		$iter1_iter = board;
@@ -341,7 +338,7 @@ $pyjs['loaded_modules']['learning'] = function (__mod_name__) {
 
 	$m['f4_side']['__bind_type__'] = 0;
 	$m['f4_side']['__args__'] = [null,null,['state']];
-	$m['hasBlock'] = function(listDict) {
+	$m['has_block'] = function(listDict) {
 		var cells,$lambda3;
 		var 		$lambda3 = function(x) {
 
@@ -364,10 +361,10 @@ $pyjs['loaded_modules']['learning'] = function (__mod_name__) {
 		}
 		return null;
 	};
-	$m['hasBlock']['__name__'] = 'hasBlock';
+	$m['has_block']['__name__'] = 'has_block';
 
-	$m['hasBlock']['__bind_type__'] = 0;
-	$m['hasBlock']['__args__'] = [null,null,['listDict']];
+	$m['has_block']['__bind_type__'] = 0;
+	$m['has_block']['__args__'] = [null,null,['listDict']];
 	$m['hasPotential'] = function(listDict) {
 		var cells,$lambda4;
 		var 		$lambda4 = function(x) {
@@ -464,7 +461,7 @@ $pyjs['loaded_modules']['learning'] = function (__mod_name__) {
 			$iter22_nextval=$p['__iter_prepare']($iter22_iter,false);
 			while (typeof($p['__wrapped_next']($iter22_nextval)['$nextval']) != 'undefined') {
 				row = $iter22_nextval['$nextval'];
-				getblock = $m['hasBlock'](row);
+				getblock = $m['has_block'](row);
 				if ($p['bool']($p['op_eq'](getblock, MAX))) {
 					blocking['__setitem__'](MAX, $p['__op_add']($add31=blocking['__getitem__'](MAX),$add32=1));
 				}
@@ -505,7 +502,7 @@ $pyjs['loaded_modules']['learning'] = function (__mod_name__) {
 			$iter26_nextval=$p['__iter_prepare']($iter26_iter,false);
 			while (typeof($p['__wrapped_next']($iter26_nextval)['$nextval']) != 'undefined') {
 				row = $iter26_nextval['$nextval'];
-				getBlock = $m['hasBlock'](row);
+				getBlock = $m['has_block'](row);
 				if ($p['bool']($p['op_eq'](getBlock, MAX))) {
 					blocking['__setitem__'](MAX, $p['__op_add']($add37=blocking['__getitem__'](MAX),$add38=1));
 				}
@@ -1532,7 +1529,7 @@ var $generator_state = [0], $generator_exc = [null], $yield_value = null, $exc =
 		while ($p['bool'](true)) {
 			response = (typeof raw_input == "undefined"?$m['raw_input']:raw_input)($m['messageChoosePlayer']);
 			if ($p['bool']($p['op_eq'](response, '1'))) {
-				return $m['userFirst'];
+				return (typeof userFirst == "undefined"?$m['userFirst']:userFirst);
 			}
 			else if ($p['bool']($p['op_eq'](response, '2'))) {
 				return 2;
@@ -1554,10 +1551,10 @@ var $generator_state = [0], $generator_exc = [null], $yield_value = null, $exc =
 		var state;
 		$p['printFunc'](['Should only happen once'], 1);
 		state = $m['State']();
-		if ($p['bool']($p['op_eq'](first_player, $m['userFirst']))) {
+		if ($p['bool']($p['op_eq'](first_player, (typeof userFirst == "undefined"?$m['userFirst']:userFirst)))) {
 			(typeof user_turn == "undefined"?$m['user_turn']:user_turn)(state, TD_CONSTS);
 		}
-		else if ($p['bool']($p['op_eq'](first_player, $m['computerFirst']))) {
+		else if ($p['bool']($p['op_eq'](first_player, (typeof computerFirst == "undefined"?$m['computerFirst']:computerFirst)))) {
 			(typeof computer_turn == "undefined"?$m['computer_turn']:computer_turn)(state, TD_CONSTS);
 		}
 		else {
