@@ -151,7 +151,7 @@ f1_score, is clearly much more important than f4_side.  In fact, in my implement
 <h3>Learning Utility Function Constants Using Temporal Difference Learning</h3>
 <a href="http://en.wikipedia.org/wiki/Temporal_difference_learning">Temporal difference learning</a> works by comparing two evaluations of the utility of a state: one evaluation that is not very ideal and the other evaluation that is somehow closer to the true value.  Then the constants are updated so that if the less ideal evaluation were computed again, it would return a value closer to what the more idea evaluation had returned.  In my case, one evaluation is simply the utility function applied to the current state, and the other evaluation that is somehow
 more "ideal" is what the minimax search predicts
-will occur -- in other words, it is the utility function of the state that the minimax search predicts will be played.  (In a sense, temporal difference learning is vaguely analogous to supervised learning except rather than having labeled/training instances, we have these more "ideal" predictions based on using the minimax search.)  My implementation of temporal difference learning is expressed in only a few lines of python code:
+will occur -- in other words, it is the utility function evaluation of the state that the minimax search predicts will be played.  (In a sense, temporal difference learning is vaguely analogous to supervised learning except rather than having labeled/training instances, we have these more "ideal" predictions based on using the minimax search.)  My implementation of temporal difference learning is expressed in only a few lines of python code:
 <Pre style="white-space: pre-wrap;">
 def td_learning(terminal_state, TD_CONSTS, prev_state):
   '''This function modifies TD_CONSTS according to the temporal difference algorithm.
@@ -389,7 +389,7 @@ The <a href="http://chet-weger.herokuapp.com/learn_meta_ttt/">training regime</a
                   prev_y_cell == y_cell and
                   prev_y_board == y_board and
                   prev_x_board == x_board):
-                b = HTML('<p style="backgound-color:red;color:red">1</p>')
+                b = HTML('<p style="color:red">1</p>')
               else:
                 b = HTML('1')
             elif board[y_board][x_board][y_cell][x_cell]['cell'] == 2:
@@ -397,7 +397,7 @@ The <a href="http://chet-weger.herokuapp.com/learn_meta_ttt/">training regime</a
                   prev_y_cell == y_cell and
                   prev_y_board == y_board and
                   prev_x_board == x_board):
-                b = HTML('<p style="backgound-color:red;color:red">2</p>')
+                b = HTML('<p style="color:red">2</p>')
               else:
                 b = HTML('2')
             g.setWidget(y_cell, x_cell, b)
