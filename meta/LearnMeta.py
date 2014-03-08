@@ -1,24 +1,5 @@
 import pyjd # this is dummy in pyjs
 
-"""
-additional features:
-  ability to show graph of evolution of TD_CONSTS
-
-integration with website:
-  mandatory (tonight)
-    TD_CONSTANTS can be transfered to and from playAI <--> trainAI
-    link from resume page to playAI and trainAI pages
-    import resume (base changes off of template)
-    prepare email to pagewoo, rubicon, rocketfuel, and
-  optional
-    2 videos:
-      "the power of stocastic matrices"
-      "temporal difference learning with meta ttt"
-    forward email to chen
-    research promoting my project
-
-"""
-
 from pyjamas.ui.Button import Button
 from pyjamas.ui.RootPanel import RootPanel
 from pyjamas.ui.Label import Label
@@ -45,7 +26,7 @@ class GridWidget(AbsolutePanel):
     self.state = State()
     self.game_round = 0
     self.TD_CONSTS = {'c3': 1., 'c2': 1., 'c1': 1., 'c6': 1., 'c5': 1., 'c4': 1.}
-    self.CONSTS   =  {'c3': 1., 'c2': 1., 'c1': 1., 'c6': 1., 'c5': 1., 'c4': 1.}
+    self.CONSTS   =  {'c3': .5, 'c2': 1., 'c1': 3., 'c6': .5, 'c5': .5, 'c4': .5}
     self.BEST_CONSTANTS = {'c3': 0.767944, 'c2': 1.049451, 'c1': 3.074038, 'c6': 0.220823, 'c5': 0.281883, 'c4': 0.605861}
     self.ONES_CONSTS = {'c3': 1., 'c2': 1., 'c1': 1., 'c6': 1., 'c5': 1., 'c4': 1.}
     AbsolutePanel.__init__(self)
@@ -59,14 +40,15 @@ class GridWidget(AbsolutePanel):
     self.train_td = Button("Begin game.  Learning AI first!", self)
     self.add(self.train_td)
 
-    self.train_dumb = Button("Begin game.  Dumb AI first!", self)
-    self.add(self.train_dumb)
+    self.train_static = Button("Begin game.  Static AI first!", self)
+    self.add(self.train_static)
+
+    self.score_label = Label("CURRENT SCORE: Learning AI: %d | Static AI: %d"% (0,0))
+    self.add(self.score_label)
 
     self.increase_depth = Button("Increase ply search depth.", self)
     self.decrease_depth = Button("Decrease ply search depth.", self)
     self.depth_label = Label("Current depth is " + str(self.depth_limit) +".")
-    self.score_label = Label("Learning AI: %d | Dumb AI: %d"% (0,0))
-
     self.depth_grid = Grid()
     self.depth_grid.resize(1, 3)
     self.depth_grid.setBorderWidth(2)
@@ -110,15 +92,15 @@ class GridWidget(AbsolutePanel):
     '''
     self.decr_buttons = {}
     self.adj_learning_labels = {}
-    self.adj_dumb_labels = {}
+    self.adj_static_labels = {}
     self.incr_buttons = {}
     td_keys = ['c1', 'c2', 'c3', 'c4', 'c5', 'c6']
 
     learning_ai_header = Label("Constant for the learning AI.")
     self.adj_grid.setWidget(0, 0, learning_ai_header)
 
-    dumb_ai_header = Label("Constants for the dumb AI.")
-    self.adj_grid.setWidget(0, 2, dumb_ai_header)
+    static_ai_header = Label("Constants for the static AI.")
+    self.adj_grid.setWidget(0, 2, static_ai_header)
 
     for i, key in enumerate(td_keys):
       j = i + 1 # off by one because of header...
@@ -128,8 +110,8 @@ class GridWidget(AbsolutePanel):
       self.decr_buttons[key] = Button('<', self)
       self.adj_grid.setWidget(j, 1, self.decr_buttons[key])
 
-      self.adj_dumb_labels[key] = Label("Constant %d: %f" % (key[1], self.CONSTS[key]))
-      self.adj_grid.setWidget(j, 2, self.adj_dumb_labels[key])
+      self.adj_static_labels[key] = Label("Constant %d: %f" % (key[1], self.CONSTS[key]))
+      self.adj_grid.setWidget(j, 2, self.adj_static_labels[key])
 
       self.incr_buttons[key] = Button('>', self)
       self.adj_grid.setWidget(j, 3, self.incr_buttons[key])
@@ -154,6 +136,20 @@ class GridWidget(AbsolutePanel):
         self.add(g)
         self.g.setWidget(y_board, x_board, g)
 
+  def start_new_game(self):
+    #g.__init__() nope, can't use this :(
+    g.state = State()
+    g.game_over = False
+
+    self.depthLimit = 2
+    self.human_first = True
+
+    self.check_is_win()
+
+    self.max_player = '-1'
+    self.min_player = '-1'
+    self.state_to_grid()
+
   def onClick(self, sender):
     self.check_adjusts(sender)
     if sender == self.reset_constants:
@@ -169,27 +165,27 @@ class GridWidget(AbsolutePanel):
       self.depth_label.setText("Current depth is " + str(self.depth_limit) +".")
 
     if sender == self.new_game:
-      AppInit()
+      self.start_new_game()
 
     if sender == self.train_td:
       self.state = State()
       print "here!!!!"
 
-      self.dumb_ai_str = '2'
+      self.static_ai_str = '2'
       self.td_ai_str = '1'
 
       self.state.next_piece = [1, 1, 1]
       Timer(250, notify=self.td_ai_turn)
       print "Done training."
 
-    if sender == self.train_dumb:
+    if sender == self.train_static:
       self.state = State()
 
-      self.dumb_ai_str = '1'
+      self.static_ai_str = '1'
       self.td_ai_str = '2'
 
       self.state.next_piece = [1, 1, 1]
-      Timer(250, notify=self.dumb_ai_turn)
+      Timer(250, notify=self.static_ai_turn)
       print "Done training."
 
   def check_adjusts(self, sender):
@@ -216,21 +212,25 @@ class GridWidget(AbsolutePanel):
     td_keys = ['c1', 'c2', 'c3', 'c4', 'c5', 'c6']
     for key in td_keys:
       self.adj_learning_labels[key].setText("Constant %d: %f" % (key[1], self.TD_CONSTS[key]))
-      self.adj_dumb_labels[key].setText("Constant %d: %f" % (key[1], self.CONSTS[key]))
+      self.adj_static_labels[key].setText("Constant %d: %f" % (key[1], self.CONSTS[key]))
 
-  def check_is_win(self):
-    self.state_to_grid()
+  def check_is_win(self, last_position={}):
+    self.state_to_grid(prev_x_board=last_position['x_board'],
+                       prev_y_board=last_position['y_board'],
+                       prev_x_cell=last_position['x_cell'],
+                       prev_y_cell=last_position['y_cell'],)
+
     learning_ai_score = self.state.score[self.td_ai_str]
-    dumb_ai_score = self.state.score[self.dumb_ai_str]
+    static_ai_score = self.state.score[self.static_ai_str]
     print "scores are ", p1_score, p2_score
-    self.score_label.setText("Learning AI(%d): %d | Dumb AI(%d): %d" % (self.td_ai_str, learning_ai_score, self.dumb_ai_str, dumb_ai_score))
+    self.score_label.setText("CURRENT SCORE: Learning AI(%d): %d | Static AI(%d): %d" % (self.td_ai_str, learning_ai_score, self.static_ai_str, static_ai_score))
     self.state.printInfo()
     if is_over(self.state):
-      if learning_ai_score > dumb_ai_score:
-        msg = "the learning AI won with score %d vs %d." % (learning_ai_score, dumb_ai_score)
-      elif learning_ai_score < dumb_ai_score:
-        msg = "the dumb AI won with score %d vs %d." % (dumb_ai_score, learning_ai_score)
-      elif learning_ai_score == dumb_ai_score:
+      if learning_ai_score > static_ai_score:
+        msg = "the learning AI won with score %d vs %d." % (learning_ai_score, static_ai_score)
+      elif learning_ai_score < static_ai_score:
+        msg = "the static AI won with score %d vs %d." % (static_ai_score, learning_ai_score)
+      elif learning_ai_score == static_ai_score:
         msg = "the game ended in a tie."
       self.game_round += 1
       game_over_message = Label("In game round " + str(self.game_round) + ", " + msg)
@@ -239,19 +239,21 @@ class GridWidget(AbsolutePanel):
     else:
       return False
 
-  def dumb_ai_turn(self):
+  def static_ai_turn(self):
     print "\n\nNaive AIs turn which plays the piece: ", self.state.next_piece[2]
     print "next piece is ", self.state.next_piece
     print "TD_CONSTS", self.TD_CONSTS
-    (expectedUtility, nextState) = ab(self.state,
+    (expectedUtility, next_state) = ab(self.state,
                                       self.CONSTS,
                                       depth_limit=self.depth_limit)
-    self.state = nextState
-    print "Scores: Player 1: ", self.state.score['1'], " Player 2: ", self.state.score['2']
+
+    last_position = find_last_move(self.state, next_state)
+
+    self.state = next_state
     self.state.printInfo()
 
-    over = self.check_is_win()
-    print "back in dumb"
+    over = self.check_is_win(last_position)
+    print "back in static"
     if not over:
       self.pause_update = Timer(250, notify=self.td_ai_turn)
     else:
@@ -269,18 +271,19 @@ class GridWidget(AbsolutePanel):
     self.TD_CONSTS = td_learning(terminal_state, self.TD_CONSTS, self.state)
     self.sync_consts() # reflect the new TD_CONSTS in the game.
 
+    last_position = find_last_move(self.state, state)
+
     self.state = state
 
-    print "Scores: Player 1: ", self.state.score['1'], " Player 2: ", self.state.score['2']
     state.printInfo()
 
     print "TD_CONSTS after being adjusted are: ", self.TD_CONSTS
 
-    over = self.check_is_win()
+    over = self.check_is_win(last_position)
     print "back in td"
     print "Is over ", over
     if not over:
-      return Timer(250, notify=self.dumb_ai_turn)
+      return Timer(250, notify=self.static_ai_turn)
     else:
       return True
 
@@ -327,24 +330,10 @@ class GridWidget(AbsolutePanel):
             elif board[y_board][x_board][y_cell][x_cell]['cell'] == 2:
               g.setText(y_cell, x_cell, '2')
             else:
-              print 'a'
-              #assert False
+              assert False
 
         self.add(g)
         self.g.setWidget(y_board, x_board, g)
-
-def AppInit():
-  #GridWidget()
-  #pyjd.setup("./GridTest.html")
-  r.remove(g)
-  try:
-    del(g)
-  except:
-    # try except statement necessary to get around pyjs limitations
-    print "wow so hacky"
-  g = GridWidget()
-  r.add(g)
-  pyjd.run()
 
 if __name__ == '__main__':
   pyjd.setup("./GridTest.html")
