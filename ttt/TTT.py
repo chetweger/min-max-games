@@ -22,12 +22,15 @@ class GridWidget(AbsolutePanel):
   def __init__(self):
     AbsolutePanel.__init__(self)
 
-    header = """<div>Welcome to unbeatable tic-tac-toe.  <br>My <a href="https://github.com/chetweger/min-max-games/blob/master/ttt/ttt.py">implementation</a> uses the min-max search algorithm with alpha beta-pruning and a transposition table!</div>"""
+    header = """<div>Welcome to unbeatable tic-tac-toe.  <br>My <a href="https://github.com/chetweger/min-max-games/blob/master/ttt/ttt.py">implementation</a> uses the min-max search algorithm with alpha beta pruning and a transposition table!</div>"""
     header = HTML(header)
     self.add(header)
 
     self.ai_first = Button("AI first.", self)
     self.add(self.ai_first)
+
+    self.new_game = Button("New game", self)
+    self.add(self.new_game)
 
     self.g=Grid()
     self.g.resize(3, 3)
@@ -40,21 +43,67 @@ class GridWidget(AbsolutePanel):
 
     self.state = State()
 
+
+    explanation = """
+<div style="margin-top: 1em;width: 90%;margin-left: 5%;">
+
+<p>
+<h3>Turning Python into JavaScript with pyjs/pyjamas</h3>
+The AI for this game is programmed in python.  During initial development, the only interface to play the AI was through the python terminal.  When I decided to expand this project into a web app, I had to choose whether the AI would run on the client or the server.  I quickly decided that this computationally intensive task should be put client side which necessitated somehow transforming my python script into javascript.  I realized that I
+could translate my python code into javascript manually, but a superior solution would be finding an adequate python to javascript compiler/translator.  Pyjs/pyjamas seemed adequate for this job, and it also provides a convenient library for creating a user interface.  Indeed, pyjs/pyjamas has been able to do everything I needed it to do, but if I had to start over again, I would probably <em>not</em> use pyjs/pyjamas.  Due to cryptic or non existent error messages, debugging pyjs/pyjamas is an
+arduous process.  Indeed, the most difficult step was the initial translation of my python script into javascript which required a substantial change in my existing implementation to get around a <a href="https://github.com/pyjs/pyjs/issues/817">bug</a>.  In addition to cryptic error messages, the output of the pyjs/pyjamas compiler is extremely slow and innefficient.  However, due to the relative simplicity of tic tac toe and this implementation can solve tic-tac-toe from any
+position in less than 10 seconds on most computers.</p>
+
+<p>
+<a name="depth_explanation"></a>
+<h3>How the AI Works</h3>
+The AI uses the <a href="http://en.wikipedia.org/wiki/Minimax">minimax</a> search algorithm to find a next move.  Basically the AI looks at all the possible moves that the player MAX can make (player MAX because the current player is trying to maximize the utility of its move), and selects the move with the highest predicted utility.  How does the player MAX calculate the predicted utility of a move or state?  Player MAX makes a recursive call to the minimax algorithm, except,
+this time the next player will be player MIN who is trying to minimize the utility of the positions.  Player MIN, like player MAX looks at all the possible moves, but choses the move with the lowest predicted utility.  How does player MIN calculate the predicted utility of a move?  Well you can already guess: making a recursive call to the minimax algorithm.  However, at some point these recursive calls must stop.  In the case of tic-tac-toe, this occurs, when there no valid moves
+for the next player to make, either because the board has been won or completely filled up with pieces.  When one of these terminal positions is encountered, the utility function is applied to the state:
+  <li>The board is a victory for player MAX: return 1</li>
+  <li>The board is a tie: return 0</li>
+  <li>The board is a defeat for player MAX: return -1</p>
+</p>
+
+<p>
+<h3>Speeding up Minimax Search with Alpha Beta Pruning and a Transposition Table</h3>
+<img width="600" align="right" src="/home/chet/projects/pyjs/ttt/alpha_beta.png"></img>
+The minimax search algorithm's efficiency can be dramatically improved with alpha beta pruning and a transposition table. These optimizations provide an exponential decrease in running time while guarunteeing to never return a state with a utility value less than the value of what the vanilla minimax search returns.  The logic behind alpha beta pruning is illustrated in Figure 1.  In chess, a transposition is a sequence of moves that result in a position that can be reached by one or
+more
+alternate sequences of moves.  A transposition table is essentially a hash table of all positions that have been seen in a given minimax search.  A transposition table is therefore essentially a form a <a href="http://en.wikipedia.org/wiki/Memoization">memoization</a>.
+</p>
+
+<p>
+<h3>Challenges in Combining Alpha Beta Pruning and a Transposition Table</h3>
+During development, one of the most challenging bugs I faced involved naively combining alpha beta pruning and a transposition table. It turns out that naively combining the two optimizations introduces a bug causing the minimax search to return suboptimal states.  A breakthough occured when I noticed that my implementation seemed to play perfectly when it <em>only</em> had alpha beta pruning and in addition seemed to play perfectly when it <em>only</em> had a transposition table.
+The suboptimal results only seemed to occur when both optimizations were present.  I realized at this moment that somehow combining both alpha beta pruning with a transposition table must cause a bug.  The problem is that a transposition table depends on the minimax search to return <em>exact</em> values, but when alpha beta pruning is present, whenever a cutoff occurs, the value returned is either an upper bound or a lower bound on the true value. An internet search confirmed my
+suspicions and <a href="web.archive.org/web/20070822204120/www.seanet.com/~brucemo/topics/hashing.htm">provided</a> pseudo code for a fix to the problem.  You can find my code on <a href="https://github.com/chetweger/min-max-games/tree/master/ttt">github</a>.
+</p>
+    """
+    self.add(HTML(explanation))
+
+  def start_new_game(self):
+    self.state = State()
+    self.game_over = False
+    self.ai_first.setVisible(True)
+    self.state_to_grid()
+
   def onClick(self, sender):
-    if hasattr(self, 'ai_first') and sender == self.ai_first:
+    if sender == self.ai_first:
       print 'player is ', self.state.player
       self.state.max_v = 1
       self.state.min_v = 2
-      self.remove(self.ai_first)
-      del(self.ai_first) # remove all fucking traces
+      self.ai_first.setVisible(False)
       print 'button ai_first exists', hasattr(self, 'ai_first')
 
       self.state.print_me()
       next_state = ab(self.state)
       self.state = next_state
-      #self.state.player = next_player(self.state.player) #Just added this.  Hopefully fixes bug when ai first.
       self.state_to_grid(next_state)
       print '[after]player is ', self.state.player
+
+    elif sender == self.new_game:
+      self.start_new_game()
 
     else:
       print 'player is ', self.state.player

@@ -103,7 +103,7 @@ of 3.  As a result, the AI for this web app has an inferior skill relative to th
 <p>
 <a name="depth_explanation"></a>
 <h3>How the AI Works</h3>
-The AI uses the <a href="http://en.wikipedia.org/wiki/Minimax">minimax</a> search algorithm to find a next move.  Basically the AI looks at all the possible moves that the player MAX can make (player MAX because the current player is trying to maximize the utility of its move), and selects the move with the highest predicted utility.  How does the player MAX calculate the predicted utility of a move or state?  Player MAX makes a recursive call to the minimax algorithm, except,
+The AI uses the <a href="http://en.wikipedia.org/wiki/Minimax">minimax</a> search algorithm to find a next move along with alpha beta pruning which I describe in more detail <a href="http://chet-weger.herokuapp.com/play_ttt/">here</a>.  In minimax search, the AI looks at all the possible moves that the player MAX can make (player MAX because the current player is trying to maximize the utility of its move), and selects the move with the highest predicted utility.  How does the player MAX calculate the predicted utility of a move or state?  Player MAX makes a recursive call to the minimax algorithm, except,
 this time the next player will be player MIN who is trying to minimize the utility of the positions.  Player MIN, like player MAX looks at all the possible moves, but choses the move with the lowest predicted utility.  How does player MIN calculate the predicted utility of a move?  Well you can already guess: making a recursive call to the minimax algorithm.  However, at some point these recursive calls must stop, so an additional parameter is passed into the minimax algorithm that
 keeps track of depth.  When the maximum depth has been reached, the minimax algorithm, rather than making a recursive call to itself, makes a call to a utility function that assigns a rough estimate of the value of the state.
 </p>
@@ -230,8 +230,8 @@ The <a href="http://chet-weger.herokuapp.com/learn_meta_ttt/">training regime</a
 
   def start_new_game(self):
     #g.__init__() nope, can't use this :(
-    g.state = State()
-    g.game_over = False
+    self.state = State()
+    self.game_over = False
 
     self.depthLimit = 3
     self.human_first = True
