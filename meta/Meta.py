@@ -93,14 +93,6 @@ it.  Play is stopped when all individual boards have been won or are completely 
 </p>
 
 <p>
-<h3>Turning Python into JavaScript with pyjs/pyjamas</h3>
-The AI for this game is programmed in python.  During initial development, the only interface to play the AI was through the python terminal.  When I decided to expand this project into a web app, I had to choose whether the AI would run on the client or the server.  I quickly decided that this computationally intensive task should be put client side which necessitated somehow transforming my python script into javascript.  I realized that I
-could translate my python code into javascript manually, but a superior solution would be finding an adequate python to javascript compiler/translator.  Pyjs/pyjamas seemed adequate for this job, and it also provides a convenient library for creating a user interface.  Indeed, pyjs/pyjamas has been able to do everything I needed it to do, but if I had to start over again, I would probably <em>not</em> use pyjs/pyjamas.  Due to cryptic or non existent error messages, debugging pyjs/pyjamas is an
-arduous process.  Indeed, the most difficult step was the initial translation of my python script into javascript which required a substantial change in my existing implementation to get around a <a href="https://github.com/pyjs/pyjs/issues/817">bug</a>.  In addition to cryptic error messages, the output of the pyjs/pyjamas compiler is extremely slow and innefficient. While the python CLI AI can perform a minimax search to a depth of 6 ply, the pyjs/pyjamas AI in the same time can only search to a depth
-of 3.  As a result, the AI for this web app has an inferior skill relative to the command line interface AI.
-</p>
-
-<p>
 <a name="depth_explanation"></a>
 <h3>How the AI Works</h3>
 The AI uses the <a href="http://en.wikipedia.org/wiki/Minimax">minimax</a> search algorithm to find a next move along with alpha beta pruning which I describe in more detail <a href="http://chet-weger.herokuapp.com/play_ttt/">here</a>.  In minimax search, the AI looks at all the possible moves that the player MAX can make (player MAX because the current player is trying to maximize the utility of its move), and selects the move with the highest predicted utility.  How does the player MAX calculate the predicted utility of a move or state?  Player MAX makes a recursive call to the minimax algorithm, except,
@@ -179,6 +171,14 @@ def td_learning(terminal_state, TD_CONSTS, prev_state):
 The <a href="http://chet-weger.herokuapp.com/learn_meta_ttt/">training regime</a> for temporal difference learning proceeds by playing a game where the AI makes moves for both sides.  After only a few games of training, one can see dramatic improvements in the relative value of the constants.
 </p>
 </div>
+
+<p>
+<h3>Turning Python into JavaScript with pyjs/pyjamas</h3>
+The AI for this game is programmed in python.  During initial development, the only interface to play the AI was through the python terminal.  When I decided to expand this project into a web app, I had to choose whether the AI would run on the client or the server.  I quickly decided that this computationally intensive task should be put client side which necessitated somehow transforming my python script into javascript.  I realized that I
+could translate my python code into javascript manually, but a superior solution would be finding an adequate python to javascript compiler/translator.  Pyjs/pyjamas seemed adequate for this job, and it also provides a convenient library for creating a user interface.  Indeed, pyjs/pyjamas has been able to do everything I needed it to do, but if I had to start over again, I would probably <em>not</em> use pyjs/pyjamas.  Due to cryptic or non existent error messages, debugging pyjs/pyjamas is an
+arduous process.  Indeed, the most difficult step was the initial translation of my python script into javascript which required a substantial change in my existing implementation to get around a <a href="https://github.com/pyjs/pyjs/issues/817">bug</a>.  In addition to cryptic error messages, the output of the pyjs/pyjamas compiler is extremely slow and innefficient. While the python CLI AI can perform a minimax search to a depth of 6 ply, the pyjs/pyjamas AI in the same time can only search to a depth
+of 3.  As a result, the AI for this web app has an inferior skill relative to the command line interface AI.
+</p>
 
 <br>
 </div>

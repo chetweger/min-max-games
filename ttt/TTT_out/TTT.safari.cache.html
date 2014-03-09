@@ -26496,13 +26496,15 @@ $pyjs['loaded_modules']['TTT'] = function (__mod_name__) {
 			} else {
 				var self = arguments[0];
 			}
-			var header;
+			var header,explanation;
 			$m['AbsolutePanel']['__init__'](self);
-			header = '<div>Welcome to unbeatable tic-tac-toe.  <br>My <a href="https://github.com/chetweger/min-max-games/blob/master/ttt/ttt.py">implementation</a> uses the min-max search algorithm with alpha beta-pruning and a transposition table!</div>';
+			header = '<div>Welcome to unbeatable tic-tac-toe.  <br>My <a href="https://github.com/chetweger/min-max-games/blob/master/ttt/ttt.py">implementation</a> uses the min-max search algorithm with alpha beta pruning and a transposition table!</div>';
 			header = $m['HTML'](header);
 			self['add'](header);
 			self['ai_first'] = $m['Button']('AI first.', self);
 			self['add']($p['getattr'](self, 'ai_first'));
+			self['new_game'] = $m['Button']('New game', self);
+			self['add']($p['getattr'](self, 'new_game'));
 			self['g'] = $m['Grid']();
 			self['g']['resize'](3, 3);
 			self['g']['setBorderWidth'](2);
@@ -26511,10 +26513,29 @@ $pyjs['loaded_modules']['TTT'] = function (__mod_name__) {
 			self['init']();
 			self['add']($p['getattr'](self, 'g'));
 			self['state'] = (typeof State == "undefined"?$m['State']:State)();
+			self['game_resolution'] = $m['Label']('');
+			self['add']($p['getattr'](self, 'game_resolution'));
+			explanation = '\n<div style="margin-top: 1em;width: 90%;margin-left: 5%;">\n\n<p>\n<a name="depth_explanation"></a>\n<h3>How the AI Works</h3>\nThe AI uses the <a href="http://en.wikipedia.org/wiki/Minimax">minimax</a> search algorithm to find a next move.  Basically the AI looks at all the possible moves that the player MAX can make (player MAX because the current player is trying to maximize the utility of its move), and selects the move with the highest predicted utility.  How does the player MAX calculate the predicted utility of a move or state?  Player MAX makes a recursive call to the minimax algorithm, except,\nthis time the next player will be player MIN who is trying to minimize the utility of the positions.  Player MIN, like player MAX looks at all the possible moves, but choses the move with the lowest predicted utility.  How does player MIN calculate the predicted utility of a move?  Well you can already guess: making a recursive call to the minimax algorithm.  However, at some point these recursive calls must stop.  In the case of tic-tac-toe, this occurs, when there no valid moves\nfor the next player to make, either because the board has been won or completely filled up with pieces.  When one of these terminal positions is encountered, the utility function is applied to the state:\n  <li>The board is a victory for player MAX: return 1</li>\n  <li>The board is a tie: return 0</li>\n  <li>The board is a defeat for player MAX: return -1</p>\n</p>\n\n<p>\n<h3>Speeding up Minimax Search with Alpha Beta Pruning and a Transposition Table</h3>\n<img width="600" align="right" src="http://chet-weger.herokuapp.com/media/imgs/alpha_beta.png"></img>\nThe minimax search algorithm\'s efficiency can be dramatically improved with alpha beta pruning and a transposition table. These optimizations provide an exponential decrease in running time while guarunteeing to never return a state with a utility value less than the value of what the vanilla minimax search returns.  The logic behind alpha beta pruning is illustrated in Figure 1.  In chess, a transposition is a sequence of moves that result in a position that can be reached by one or\nmore\nalternate sequences of moves.  A transposition table is essentially a hash table of all positions that have been seen in a given minimax search.  A transposition table is therefore essentially a form a <a href="http://en.wikipedia.org/wiki/Memoization">memoization</a>.\n</p>\n\n<p>\n<h3>Challenges in Combining Alpha Beta Pruning and a Transposition Table</h3>\nDuring development, one of the most challenging bugs I faced involved naively combining alpha beta pruning and a transposition table. It turns out that naively combining the two optimizations introduces a bug causing the minimax search to return suboptimal states.  A breakthough occured when I noticed that my implementation seemed to play perfectly when it <em>only</em> had alpha beta pruning and in addition seemed to play perfectly when it <em>only</em> had a transposition table.\nThe suboptimal results only seemed to occur when both optimizations were present.  I realized at this moment that somehow combining both alpha beta pruning with a transposition table must cause a bug.  The problem is that a transposition table depends on the minimax search to return <em>exact</em> values, but when alpha beta pruning is present, whenever a cutoff occurs, the value returned is either an upper bound or a lower bound on the true value. An internet search confirmed my\nsuspicions and <a href="http://web.archive.org/web/20070822204120/www.seanet.com/~brucemo/topics/hashing.htm">provided</a> pseudo code for a fix to the problem.  You can find my code on <a href="https://github.com/chetweger/min-max-games/tree/master/ttt">github</a>.\n</p>\n\n<p>\n<h3>Turning Python into JavaScript with pyjs/pyjamas</h3>\nThe AI for this game is programmed in python.  During initial development, the only interface to play the AI was through the python terminal.  When I decided to expand this project into a web app, I had to choose whether the AI would run on the client or the server.  I quickly decided that this computationally intensive task should be put client side which necessitated somehow transforming my python script into javascript.  I realized that I\ncould translate my python code into javascript manually, but a superior solution would be finding an adequate python to javascript compiler/translator.  Pyjs/pyjamas seemed adequate for this job, and it also provides a convenient library for creating a user interface.  Indeed, pyjs/pyjamas has been able to do everything I needed it to do, but if I had to start over again, I would probably <em>not</em> use pyjs/pyjamas.  Due to cryptic or non existent error messages, debugging pyjs/pyjamas is an\narduous process.  Indeed, the most difficult step was the initial translation of my python script into javascript which required a substantial change in my existing implementation to get around a <a href="https://github.com/pyjs/pyjs/issues/817">bug</a>.  In addition to cryptic error messages, the output of the pyjs/pyjamas compiler is extremely slow and innefficient.  However, due to the relative simplicity of tic tac toe and this implementation can solve tic-tac-toe from any\nposition in less than 10 seconds on most computers.</p>\n</div>\n\n\n<p align="center">Written by <a href="http://chet-weger.herokuapp.com/">Chet Weger</a>.  Questions, comments, bugs?  Contact me at chetweger [at] gmail.com.</p>\n<p align="center"><a href="http://chet-weger.herokuapp.com/">Return to my home page.</a></p>\n    ';
+			self['add']($m['HTML'](explanation));
 			return null;
 		}
 	, 1, [null,null,['self']]);
 		$cls_definition['__init__'] = $method;
+		$method = $pyjs__bind_method2('start_new_game', function() {
+			if (this['__is_instance__'] === true) {
+				var self = this;
+			} else {
+				var self = arguments[0];
+			}
+
+			self['state'] = (typeof State == "undefined"?$m['State']:State)();
+			self['game_over'] = false;
+			self['ai_first']['setVisible'](true);
+			self['state_to_grid']($p['getattr'](self, 'state'));
+			return null;
+		}
+	, 1, [null,null,['self']]);
+		$cls_definition['start_new_game'] = $method;
 		$method = $pyjs__bind_method2('onClick', function(sender) {
 			if (this['__is_instance__'] === true) {
 				var self = this;
@@ -26522,13 +26543,12 @@ $pyjs['loaded_modules']['TTT'] = function (__mod_name__) {
 				var self = arguments[0];
 				sender = arguments[1];
 			}
-			var $and1,p,$and2,next_state;
-			if ($p['bool'](($p['bool']($and1=$p['hasattr'](self, 'ai_first'))?$p['op_eq'](sender, $p['getattr'](self, 'ai_first')):$and1))) {
+			var p,next_state;
+			if ($p['bool']($p['op_eq'](sender, $p['getattr'](self, 'ai_first')))) {
 				$p['printFunc'](['player is ', $p['getattr']($p['getattr'](self, 'state'), 'player')], 1);
 				$p['getattr'](self, 'state')['max_v'] = 1;
 				$p['getattr'](self, 'state')['min_v'] = 2;
-				self['remove']($p['getattr'](self, 'ai_first'));
-				$p['delattr'](self, 'ai_first');
+				self['ai_first']['setVisible'](false);
 				$p['printFunc'](['button ai_first exists', $p['hasattr'](self, 'ai_first')], 1);
 				self['state']['print_me']();
 				next_state = (typeof ab == "undefined"?$m['ab']:ab)($p['getattr'](self, 'state'));
@@ -26536,20 +26556,23 @@ $pyjs['loaded_modules']['TTT'] = function (__mod_name__) {
 				self['state_to_grid'](next_state);
 				$p['printFunc'](['[after]player is ', $p['getattr']($p['getattr'](self, 'state'), 'player')], 1);
 			}
+			else if ($p['bool']($p['op_eq'](sender, $p['getattr'](self, 'new_game')))) {
+				self['start_new_game']();
+			}
 			else {
 				$p['printFunc'](['player is ', $p['getattr']($p['getattr'](self, 'state'), 'player')], 1);
-				if ($p['bool']($p['hasattr'](self, 'ai_first'))) {
+				if ($p['bool'](self['ai_first']['isVisible']())) {
 					$p['printFunc'](['Setting state.max_v'], 1);
 					$p['getattr'](self, 'state')['max_v'] = 2;
 					$p['getattr'](self, 'state')['min_v'] = 1;
-					self['remove']($p['getattr'](self, 'ai_first'));
+					self['ai_first']['setVisible'](false);
 				}
 				p = $p['getattr'](sender, 'point');
 				self['g']['setText'](p['__getitem__']('y'), p['__getitem__']('x'), $p['str']($p['getattr']($p['getattr'](self, 'state'), 'player')));
 				self['state'] = self['grid_to_state']();
 				self['check_for_tie']();
 				if ($p['bool']((typeof is_win == "undefined"?$m['is_win']:is_win)($p['getattr'](self, 'state')))) {
-					$pyjs_kwargs_call(self, 'state_to_grid', null, null, [{'game_over':true, 'over_message':'<b>You won! This should not happen. This is a bug. Please email chetweger@gmail.com describing the conditions of the game.</b>'}, $p['getattr'](self, 'state')]);
+					$pyjs_kwargs_call(self, 'state_to_grid', null, null, [{'game_over':true, 'over_message':'You won! This should not happen. This is a bug. Please email chetweger@gmail.com describing the conditions of the game.'}, $p['getattr'](self, 'state')]);
 				}
 				$p['getattr'](self, 'state')['player'] = (typeof next_player == "undefined"?$m['next_player']:next_player)($p['getattr']($p['getattr'](self, 'state'), 'player'));
 				self['state']['print_me']();
@@ -26558,7 +26581,7 @@ $pyjs['loaded_modules']['TTT'] = function (__mod_name__) {
 				self['state_to_grid'](next_state);
 				self['check_for_tie']();
 				if ($p['bool']((typeof is_win == "undefined"?$m['is_win']:is_win)($p['getattr'](self, 'state')))) {
-					$pyjs_kwargs_call(self, 'state_to_grid', null, null, [{'game_over':true, 'over_message':'<b>You lost! Better luck next time.</b>'}, $p['getattr'](self, 'state')]);
+					$pyjs_kwargs_call(self, 'state_to_grid', null, null, [{'game_over':true, 'over_message':'You lost! Better luck next time.'}, $p['getattr'](self, 'state')]);
 				}
 			}
 			return null;
@@ -26573,7 +26596,7 @@ $pyjs['loaded_modules']['TTT'] = function (__mod_name__) {
 			}
 
 			if ($p['bool']((typeof is_over == "undefined"?$m['is_over']:is_over)($p['getattr'](self, 'state')))) {
-				$pyjs_kwargs_call(self, 'state_to_grid', null, null, [{'game_over':true, 'over_message':'<b>The game is a tie.</b>'}, $p['getattr'](self, 'state')]);
+				$pyjs_kwargs_call(self, 'state_to_grid', null, null, [{'game_over':true, 'over_message':'The game is a tie.'}, $p['getattr'](self, 'state')]);
 			}
 			return null;
 		}
@@ -26592,7 +26615,7 @@ $pyjs['loaded_modules']['TTT'] = function (__mod_name__) {
 			if (typeof over_message == 'undefined') over_message=arguments['callee']['__args__'][5][1];
 			var $iter2_iter,$iter2_nextval,$iter1_nextval,$iter1_type,$iter1_idx,$iter2_idx,$iter1_iter,b,board,x,y,$iter2_type,$iter2_array,$iter1_array;
 			if ($p['bool'](over_message)) {
-				self['add']($m['HTML'](over_message));
+				self['game_resolution']['setText'](over_message);
 			}
 			board = $p['getattr'](state, 'board');
 			$iter1_iter = $p['range'](3);

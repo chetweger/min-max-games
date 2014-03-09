@@ -43,16 +43,12 @@ class GridWidget(AbsolutePanel):
 
     self.state = State()
 
+    self.game_resolution=Label("")
+    self.add(self.game_resolution)
+
 
     explanation = """
 <div style="margin-top: 1em;width: 90%;margin-left: 5%;">
-
-<p>
-<h3>Turning Python into JavaScript with pyjs/pyjamas</h3>
-The AI for this game is programmed in python.  During initial development, the only interface to play the AI was through the python terminal.  When I decided to expand this project into a web app, I had to choose whether the AI would run on the client or the server.  I quickly decided that this computationally intensive task should be put client side which necessitated somehow transforming my python script into javascript.  I realized that I
-could translate my python code into javascript manually, but a superior solution would be finding an adequate python to javascript compiler/translator.  Pyjs/pyjamas seemed adequate for this job, and it also provides a convenient library for creating a user interface.  Indeed, pyjs/pyjamas has been able to do everything I needed it to do, but if I had to start over again, I would probably <em>not</em> use pyjs/pyjamas.  Due to cryptic or non existent error messages, debugging pyjs/pyjamas is an
-arduous process.  Indeed, the most difficult step was the initial translation of my python script into javascript which required a substantial change in my existing implementation to get around a <a href="https://github.com/pyjs/pyjs/issues/817">bug</a>.  In addition to cryptic error messages, the output of the pyjs/pyjamas compiler is extremely slow and innefficient.  However, due to the relative simplicity of tic tac toe and this implementation can solve tic-tac-toe from any
-position in less than 10 seconds on most computers.</p>
 
 <p>
 <a name="depth_explanation"></a>
@@ -67,7 +63,7 @@ for the next player to make, either because the board has been won or completely
 
 <p>
 <h3>Speeding up Minimax Search with Alpha Beta Pruning and a Transposition Table</h3>
-<img width="600" align="right" src="/home/chet/projects/pyjs/ttt/alpha_beta.png"></img>
+<img width="600" align="right" src="http://chet-weger.herokuapp.com/media/imgs/alpha_beta.png"></img>
 The minimax search algorithm's efficiency can be dramatically improved with alpha beta pruning and a transposition table. These optimizations provide an exponential decrease in running time while guarunteeing to never return a state with a utility value less than the value of what the vanilla minimax search returns.  The logic behind alpha beta pruning is illustrated in Figure 1.  In chess, a transposition is a sequence of moves that result in a position that can be reached by one or
 more
 alternate sequences of moves.  A transposition table is essentially a hash table of all positions that have been seen in a given minimax search.  A transposition table is therefore essentially a form a <a href="http://en.wikipedia.org/wiki/Memoization">memoization</a>.
@@ -77,8 +73,20 @@ alternate sequences of moves.  A transposition table is essentially a hash table
 <h3>Challenges in Combining Alpha Beta Pruning and a Transposition Table</h3>
 During development, one of the most challenging bugs I faced involved naively combining alpha beta pruning and a transposition table. It turns out that naively combining the two optimizations introduces a bug causing the minimax search to return suboptimal states.  A breakthough occured when I noticed that my implementation seemed to play perfectly when it <em>only</em> had alpha beta pruning and in addition seemed to play perfectly when it <em>only</em> had a transposition table.
 The suboptimal results only seemed to occur when both optimizations were present.  I realized at this moment that somehow combining both alpha beta pruning with a transposition table must cause a bug.  The problem is that a transposition table depends on the minimax search to return <em>exact</em> values, but when alpha beta pruning is present, whenever a cutoff occurs, the value returned is either an upper bound or a lower bound on the true value. An internet search confirmed my
-suspicions and <a href="web.archive.org/web/20070822204120/www.seanet.com/~brucemo/topics/hashing.htm">provided</a> pseudo code for a fix to the problem.  You can find my code on <a href="https://github.com/chetweger/min-max-games/tree/master/ttt">github</a>.
+suspicions and <a href="http://web.archive.org/web/20070822204120/www.seanet.com/~brucemo/topics/hashing.htm">provided</a> pseudo code for a fix to the problem.  You can find my code on <a href="https://github.com/chetweger/min-max-games/tree/master/ttt">github</a>.
 </p>
+
+<p>
+<h3>Turning Python into JavaScript with pyjs/pyjamas</h3>
+The AI for this game is programmed in python.  During initial development, the only interface to play the AI was through the python terminal.  When I decided to expand this project into a web app, I had to choose whether the AI would run on the client or the server.  I quickly decided that this computationally intensive task should be put client side which necessitated somehow transforming my python script into javascript.  I realized that I
+could translate my python code into javascript manually, but a superior solution would be finding an adequate python to javascript compiler/translator.  Pyjs/pyjamas seemed adequate for this job, and it also provides a convenient library for creating a user interface.  Indeed, pyjs/pyjamas has been able to do everything I needed it to do, but if I had to start over again, I would probably <em>not</em> use pyjs/pyjamas.  Due to cryptic or non existent error messages, debugging pyjs/pyjamas is an
+arduous process.  Indeed, the most difficult step was the initial translation of my python script into javascript which required a substantial change in my existing implementation to get around a <a href="https://github.com/pyjs/pyjs/issues/817">bug</a>.  In addition to cryptic error messages, the output of the pyjs/pyjamas compiler is extremely slow and innefficient.  However, due to the relative simplicity of tic tac toe and this implementation can solve tic-tac-toe from any
+position in less than 10 seconds on most computers.</p>
+</div>
+
+
+<p align="center">Written by <a href="http://chet-weger.herokuapp.com/">Chet Weger</a>.  Questions, comments, bugs?  Contact me at chetweger [at] gmail.com.</p>
+<p align="center"><a href="http://chet-weger.herokuapp.com/">Return to my home page.</a></p>
     """
     self.add(HTML(explanation))
 
@@ -86,7 +94,7 @@ suspicions and <a href="web.archive.org/web/20070822204120/www.seanet.com/~bruce
     self.state = State()
     self.game_over = False
     self.ai_first.setVisible(True)
-    self.state_to_grid()
+    self.state_to_grid(self.state)
 
   def onClick(self, sender):
     if sender == self.ai_first:
@@ -111,18 +119,18 @@ suspicions and <a href="web.archive.org/web/20070822204120/www.seanet.com/~bruce
       self.g.setText(0, 1, 'wassup')
       self.g.setText(p['x'], p['y'], str(self.state.min_v))
       '''
-      if hasattr(self, 'ai_first'):
+      if self.ai_first.isVisible():
         print 'Setting state.max_v'
         self.state.max_v = 2
         self.state.min_v = 1
-        self.remove(self.ai_first)
+        self.ai_first.setVisible(False)
       p = sender.point
       self.g.setText(p['y'], p['x'], str(self.state.player))
 
       self.state = self.grid_to_state()
       self.check_for_tie() # end 1
       if is_win(self.state):
-        self.state_to_grid(self.state, game_over=True, over_message='<b>You won! This should not happen. This is a bug. Please email chetweger@gmail.com describing the conditions of the game.</b>')
+        self.state_to_grid(self.state, game_over=True, over_message='You won! This should not happen. This is a bug. Please email chetweger@gmail.com describing the conditions of the game.')
 
       self.state.player = next_player(self.state.player)
 
@@ -132,16 +140,16 @@ suspicions and <a href="web.archive.org/web/20070822204120/www.seanet.com/~bruce
       self.state_to_grid(next_state)
       self.check_for_tie() # end 1
       if is_win(self.state):
-        self.state_to_grid(self.state, game_over=True, over_message='<b>You lost! Better luck next time.</b>')
+        self.state_to_grid(self.state, game_over=True, over_message='You lost! Better luck next time.')
 
   def check_for_tie(self):
     if is_over(self.state):
-      self.state_to_grid(self.state, game_over=True, over_message='<b>The game is a tie.</b>')
+      self.state_to_grid(self.state, game_over=True, over_message='The game is a tie.')
 
 
   def state_to_grid(self, state, game_over=False, over_message=''):
     if over_message:
-      self.add(HTML(over_message))
+      self.game_resolution.setText(over_message)
     board = state.board
     for y in range(3):
       for x in range(3):
