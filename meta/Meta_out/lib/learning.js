@@ -8,13 +8,15 @@ $pyjs['loaded_modules']['learning'] = function (__mod_name__) {
 	$m['__name__'] = __mod_name__;
 
 
-	$m['README'] = 'Welcome to meta_tic-tac-toe by Chet Weger\n\nThis program relies on the min-max algorithm with alpha beta\npruning as well as temporal difference learning to learn values\nfor a weighted utility function.\n\nThe weightings/constants for the utility function is stored in a\nfile called "td.txt". If you do not see such a file, you can\ntrain the AI with the command:\ntrainAI()\n\nYou can start a new game of meta_tic-tac-toe with:\nplayAI()';
+	$m['README'] = 'Welcome to meta_tic-tac-toe by Chet Weger\n\nThis program relies on the min-max algorithm with alpha beta\npruning as well as temporal difference learning to learn values\nfor a weighted utility function.\n\nTo produce a graph of the AI training, type trainAI()\n\nYou can start a new game of meta_tic-tac-toe with:\nplayAI()';
 	if ($p['bool']($p['op_eq']((typeof __name__ == "undefined"?$m['__name__']:__name__), '__main__'))) {
 		$m['copy'] = $p['___import___']('copy', null);
 		$m['os'] = $p['___import___']('os', null);
 		$m['CWD'] = $m['os']['getcwd']();
 		$m['sys'] = $p['___import___']('sys', null);
 		$m['subprocess'] = $p['___import___']('subprocess', null);
+		$m['pyplot'] = $p['___import___']('matplotlib.pyplot', null, null, false);
+		$m['array'] = $p['___import___']('numpy.array', null, null, false);
 	}
 	$m['DIMENSION'] = 3;
 	$m['ALPHA'] = 0.005;
@@ -26,17 +28,6 @@ $pyjs['loaded_modules']['learning'] = function (__mod_name__) {
 	$m['messageWelcome'] = 'Welcome to meta tic tac toe!';
 	$m['messageYouWin'] = 'User wins.';
 	$m['messageCompWin'] = 'Computer Wins';
-	$m['train'] = function() {
-
-		while ($p['bool'](true)) {
-			(typeof trainAI == "undefined"?$m['trainAI']:trainAI)();
-		}
-		return null;
-	};
-	$m['train']['__name__'] = 'train';
-
-	$m['train']['__bind_type__'] = 0;
-	$m['train']['__args__'] = [null,null];
 	$m['has_row'] = function(list_dict) {
 		var list_and,cells,$lambda1,$lambda2;
 		var 		$lambda1 = function(x) {
@@ -743,7 +734,7 @@ $pyjs['loaded_modules']['learning'] = function (__mod_name__) {
 	$m['ab']['__name__'] = 'ab';
 
 	$m['ab']['__bind_type__'] = 0;
-	$m['ab']['__args__'] = [null,null,['state'],['constants'],['depth_limit', 6]];
+	$m['ab']['__args__'] = [null,null,['state'],['constants'],['depth_limit', 3]];
 	$m['turn'] = function(integer) {
 
 		if ($p['bool']($p['op_eq'](integer, 1))) {
@@ -1527,10 +1518,49 @@ var $generator_state = [0], $generator_exc = [null], $yield_value = null, $exc =
 		for (var $item in $cls_definition) { $data['__setitem__']($item, $cls_definition[$item]); }
 		return $p['_create_class']('State', $p['tuple']($bases), $data);
 	})();
+	$m['td_learning'] = function(terminal_state, TD_CONSTS, prev_state) {
+		var $sub26,$sub25,$iter71_type,$iter71_iter,$mul44,$mul45,$mul46,$mul41,$mul42,$mul43,sub2,change_sub_utility,$add96,$iter71_nextval,$augexpr5,sub1,$add94,$add95,$augsub5,$add91,$add92,$add93,$iter71_array,i,change_total_utility,$iter71_idx;
+		change_total_utility = $p['__op_sub']($sub25=$m['utility'](terminal_state, TD_CONSTS),$sub26=$m['utility'](prev_state, TD_CONSTS));
+		sub1 = $m['sub_utility'](terminal_state, TD_CONSTS);
+		sub2 = $m['sub_utility'](prev_state, TD_CONSTS);
+		change_sub_utility = function(){
+			var $iter70_array,$iter70_idx,$sub27,$iter70_type,i,$sub28,$collcomp17,$iter70_nextval,$iter70_iter;
+	$collcomp17 = $p['list']();
+		$iter70_iter = $p['range']($p['len'](sub1));
+		$iter70_nextval=$p['__iter_prepare']($iter70_iter,false);
+		while (typeof($p['__wrapped_next']($iter70_nextval)['$nextval']) != 'undefined') {
+			i = $iter70_nextval['$nextval'];
+			$collcomp17['append']($p['__op_sub']($sub27=sub1['__getitem__'](i),$sub28=sub2['__getitem__'](i)));
+		}
+
+	return $collcomp17;}();
+		$iter71_iter = $p['range']($p['len'](TD_CONSTS));
+		$iter71_nextval=$p['__iter_prepare']($iter71_iter,false);
+		while (typeof($p['__wrapped_next']($iter71_nextval)['$nextval']) != 'undefined') {
+			i = $iter71_nextval['$nextval'];
+			var $augsub5 = $p['__op_add']($add93='c',$add94=$p['str']($p['__op_add']($add91=i,$add92=1)));
+			var $augexpr5 = TD_CONSTS;
+			$augexpr5['__setitem__']($augsub5, $p['__op_add']($add95=$augexpr5['__getitem__']($augsub5),$add96=(typeof ($mul45=(typeof ($mul43=(typeof ($mul41=$m['ALPHA'])==typeof ($mul42=change_total_utility) && typeof $mul41=='number'?
+				$mul41*$mul42:
+				$p['op_mul']($mul41,$mul42)))==typeof ($mul44=change_sub_utility['__getitem__'](i)) && typeof $mul43=='number'?
+				$mul43*$mul44:
+				$p['op_mul']($mul43,$mul44)))==typeof ($mul46=(typeof ($usub12=1)=='number'?
+				-$usub12:
+				$p['op_usub']($usub12))) && typeof $mul45=='number'?
+				$mul45*$mul46:
+				$p['op_mul']($mul45,$mul46))));
+		}
+		TD_CONSTS = (typeof normalize == "undefined"?$m['normalize']:normalize)(TD_CONSTS);
+		return TD_CONSTS;
+	};
+	$m['td_learning']['__name__'] = 'td_learning';
+
+	$m['td_learning']['__bind_type__'] = 0;
+	$m['td_learning']['__args__'] = [null,null,['terminal_state'],['TD_CONSTS'],['prev_state']];
 	$m['playAI'] = function() {
 		var first_player,TD_CONSTS;
 		$p['printFunc']([$m['messageWelcome']], 1);
-		TD_CONSTS = (typeof load_TD_CONSTS == "undefined"?$m['load_TD_CONSTS']:load_TD_CONSTS)();
+		TD_CONSTS = $p['dict']([['c3', 0.767944], ['c2', 1.049451], ['c1', 3.074038], ['c6', 0.220823], ['c5', 0.281883], ['c4', 0.605861]]);
 		while ($p['bool'](true)) {
 			first_player = (typeof getFirstPlayer == "undefined"?$m['getFirstPlayer']:getFirstPlayer)();
 			if ($p['bool']($p['op_eq'](first_player, 0))) {
@@ -1550,7 +1580,7 @@ var $generator_state = [0], $generator_exc = [null], $yield_value = null, $exc =
 		while ($p['bool'](true)) {
 			response = (typeof raw_input == "undefined"?$m['raw_input']:raw_input)($m['messageChoosePlayer']);
 			if ($p['bool']($p['op_eq'](response, '1'))) {
-				return (typeof userFirst == "undefined"?$m['userFirst']:userFirst);
+				return 1;
 			}
 			else if ($p['bool']($p['op_eq'](response, '2'))) {
 				return 2;
@@ -1572,10 +1602,10 @@ var $generator_state = [0], $generator_exc = [null], $yield_value = null, $exc =
 		var state;
 		$p['printFunc'](['Should only happen once'], 1);
 		state = $m['State']();
-		if ($p['bool']($p['op_eq'](first_player, (typeof userFirst == "undefined"?$m['userFirst']:userFirst)))) {
+		if ($p['bool']($p['op_eq'](first_player, 1))) {
 			(typeof user_turn == "undefined"?$m['user_turn']:user_turn)(state, TD_CONSTS);
 		}
-		else if ($p['bool']($p['op_eq'](first_player, (typeof computerFirst == "undefined"?$m['computerFirst']:computerFirst)))) {
+		else if ($p['bool']($p['op_eq'](first_player, 2))) {
 			(typeof computer_turn == "undefined"?$m['computer_turn']:computer_turn)(state, TD_CONSTS);
 		}
 		else {
@@ -1590,7 +1620,7 @@ var $generator_state = [0], $generator_exc = [null], $yield_value = null, $exc =
 	$m['playMeta']['__bind_type__'] = 0;
 	$m['playMeta']['__args__'] = [null,null,['first_player'],['TD_CONSTS']];
 	$m['user_turn'] = function(state, TD_CONSTS) {
-		var y_board,x_board,$and8,$and9,$augexpr5,$augexpr6,$add94,$augsub6,$augsub5,$and5,$and6,$and7,$and12,$and13,$and10,$and11,$add92,$add91,$add93,y,x;
+		var $add100,x_board,$and8,$and9,$add98,$add99,$augexpr7,$augexpr6,$augsub7,$augsub6,$add97,$and5,$and6,$and7,$and12,$and13,$and10,$and11,y_board,y,x;
 		$p['printFunc']([$m['messageUsersTurn']], 1);
 		$p['printFunc']([state['printInfo']()], 1);
 		if ($p['bool']($m['is_over'](state))) {
@@ -1613,9 +1643,9 @@ var $generator_state = [0], $generator_exc = [null], $yield_value = null, $exc =
 						y = $p['float_int'](y);
 						$p['getattr'](state, 'boards')['__getitem__'](y_board)['__getitem__'](x_board)['__getitem__'](y)['__getitem__'](x)['__setitem__']('cell', $p['getattr'](state, 'next_piece')['__getitem__'](2));
 						if ($p['bool']($m['is_win']($p['getattr'](state, 'boards')['__getitem__'](y_board)['__getitem__'](x_board)))) {
-							var $augsub5 = $p['str']($p['getattr'](state, 'next_piece')['__getitem__'](2));
-							var $augexpr5 = $p['getattr'](state, 'score');
-							$augexpr5['__setitem__']($augsub5, $p['__op_add']($add91=$augexpr5['__getitem__']($augsub5),$add92=1));
+							var $augsub6 = $p['str']($p['getattr'](state, 'next_piece')['__getitem__'](2));
+							var $augexpr6 = $p['getattr'](state, 'score');
+							$augexpr6['__setitem__']($augsub6, $p['__op_add']($add97=$augexpr6['__getitem__']($augsub6),$add98=1));
 						}
 						state['next_piece'] = $p['list']([y, x, $m['turn']($p['getattr'](state, 'next_piece')['__getitem__'](2))]);
 						break;
@@ -1633,9 +1663,9 @@ var $generator_state = [0], $generator_exc = [null], $yield_value = null, $exc =
 					y = $p['float_int'](y);
 					$p['getattr'](state, 'boards')['__getitem__']($p['getattr'](state, 'next_piece')['__getitem__'](0))['__getitem__']($p['getattr'](state, 'next_piece')['__getitem__'](1))['__getitem__'](y)['__getitem__'](x)['__setitem__']('cell', $p['getattr'](state, 'next_piece')['__getitem__'](2));
 					if ($p['bool']($m['is_win']($p['getattr'](state, 'boards')['__getitem__']($p['getattr'](state, 'next_piece')['__getitem__'](0))['__getitem__']($p['getattr'](state, 'next_piece')['__getitem__'](1))))) {
-						var $augsub6 = $p['str']($p['getattr'](state, 'next_piece')['__getitem__'](2));
-						var $augexpr6 = $p['getattr'](state, 'score');
-						$augexpr6['__setitem__']($augsub6, $p['__op_add']($add93=$augexpr6['__getitem__']($augsub6),$add94=1));
+						var $augsub7 = $p['str']($p['getattr'](state, 'next_piece')['__getitem__'](2));
+						var $augexpr7 = $p['getattr'](state, 'score');
+						$augexpr7['__setitem__']($augsub7, $p['__op_add']($add99=$augexpr7['__getitem__']($augsub7),$add100=1));
 					}
 					state['next_piece'] = $p['tuple']([y, x, $m['turn']($p['getattr'](state, 'next_piece')['__getitem__'](2))]);
 					break;
@@ -1674,83 +1704,107 @@ var $generator_state = [0], $generator_exc = [null], $yield_value = null, $exc =
 
 	$m['computer_turn']['__bind_type__'] = 0;
 	$m['computer_turn']['__args__'] = [null,null,['state'],['TD_CONSTS']];
-	$m['load_TD_CONSTS'] = function() {
-		var $add100,$add98,$add99,f,$add95,$add96,$add97,TD_CONSTS,content,$pyjs_try_err,writeTo;
-		try {
-			f = $p['open']($p['__op_add']($add97=$p['__op_add']($add95=$m['CWD'],$add96='/'),$add98='td.txt'));
-			content = f['read']();
-			TD_CONSTS = (typeof eval == "undefined"?$m['eval']:eval)(content);
-			$p['printFunc'](['Succesfully loaded file "td.txt"'], 1);
-		} catch($pyjs_try_err) {
-			var $pyjs_try_err_name = (typeof $pyjs_try_err['__name__'] == 'undefined' ? $pyjs_try_err['name'] : $pyjs_try_err['__name__'] );
-			$pyjs['__last_exception__'] = {'error': $pyjs_try_err, 'module': $m};
-			if (true) {
-				$p['printFunc'](['ERROR FILE MISSING!!\nFile "td.txt" not found.\nYou can run "trainAI()" to create this file.'], 1);
-				writeTo = $p['open']($p['__op_add']($add99=$m['CWD'],$add100='/td.txt'), 'w+');
-				writeTo['write']($p['str']($p['dict']([['c1', 1], ['c2', 1], ['c3', 1], ['c4', 1], ['c5', 1], ['c6', 1]])));
-				writeTo['close']();
-			}
-		}
-		return TD_CONSTS;
-	};
-	$m['load_TD_CONSTS']['__name__'] = 'load_TD_CONSTS';
-
-	$m['load_TD_CONSTS']['__bind_type__'] = 0;
-	$m['load_TD_CONSTS']['__args__'] = [null,null];
-	$m['trainAI'] = function() {
-		var starting_state,$lambda5,$add104,writeTo,$add103,TD_CONSTS,change,diff_list,td,saved,savedConsts;
-		$p['printFunc'](['Starting AI training!'], 1);
-		TD_CONSTS = $m['load_TD_CONSTS']();
+	$m['trainAI'] = function(td_consts, static_consts, depth_limit, training_iterations) {
+		if (typeof td_consts == 'undefined') td_consts=arguments['callee']['__args__'][2][1];
+		if (typeof static_consts == 'undefined') static_consts=arguments['callee']['__args__'][3][1];
+		if (typeof depth_limit == 'undefined') depth_limit=arguments['callee']['__args__'][4][1];
+		if (typeof training_iterations == 'undefined') training_iterations=arguments['callee']['__args__'][5][1];
+		var $add118,$add116,$add117,$add114,$sub29,$add112,$iter72_array,$add110,training_history,$add105,STATIC_CONSTS,state,$add101,$sub30,$add103,$add102,$iter72_type,$add104,$add107,$add106,$add108,$add113,history_index,$iter72_iter,$add111,$iter72_idx,$iter72_nextval,$add115,i,TD_CONSTS,victories,$add109;
+		$p['printFunc'](['Starting AI training!  Training takes about 15 minutes to run depending on your system.'], 1);
+		TD_CONSTS = td_consts;
+		STATIC_CONSTS = static_consts;
 		$p['printFunc'](['TD_CONSTS is currently:\n', TD_CONSTS], 1);
-		savedConsts = $m['copy']['copy'](TD_CONSTS);
-		starting_state = $m['State']();
-		(typeof learning_TD_AI == "undefined"?$m['learning_TD_AI']:learning_TD_AI)(starting_state, TD_CONSTS);
-		saved = savedConsts['values']();
-		td = TD_CONSTS['values']();
-		diff_list = function(){
-			var $iter70_array,$iter70_idx,$sub26,$iter70_type,$sub25,i,$collcomp17,$iter70_nextval,$iter70_iter;
-	$collcomp17 = $p['list']();
-		$iter70_iter = $p['range']($p['len'](TD_CONSTS));
-		$iter70_nextval=$p['__iter_prepare']($iter70_iter,false);
-		while (typeof($p['__wrapped_next']($iter70_nextval)['$nextval']) != 'undefined') {
-			i = $iter70_nextval['$nextval'];
-			$collcomp17['append']($p['abs']($p['__op_sub']($sub25=saved['__getitem__'](i),$sub26=td['__getitem__'](i))));
+		training_history = $p['list']([TD_CONSTS]);
+		victories = $p['list']([]);
+		$iter72_iter = $p['range'](training_iterations);
+		$iter72_nextval=$p['__iter_prepare']($iter72_iter,false);
+		while (typeof($p['__wrapped_next']($iter72_nextval)['$nextval']) != 'undefined') {
+			i = $iter72_nextval['$nextval'];
+			state = $m['State']();
+			while ($p['bool'](!$p['bool']($m['is_over'](state)))) {
+				var $tupleassign8 = $p['__ass_unpack']((typeof learning_TD_AI == "undefined"?$m['learning_TD_AI']:learning_TD_AI)(state, $m['copy']['copy'](TD_CONSTS), depth_limit), 2, null);
+				state = $tupleassign8[0];
+				TD_CONSTS = $tupleassign8[1];
+				training_history = $p['__op_add']($add101=training_history,$add102=$p['list']([TD_CONSTS]));
+				if ($p['bool']($m['is_over'](state))) {
+					break;
+				}
+				state = (typeof naive_AI == "undefined"?$m['naive_AI']:naive_AI)(state, STATIC_CONSTS, depth_limit);
+			}
+			history_index = $p['__op_sub']($sub29=$p['len'](training_history),$sub30=1);
+			if ($p['bool'](($p['cmp']($p['getattr'](state, 'score')['__getitem__']('1'), $p['getattr'](state, 'score')['__getitem__']('2')) == 1))) {
+				victories['append']($p['dict']([['index', history_index], ['message', $p['__op_add']($add109=$p['__op_add']($add107=$p['__op_add']($add105=$p['__op_add']($add103='Learning AI won\n',$add104=$p['str']($p['getattr'](state, 'score')['__getitem__']('1'))),$add106=' to '),$add108=$p['str']($p['getattr'](state, 'score')['__getitem__']('2'))),$add110='.')]]));
+			}
+			else {
+				victories['append']($p['dict']([['index', history_index], ['message', $p['__op_add']($add117=$p['__op_add']($add115=$p['__op_add']($add113=$p['__op_add']($add111='Static AI won\n',$add112=$p['str']($p['getattr'](state, 'score')['__getitem__']('2'))),$add114=' to '),$add116=$p['str']($p['getattr'](state, 'score')['__getitem__']('1'))),$add118='.')]]));
+			}
+			state['printInfo']();
+			$p['printFunc'](["Learning AI's constants were ", TD_CONSTS], 1);
+			$p['printFunc'](['Results were learning: ', $p['getattr'](state, 'score')['__getitem__']('1'), ' static ', $p['getattr'](state, 'score')['__getitem__']('2')], 1);
 		}
-
-	return $collcomp17;}();
-		var 		$lambda5 = function(x, y) {
-			var $add102,$add101;
-			return $p['__op_add']($add101=x,$add102=y);
-		};
-		$lambda5['__name__'] = '$lambda5';
-
-		$lambda5['__bind_type__'] = 0;
-		$lambda5['__args__'] = [null,null,['x'],['y']];
-		change = $p['reduce']($lambda5, diff_list);
-		$p['printFunc'](['TD_CONSTS update to:\n', TD_CONSTS, '\nNet change was: ', change], 1);
-		$p['printFunc'](['Finished training!'], 1);
-		writeTo = $p['open']($p['__op_add']($add103=$m['CWD'],$add104='/td.txt'), 'w+');
-		writeTo['write']($p['str'](TD_CONSTS));
-		writeTo['close']();
-		return TD_CONSTS;
+		$p['printFunc'](['Done training.'], 1);
+		(typeof plot_results == "undefined"?$m['plot_results']:plot_results)(training_history, victories);
+		return $p['tuple']([training_history, victories]);
 	};
 	$m['trainAI']['__name__'] = 'trainAI';
 
 	$m['trainAI']['__bind_type__'] = 0;
-	$m['trainAI']['__args__'] = [null,null];
+	$m['trainAI']['__args__'] = [null,null,['td_consts', $p['dict']([['c1', 1.0], ['c2', 1.0], ['c3', 1.0], ['c4', 1.0], ['c5', 1.0], ['c6', 1.0]])],['static_consts', $p['dict']([['c1', 3.0], ['c2', 1.0], ['c3', 0.5], ['c4', 0.5], ['c5', 0.5], ['c6', 0.5]])],['depth_limit', 3],['training_iterations', 20]];
+	$m['plot_results'] = function(history, victories) {
+		var $sub31,$mod5,$lambda5,$iter73_array,$iter73_iter,$add121,$add119,i,$iter73_type,$iter73_idx,numpy_array,$add120,$mod6,victory,$iter73_nextval,history_list,vertical_offset,$add122,$sub32;
+		var 		$lambda5 = function(x) {
+
+			return $p['list']([x['__getitem__']('c1'), x['__getitem__']('c2'), x['__getitem__']('c3'), x['__getitem__']('c4'), x['__getitem__']('c5'), x['__getitem__']('c6')]);
+		};
+		$lambda5['__name__'] = '$lambda5';
+
+		$lambda5['__bind_type__'] = 0;
+		$lambda5['__args__'] = [null,null,['x']];
+		history_list = $p['map']($lambda5, history);
+		numpy_array = $m['array'](history_list);
+		$m['pyplot']['plot'](numpy_array);
+		$m['pyplot']['xlabel']('Cumulative move number');
+		$m['pyplot']['title']('Figure 1. Results of Temporal Difference Learning');
+		$m['pyplot']['ylabel']('Constant value');
+		$m['pyplot']['legend']($p['tuple'](['c1: relative score', 'c2: relative number of center pieces', 'c3: relative number of corner pieces', 'c4: relative number of side pieces', 'c5: relative number of blocking positions', 'c6: relative number of potential positions']), 0);
+		$iter73_iter = $p['enumerate'](victories);
+		$iter73_nextval=$p['__iter_prepare']($iter73_iter,false);
+		while (typeof($p['__wrapped_next']($iter73_nextval)['$nextval']) != 'undefined') {
+			var $tupleassign9 = $p['__ass_unpack']($iter73_nextval['$nextval'], 2, null);
+			i = $tupleassign9[0];
+			victory = $tupleassign9[1];
+			if ($p['bool']($p['op_eq']((typeof ($mod5=i)==typeof ($mod6=2) && typeof $mod5=='number'?
+				(($mod5=$mod5%$mod6)<0&&$mod6>0?$mod5+$mod6:$mod5):
+				$p['op_mod']($mod5,$mod6)), 1))) {
+				$p['printFunc'](['A'], 1);
+				vertical_offset = $p['__op_add']($add119=history['__getitem__'](victory['__getitem__']('index'))['__getitem__']('c1'),$add120=0.23);
+			}
+			else {
+				$p['printFunc'](['B'], 1);
+				vertical_offset = $p['__op_add']($add121=history['__getitem__'](victory['__getitem__']('index'))['__getitem__']('c1'),$add122=0.1);
+			}
+			$pyjs_kwargs_call($m['pyplot'], 'annotate', null, null, [{'xytext':$p['tuple']([$p['__op_sub']($sub31=victory['__getitem__']('index'),$sub32=10), vertical_offset]), 'arrowprops':$pyjs_kwargs_call(null, $p['dict'], null, null, [{'arrowstyle':'->'}])}, victory['__getitem__']('message'), $p['tuple']([victory['__getitem__']('index'), history['__getitem__'](victory['__getitem__']('index'))['__getitem__']('c1')])]);
+		}
+		$m['pyplot']['show']();
+		return null;
+	};
+	$m['plot_results']['__name__'] = 'plot_results';
+
+	$m['plot_results']['__bind_type__'] = 0;
+	$m['plot_results']['__args__'] = [null,null,['history'],['victories']];
 	$m['normalize'] = function(TD_CONSTS) {
-		var $iter71_nextval,$iter71_iter,$add105,$mul42,$add107,$add106,i,$add108,$add112,$mul41,tot,$add111,$iter71_array,$add109,$iter71_idx,$div2,$iter71_type,$add110,$div1,norm;
+		var $add127,$add126,$add125,$add124,$add123,i,$iter74_type,$mul47,$iter74_array,$add130,tot,$add128,$iter74_iter,$div2,$mul48,$div1,$iter74_idx,$iter74_nextval,norm,$add129;
 		norm = 6.0;
 		tot = $p['sum'](TD_CONSTS['values']());
-		$iter71_iter = $p['range']($p['len'](TD_CONSTS));
-		$iter71_nextval=$p['__iter_prepare']($iter71_iter,false);
-		while (typeof($p['__wrapped_next']($iter71_nextval)['$nextval']) != 'undefined') {
-			i = $iter71_nextval['$nextval'];
-			TD_CONSTS['__setitem__']($p['__op_add']($add111='c',$add112=$p['str']($p['__op_add']($add109=i,$add110=1))), (typeof ($mul41=(typeof ($div1=TD_CONSTS['__getitem__']($p['__op_add']($add107='c',$add108=$p['str']($p['__op_add']($add105=i,$add106=1)))))==typeof ($div2=tot) && typeof $div1=='number' && $div2 !== 0?
+		$iter74_iter = $p['range']($p['len'](TD_CONSTS));
+		$iter74_nextval=$p['__iter_prepare']($iter74_iter,false);
+		while (typeof($p['__wrapped_next']($iter74_nextval)['$nextval']) != 'undefined') {
+			i = $iter74_nextval['$nextval'];
+			TD_CONSTS['__setitem__']($p['__op_add']($add129='c',$add130=$p['str']($p['__op_add']($add127=i,$add128=1))), (typeof ($mul47=(typeof ($div1=TD_CONSTS['__getitem__']($p['__op_add']($add125='c',$add126=$p['str']($p['__op_add']($add123=i,$add124=1)))))==typeof ($div2=tot) && typeof $div1=='number' && $div2 !== 0?
 				$div1/$div2:
-				$p['op_div']($div1,$div2)))==typeof ($mul42=norm) && typeof $mul41=='number'?
-				$mul41*$mul42:
-				$p['op_mul']($mul41,$mul42)));
+				$p['op_div']($div1,$div2)))==typeof ($mul48=norm) && typeof $mul47=='number'?
+				$mul47*$mul48:
+				$p['op_mul']($mul47,$mul48)));
 		}
 		return TD_CONSTS;
 	};
@@ -1758,84 +1812,30 @@ var $generator_state = [0], $generator_exc = [null], $yield_value = null, $exc =
 
 	$m['normalize']['__bind_type__'] = 0;
 	$m['normalize']['__args__'] = [null,null,['TD_CONSTS']];
-	$m['td_learning'] = function(terminal_state, TD_CONSTS, prev_state) {
-		var $sub27,$add118,$add116,$add117,$sub28,$add115,$add113,$mul48,$iter73_iter,$mul44,$mul45,$mul46,$mul47,$mul43,change_sub_utility,$add114,sub2,$augexpr7,sub1,$augsub7,$iter73_array,i,$iter73_idx,change_total_utility,$iter73_nextval,$iter73_type;
-		change_total_utility = $p['__op_sub']($sub27=$m['utility'](terminal_state, TD_CONSTS),$sub28=$m['utility'](prev_state, TD_CONSTS));
-		sub1 = $m['sub_utility'](terminal_state, TD_CONSTS);
-		sub2 = $m['sub_utility'](prev_state, TD_CONSTS);
-		change_sub_utility = function(){
-			var $sub30,$iter72_array,$iter72_type,i,$sub29,$iter72_iter,$collcomp18,$iter72_idx,$iter72_nextval;
-	$collcomp18 = $p['list']();
-		$iter72_iter = $p['range']($p['len'](sub1));
-		$iter72_nextval=$p['__iter_prepare']($iter72_iter,false);
-		while (typeof($p['__wrapped_next']($iter72_nextval)['$nextval']) != 'undefined') {
-			i = $iter72_nextval['$nextval'];
-			$collcomp18['append']($p['__op_sub']($sub29=sub1['__getitem__'](i),$sub30=sub2['__getitem__'](i)));
-		}
-
-	return $collcomp18;}();
-		$iter73_iter = $p['range']($p['len'](TD_CONSTS));
-		$iter73_nextval=$p['__iter_prepare']($iter73_iter,false);
-		while (typeof($p['__wrapped_next']($iter73_nextval)['$nextval']) != 'undefined') {
-			i = $iter73_nextval['$nextval'];
-			var $augsub7 = $p['__op_add']($add115='c',$add116=$p['str']($p['__op_add']($add113=i,$add114=1)));
-			var $augexpr7 = TD_CONSTS;
-			$augexpr7['__setitem__']($augsub7, $p['__op_add']($add117=$augexpr7['__getitem__']($augsub7),$add118=(typeof ($mul47=(typeof ($mul45=(typeof ($mul43=$m['ALPHA'])==typeof ($mul44=change_total_utility) && typeof $mul43=='number'?
-				$mul43*$mul44:
-				$p['op_mul']($mul43,$mul44)))==typeof ($mul46=change_sub_utility['__getitem__'](i)) && typeof $mul45=='number'?
-				$mul45*$mul46:
-				$p['op_mul']($mul45,$mul46)))==typeof ($mul48=(typeof ($usub12=1)=='number'?
-				-$usub12:
-				$p['op_usub']($usub12))) && typeof $mul47=='number'?
-				$mul47*$mul48:
-				$p['op_mul']($mul47,$mul48))));
-		}
-		TD_CONSTS = $m['normalize'](TD_CONSTS);
-		return TD_CONSTS;
-	};
-	$m['td_learning']['__name__'] = 'td_learning';
-
-	$m['td_learning']['__bind_type__'] = 0;
-	$m['td_learning']['__args__'] = [null,null,['terminal_state'],['TD_CONSTS'],['prev_state']];
-	$m['learning_TD_AI'] = function(prev_state, TD_CONSTS) {
-		var state,terminal_state,expectedUtility;
-		if ($p['bool']($m['is_over'](prev_state))) {
-			return true;
-		}
-		$p['printFunc'](['\n\nTD AI player starting turn. TD AI places the piece:', $p['getattr'](prev_state, 'next_piece')['__getitem__'](2)], 1);
-		$p['printFunc'](['TD_CONSTS after being adjusted are: ', TD_CONSTS], 1);
-		var $tupleassign8 = $p['__ass_unpack']($m['ab'](prev_state, TD_CONSTS), 2, null);
-		expectedUtility = $tupleassign8[0];
-		state = $tupleassign8[1];
+	$m['learning_TD_AI'] = function(prev_state, TD_CONSTS, depth_limit) {
+		var expectedUtility,state,terminal_state;
+		var $tupleassign10 = $p['__ass_unpack']($pyjs_kwargs_call(null, $m['ab'], null, null, [{'depth_limit':depth_limit}, prev_state, TD_CONSTS]), 2, null);
+		expectedUtility = $tupleassign10[0];
+		state = $tupleassign10[1];
 		terminal_state = $p['getattr'](expectedUtility, 'terminal');
-		$p['printFunc'](['Scores: Player 1: ', $p['getattr'](state, 'score')['__getitem__']('1'), ' Player 2: ', $p['getattr'](state, 'score')['__getitem__']('2')], 1);
-		state['printInfo']();
 		TD_CONSTS = $m['td_learning'](terminal_state, TD_CONSTS, prev_state);
-		$p['printFunc'](['TD_CONSTS after being adjusted are: ', TD_CONSTS], 1);
-		return (typeof naive_AI == "undefined"?$m['naive_AI']:naive_AI)(state, TD_CONSTS);
+		return $p['tuple']([state, TD_CONSTS]);
 	};
 	$m['learning_TD_AI']['__name__'] = 'learning_TD_AI';
 
 	$m['learning_TD_AI']['__bind_type__'] = 0;
-	$m['learning_TD_AI']['__args__'] = [null,null,['prev_state'],['TD_CONSTS']];
-	$m['naive_AI'] = function(state, TD_CONSTS) {
-		var nextState,expectedUtility;
-		if ($p['bool']($m['is_over'](state))) {
-			return true;
-		}
-		$p['printFunc'](['\n\nNaive AIs turn which plays the piece: ', $p['getattr'](state, 'next_piece')['__getitem__'](2)], 1);
-		var $tupleassign9 = $p['__ass_unpack']($m['ab'](state, TD_CONSTS), 2, null);
-		expectedUtility = $tupleassign9[0];
-		nextState = $tupleassign9[1];
-		state = $m['copy']['deepcopy'](nextState);
-		$p['printFunc'](['Scores: Player 1: ', $p['getattr'](state, 'score')['__getitem__']('1'), ' Player 2: ', $p['getattr'](state, 'score')['__getitem__']('2')], 1);
-		state['printInfo']();
-		return $m['learning_TD_AI'](state, TD_CONSTS);
+	$m['learning_TD_AI']['__args__'] = [null,null,['prev_state'],['TD_CONSTS'],['depth_limit']];
+	$m['naive_AI'] = function(state, CONSTS, depth_limit) {
+		var expectedUtility;
+		var $tupleassign11 = $p['__ass_unpack']($pyjs_kwargs_call(null, $m['ab'], null, null, [{'depth_limit':depth_limit}, state, CONSTS]), 2, null);
+		expectedUtility = $tupleassign11[0];
+		state = $tupleassign11[1];
+		return state;
 	};
 	$m['naive_AI']['__name__'] = 'naive_AI';
 
 	$m['naive_AI']['__bind_type__'] = 0;
-	$m['naive_AI']['__args__'] = [null,null,['state'],['TD_CONSTS']];
+	$m['naive_AI']['__args__'] = [null,null,['state'],['CONSTS'],['depth_limit']];
 	$p['printFunc']([$m['README']], 1);
 	return this;
 }; /* end learning */
@@ -1845,5 +1845,5 @@ var $generator_state = [0], $generator_exc = [null], $yield_value = null, $exc =
 
 
 /*
-PYJS_DEPS: ['copy', 'os', 'sys', 'subprocess']
+PYJS_DEPS: ['copy', 'os', 'sys', 'subprocess', 'matplotlib.pyplot', 'matplotlib', 'numpy.array', 'numpy']
 */

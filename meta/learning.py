@@ -4,10 +4,7 @@ This program relies on the min-max algorithm with alpha beta
 pruning as well as temporal difference learning to learn values
 for a weighted utility function.
 
-The weightings/constants for the utility function is stored in a
-file called \"td.txt\". If you do not see such a file, you can
-train the AI with the command:
-trainAI()
+To produce a graph of the AI training, type trainAI()
 
 You can start a new game of meta_tic-tac-toe with:
 playAI()'''
@@ -24,21 +21,23 @@ print "Final board position was:"
 state.printInfo()
 """
 if __name__ == '__main__':
+  '''Libraries required for the command line interface.
+  We don't want to try to import these for pyjs.
+  '''
   import copy
   import os
   global CWD
   CWD = os.getcwd()
   import sys
   import subprocess
+  from matplotlib import pyplot
+  from numpy import array
 
 DIMENSION = 3
-#MIN = "1"
-#MAX = "2"
+
 # standard function constants based on conjecture
 # and limited gameplay experience
 ALPHA = 0.005
-#CONSTS = {'c1': 1, 'c2': 1, 'c3': 1, 'c4': 1, 'c5': 1, 'c6': 1}
-#TD_CONSTS = {'c1': 1, 'c2': 1, 'c3': 1, 'c4': 1, 'c5': 1, 'c6': 1}
 
 messageComputersTurn   = "Computer's turn."
 messageChoosePlayer    = "Which player goes first? (1 = you, 2 = computer, 0 = stop) "
@@ -48,13 +47,6 @@ messageUsersTurn     = "User's turn."
 messageWelcome       = "Welcome to meta tic tac toe!"
 messageYouWin      = "User wins."
 messageCompWin       = "Computer Wins"
-
-def train():
-  """Trains the AI indefinitely.
-  """
-  while True:
-    #subprocess.call(['cp', 'td2.txt', 'td.txt'])
-    trainAI()
 
 def has_row(list_dict):
   '''returns true we have [DIMENSION] in a row
@@ -415,7 +407,7 @@ def max_search(state, depth, depth_limit, a, b, constants):
       nextS = gen.next()
     return value
 
-def ab(state, constants, depth_limit=6):
+def ab(state, constants, depth_limit=3):
   '''The minimax alpha-beta prunning algorithm as described by Norvig p. 170.
   ab is essentially a wrapper around max_search.
   '''
@@ -586,9 +578,27 @@ class State:
             yield child
     yield None
 
+def td_learning(terminal_state, TD_CONSTS, prev_state):
+  '''This function modifies TD_CONSTS according to the temporal difference algorithm.
+  prev_state: the current state that the minimax search has just found a next move for.
+  terminal_state: the state that the minimax search predicts will occur if both players play ideally.  This state is not the state that the ai choses as its next move, but rather the state that the minimax search predicts will occur in the future if both players play ideally.
+
+  Note: the number of moves between prev_state and terminal_state is equal to the number of ply searched, e.g. the depth_limit parameter passed to the minimax search function, ab.
+  '''
+  change_total_utility = utility(terminal_state, TD_CONSTS) - utility(prev_state, TD_CONSTS)
+  sub1 = sub_utility(terminal_state, TD_CONSTS)
+  sub2 = sub_utility(prev_state, TD_CONSTS)
+  change_sub_utility = [ (sub1[i] - sub2[i]) for i in range(len(sub1)) ]
+  for i in range(len(TD_CONSTS)):
+    TD_CONSTS['c' + str(i+1)] += ALPHA * change_total_utility * (change_sub_utility[i]) * (-1)
+
+  # normalize
+  TD_CONSTS = normalize(TD_CONSTS)
+  return TD_CONSTS
+
 #####################################################################
 #                                                                   #
-#            Command line interface functions.                      #
+#   Command line interface functions for playing the AI.            #
 #                                                                   #
 #####################################################################
 
@@ -596,7 +606,7 @@ class State:
 def playAI():
   """Play successive games until the user decides to stop. """
   print messageWelcome
-  TD_CONSTS = load_TD_CONSTS()
+  TD_CONSTS = {'c3': 0.767944, 'c2': 1.049451, 'c1': 3.074038, 'c6': 0.220823, 'c5': 0.281883, 'c4': 0.605861}
   while True:
     first_player = getFirstPlayer()
     if first_player == 0:
@@ -609,7 +619,7 @@ def getFirstPlayer():
   while True:
     response = raw_input(messageChoosePlayer)
     if response == "1":
-      return userFirst
+      return 1
     elif response == "2":
       return 2
     elif response == "0":
@@ -622,10 +632,10 @@ def playMeta(first_player, TD_CONSTS):
   '''
   print "Should only happen once"
   state = State()
-  if first_player == userFirst:
+  if first_player == 1:
     user_turn(state, TD_CONSTS) # starts user which calls ai and then continues to switch back and forth... until over
 
-  elif first_player == computerFirst:
+  elif first_player == 2:
     computer_turn(state, TD_CONSTS)
   else:
     assert False # Should never happen
@@ -698,41 +708,83 @@ def computer_turn(state, TD_CONSTS):
   print "Scores: Player 1: ", state.score['1'], " Player 2: ", state.score['2']
   return user_turn(state, TD_CONSTS)
 
-def load_TD_CONSTS():
-  try:
-    f = open(CWD + '/' + "td.txt")
-    content = f.read()
-    TD_CONSTS = eval(content)
-    print "Succesfully loaded file \"td.txt\""
-  except:
-    print "ERROR FILE MISSING!!\nFile \"td.txt\" not found.\nYou can run \"trainAI()\" to create this file."
-    # if td.txt does not exist, create it!
-    writeTo = open(CWD + '/' "td.txt", 'w+')
-    writeTo.write(str({'c1':1, 'c2':1, 'c3':1, 'c4':1, 'c5':1, 'c6':1}))
-    writeTo.close()
-  return TD_CONSTS
+#####################################################################
+#                                                                   #
+#   Command line interface functions for training the AI.           #
+#                                                                   #
+#####################################################################
 
-def trainAI():
-  '''Improves the TD_CONSTS by playing learning_TD_AI against naive_AI
+
+def trainAI(td_consts=
+{'c1': 1., 'c2': 1., 'c3': 1., 'c4': 1., 'c5': 1., 'c6': 1.},
+            static_consts=
+{'c1': 3., 'c2': 1., 'c3': .5, 'c4': .5, 'c5': .5, 'c6': .5},
+            depth_limit=3,
+            training_iterations=20):
+  '''Improves the TD_CONSTS by playing learning_TD_AI against naive_AI repeatedly
+  naive_AI has STATIC_CONSTS which are semi good, but are not perfect.
+  learning_AI starts off with very bad constants but after 15 to 20 games, should have
+  learned sufficiently good constants to reliably beat naive_AI.
+  requires matplotlib to graph the result of the training.
   '''
-  print "Starting AI training!"
-  TD_CONSTS = load_TD_CONSTS()
+  print "Starting AI training!  Training takes about 15 minutes to run depending on your system."
+  TD_CONSTS = td_consts
+  STATIC_CONSTS = static_consts
   print "TD_CONSTS is currently:\n", TD_CONSTS
-  savedConsts = copy.copy(TD_CONSTS)
-  starting_state = State()
-  learning_TD_AI(starting_state, TD_CONSTS)
-  # figure out how much TD_CONSTS has been update
-  # (should learning continue?)
-  saved = savedConsts.values()
-  td = TD_CONSTS.values()
-  diff_list = [ abs(saved[i] - td[i]) for i in range(len(TD_CONSTS))]
-  change = reduce( (lambda x, y: x+y), diff_list )
-  print "TD_CONSTS update to:\n", TD_CONSTS, "\nNet change was: ", change
-  print "Finished training!"
-  writeTo = open(CWD + '/' "td.txt", 'w+')
-  writeTo.write(str(TD_CONSTS))
-  writeTo.close()
-  return TD_CONSTS
+  training_history = [TD_CONSTS] # we record the history of the constants and then graph them.
+  victories = []
+  for i in range(training_iterations):
+    state = State()
+    while not is_over(state):
+      state, TD_CONSTS = learning_TD_AI(state, copy.copy(TD_CONSTS), depth_limit)
+      training_history += [TD_CONSTS]
+      if is_over(state):
+        break
+      state = naive_AI(state, STATIC_CONSTS, depth_limit)
+    history_index = len(training_history) - 1
+    if state.score['1'] > state.score['2']:
+      victories.append({'index': history_index,
+                        'message':
+'Learning AI won\n' + str(state.score['1']) + ' to ' + str(state.score['2']) + '.'
+                       })
+    else:
+      victories.append({'index': history_index,
+                        'message':
+'Static AI won\n' + str(state.score['2']) + ' to ' + str(state.score['1']) + '.'
+                       })
+    state.printInfo()
+    print "Learning AI's constants were ", TD_CONSTS
+    print "Results were learning: ", state.score['1'], " static ", state.score['2']
+  print "Done training."
+  plot_results(training_history, victories)
+  return training_history, victories
+
+def plot_results(history, victories):
+  history_list = map(lambda x: [x['c1'], x['c2'], x['c3'], x['c4'], x['c5'], x['c6']], history)
+  numpy_array = array(history_list)
+  pyplot.plot(numpy_array)
+  pyplot.xlabel('Cumulative move number')
+  pyplot.title('Figure 1. Results of Temporal Difference Learning')
+  pyplot.ylabel('Constant value')
+  pyplot.legend(("c1: relative score",
+                 "c2: relative number of center pieces",
+                 "c3: relative number of corner pieces",
+                 "c4: relative number of side pieces",
+                 "c5: relative number of blocking positions",
+                 "c6: relative number of potential positions"),
+                 0)
+  for i, victory in enumerate(victories):
+    if i % 2 == 1:
+      print "A"
+      vertical_offset = history[victory['index']]['c1'] + .23
+    else:
+      print "B"
+      vertical_offset = history[victory['index']]['c1'] + .1
+    pyplot.annotate(victory['message'],
+                    (victory['index'], history[victory['index']]['c1']),
+                    xytext=(victory['index'] - 10, vertical_offset),
+                    arrowprops=dict(arrowstyle="->"))
+  pyplot.show()
 
 def normalize(TD_CONSTS):
   norm = 6.0
@@ -741,53 +793,17 @@ def normalize(TD_CONSTS):
     TD_CONSTS['c' + str(i+1)] = TD_CONSTS['c' + str(i+1)] / tot * norm
   return TD_CONSTS
 
-def td_learning(terminal_state, TD_CONSTS, prev_state):
-  '''This function modifies TD_CONSTS according to the temporal difference algorithm.
-  prev_state: the current state that the minimax search has just found a next move for.
-  terminal_state: the state that the minimax search predicts will occur if both players play ideally.  This state is not the state that the ai choses as its next move, but rather the state that the minimax search predicts will occur in the future if both players play ideally.
-
-  Note: the number of moves between prev_state and terminal_state is equal to the number of ply searched, e.g. the depth_limit parameter passed to the minimax search function, ab.
-  '''
-  change_total_utility = utility(terminal_state, TD_CONSTS) - utility(prev_state, TD_CONSTS)
-  sub1 = sub_utility(terminal_state, TD_CONSTS)
-  sub2 = sub_utility(prev_state, TD_CONSTS)
-  change_sub_utility = [ (sub1[i] - sub2[i]) for i in range(len(sub1)) ]
-  for i in range(len(TD_CONSTS)):
-    TD_CONSTS['c' + str(i+1)] += ALPHA * change_total_utility * (change_sub_utility[i]) * (-1)
-
-  # normalize
-  TD_CONSTS = normalize(TD_CONSTS)
-  return TD_CONSTS
-
-def learning_TD_AI(prev_state, TD_CONSTS):
-  if is_over(prev_state):
-    return True
-  print "\n\nTD AI player starting turn. TD AI places the piece:", prev_state.next_piece[2]
-  print "TD_CONSTS after being adjusted are: ", TD_CONSTS
-
-  (expectedUtility, state) = ab(prev_state, TD_CONSTS)
+def learning_TD_AI(prev_state, TD_CONSTS, depth_limit):
+  (expectedUtility, state) = ab(prev_state, TD_CONSTS, depth_limit=depth_limit)
   terminal_state = expectedUtility.terminal
-
-  print "Scores: Player 1: ", state.score['1'], " Player 2: ", state.score['2']
-  state.printInfo()
-
   TD_CONSTS = td_learning(terminal_state, TD_CONSTS, prev_state)
+  return state, TD_CONSTS
 
-  print "TD_CONSTS after being adjusted are: ", TD_CONSTS
-  return naive_AI(state, TD_CONSTS)
-
-def naive_AI(state, TD_CONSTS):
+def naive_AI(state, CONSTS, depth_limit):
   '''A naive/dumb ai that does not modify the TD_CONSTS
   but still uses them when calling ab()
   '''
-  if is_over(state):
-    return True
-  print "\n\nNaive AIs turn which plays the piece: ", state.next_piece[2]
-
-  (expectedUtility, nextState) = ab(state, TD_CONSTS)
-  state = copy.deepcopy(nextState)
-  print "Scores: Player 1: ", state.score['1'], " Player 2: ", state.score['2']
-  state.printInfo()
-  return learning_TD_AI(state, TD_CONSTS)
+  (expectedUtility, state) = ab(state, CONSTS, depth_limit=depth_limit)
+  return state
 
 print README

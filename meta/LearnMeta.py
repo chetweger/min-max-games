@@ -31,6 +31,8 @@ class GridWidget(AbsolutePanel):
     self.ONES_CONSTS = {'c3': 1., 'c2': 1., 'c1': 1., 'c6': 1., 'c5': 1., 'c4': 1.}
     AbsolutePanel.__init__(self)
 
+    self.welcome_label = HTML('To watch the AI play itself, press either "begin game" button.')
+    self.add(self.welcome_label)
 
     self.depth_limit = 2
 
@@ -96,7 +98,7 @@ it.  Play is stopped when all individual boards have been won or are completely 
 <h3>Turning Python into JavaScript with pyjs/pyjamas</h3>
 The AI for this game is programmed in python.  During initial development, the only interface to play the AI was through the python terminal.  When I decided to expand this project into a web app, I had to choose whether the AI would run on the client or the server.  I quickly decided that this computationally intensive task should be put client side which necessitated somehow transforming my python script into javascript.  I realized that I
 could translate my python code into javascript manually, but a superior solution would be finding an adequate python to javascript compiler/translator.  Pyjs/pyjamas seemed adequate for this job, and it also provides a convenient library for creating a user interface.  Indeed, pyjs/pyjamas has been able to do everything I needed it to do, but if I had to start over again, I would probably <em>not</em> use pyjs/pyjamas.  Due to cryptic or non existent error messages, debugging pyjs/pyjamas is an
-arduous process.  Indeed, the most difficult step was the initial translation of my python script into javascript which required a substantial change in my existing implementation to get around a <a href="https://github.com/pyjs/pyjs/issues/817">bug</a>.  In addition to cryptic error messages, the output of the pyjs/pyjamas compiler is extremely slow and innefficient. While the python CLI AI can perform a minimax search to a depth of 6 ply, the pyjs/pyjamas AI in the same time can only search to a depth
+arduous process.  Indeed, the most difficult step was the initial translation of my python script into javascript which required a substantial change in my existing implementation to get around a <a href="https://github.com/pyjs/pyjs/issues/817">bug</a>.  In addition to cryptic error messages, the output of the pyjs/pyjamas compiler is extremely slow and innefficient. While the python CLI AI can perform a minimax search to a depth of 5 ply, the pyjs/pyjamas AI in the same time can only search to a depth
 of 3.  As a result, the AI for this web app has an inferior skill relative to the command line interface AI.
 </p>
 
@@ -126,25 +128,25 @@ def utility(state):
 For a more familiar game like chess, one can imagine these basis functions being based on a number of things including the relative number of pieces that each player has.  For instance, if relative number of pawns basis function is multiplied by a constant equal to 1, then the relative number of rooks basis function should be multiplied by a constant equal to 5 according to <a href="http://en.wikipedia.org/wiki/Chess_strategy#Basic_concepts_of_board_evaluation">chess strategy</a>.  In
 the case of meta tic-tac-toe, my utility function is based on six different basis functions:
 <li>
-f1_score - the relative "score" of each player.  This is calculated by subtracting the score of player MIN from the score of player MAX.
+<em>f1_score</em> (multiplied by Constant 1) - the relative "score" of each player.  This is calculated by subtracting the score of player MIN from the score of player MAX.
 </li>
 <li>
-f2_center - the relative number of center pieces.  This is calculated by subtracting the number of center pieces that MIN has from the number of center pieces that MAX has.
+<em>f2_center</em> (multiplied by Constant 2) - the relative number of center pieces.  This is calculated by subtracting the number of center pieces that MIN has from the number of center pieces that MAX has.
 </li>
 <li>
-f3_corner - the relative number of corner pieces (e.g. top right).
+<em>f3_corner</em> (multiplied by Constant 3) - the relative number of corner pieces (e.g. top right).
 </li>
 <li>
-f4_side - the relative number of side pieces (e.g. top middle).
+<em>f4_side</em> (multiplied by Constant 4) - the relative number of side pieces (e.g. top middle).
 </li>
 <li>
-f5_blocking - the relative number of blocking positions.  For example any time there are three pieces in a row/column/diagonal that are not all of the same type, that is considered a blocking position.
+<em>f5_blocking</em> (multiplied by Constant 5) - the relative number of blocking positions.  For example any time there are three pieces in a row/column/diagonal that are not all of the same type, that is considered a blocking position.
 </li>
 <li>
-f6_potential - the relative number of potential positions.  Any position that could lead to a three in a row, at the next opportunity is considered a potential position.
+<em>f6_potential</em> (multiplied by Constant 6) - the relative number of potential positions.  Any position that could lead to a three in a row, at the next opportunity is considered a potential position.
 </li>
 These six basis functions are components of the utility function, but they should not be weighted equally.
-f1_score, is clearly much more important than f4_side.  In fact, in my implementation, f1_score is 3.07:0.61 times more important than f4_side.  One can experiment with how changing these constants will change the behavior of the AI.  However, without a lengthy analysis, the precise weighting is difficult to determine.  To determine these constants analytically, I used temporal difference learning.
+<em>f1_score</em>, is clearly much more important than <em>f4_side</em>.  In fact, in my implementation, <em>f1_score</em> is 3.07:0.61 times more important than <em>f4_side</em>.  One can experiment with how changing these constants will change the behavior of the AI.  However, without a lengthy analysis, the precise weighting is difficult to determine.  To determine these constants analytically, I used temporal difference learning.
 </p>
 
 <p>
@@ -176,9 +178,15 @@ def td_learning(terminal_state, TD_CONSTS, prev_state):
   TD_CONSTS = normalize(TD_CONSTS)
   return TD_CONSTS
 </Pre>
-The <a href="http://chet-weger.herokuapp.com/learn_meta_ttt/">training regime</a> for temporal difference learning proceeds by playing a game where the AI makes moves for both sides.  After only a few games of training, one can see dramatic improvements in the relative value of the constants.
+The <a href="http://chet-weger.herokuapp.com/learn_meta_ttt/">training regime</a> for temporal difference learning proceeds by playing a game where the AI makes moves for both sides.  After only a few games of training, one can see dramatic improvements in the relative value of the constants.  After about 15-20 training games, the learning AI is typically capable of beating the static AI.  Figure 1 shows how the static AI's constants improve over a series of twenty training games.  In this
+series of games, both AIs search to a depth of 3 ply, and the static AI's constats are the same as the default values in this application (i.e. they are {'c1':3, 'c2':2, 'c3':0.5, 'c4':0.5, 'c5':0.5, 'c6':0.5}). Notice that the static AI
+starts by consistently beating the learning AI, but the last 5 games are all won by the learning AI.  Other patterns are also noticeable from the graph.  The ending moves of a game tend to produce the most change in the constants.  This makes sense because most of the points in a game are typically won in the last quarter of a game.  When points are being won rapidly, then the difference between the predicted utility and the actual utility will be at its highest.
 </p>
 </div>
+<p>
+<img width="1700" align="middle" src="http://chet-weger.herokuapp.com/media/imgs/temporal_difference_learning_in_meta_ttt.png"></img>
+</p>
+
 
 <br>
 </div>
@@ -271,14 +279,12 @@ The <a href="http://chet-weger.herokuapp.com/learn_meta_ttt/">training regime</a
 
     if sender == self.train_td:
       self.state = State()
-      print "here!!!!"
 
       self.static_ai_str = '2'
       self.td_ai_str = '1'
 
       self.state.next_piece = [1, 1, 1]
       Timer(250, notify=self.td_ai_turn)
-      print "Done training."
 
     if sender == self.train_static:
       self.state = State()
@@ -288,10 +294,8 @@ The <a href="http://chet-weger.herokuapp.com/learn_meta_ttt/">training regime</a
 
       self.state.next_piece = [1, 1, 1]
       Timer(250, notify=self.static_ai_turn)
-      print "Done training."
 
   def check_adjusts(self, sender):
-    print "adjusting constant for ", sender
     td_keys = ['c1', 'c2', 'c3', 'c4', 'c5', 'c6']
     for key in td_keys:
       if self.incr_buttons[key] == sender:
@@ -324,7 +328,6 @@ The <a href="http://chet-weger.herokuapp.com/learn_meta_ttt/">training regime</a
 
     learning_ai_score = self.state.score[self.td_ai_str]
     static_ai_score = self.state.score[self.static_ai_str]
-    print "scores are ", p1_score, p2_score
     self.score_label.setText("CURRENT SCORE: Learning AI(%d): %d | Static AI(%d): %d" % (self.td_ai_str, learning_ai_score, self.static_ai_str, static_ai_score))
     self.state.printInfo()
     if is_over(self.state):

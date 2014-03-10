@@ -10,41 +10,47 @@ from pyjamas.ui.HTML import HTML
 from pyjamas.ui.CheckBox import CheckBox
 from pyjamas.ui.AbsolutePanel import AbsolutePanel
 from pyjamas import Window
+from pyjamas.Timer import Timer
 
 from pyjamas import logging
 
 log = logging.getConsoleLogger()
 
-from learning import State, ab, is_win, is_full, turn, is_over, normalize, find_last_move
+from learning import State, ab, is_win, is_full, turn, is_over, normalize, td_learning, find_last_move
 
 INCREMENT_AMOUNT = .05
 
 class GridWidget(AbsolutePanel):
 
   def __init__(self):
-
     self.state = State()
-    self.game_over = False
-    self.last_ai_placement = {}
-    self.TD_CONSTS = {'c3': 0.767944, 'c2': 1.049451, 'c1': 3.074038, 'c6': 0.220823, 'c5': 0.281883, 'c4': 0.605861}
-    optional_args = {'TD_CONSTS': self.TD_CONSTS, 'MAX': '1', 'MIN': 2}
+    self.game_round = 0
+    self.TD_CONSTS = {'c3': 1., 'c2': 1., 'c1': 1., 'c6': 1., 'c5': 1., 'c4': 1.}
+    self.CONSTS   =  {'c3': .5, 'c2': 1., 'c1': 3., 'c6': .5, 'c5': .5, 'c4': .5}
+    self.BEST_CONSTANTS = {'c3': 0.767944, 'c2': 1.049451, 'c1': 3.074038, 'c6': 0.220823, 'c5': 0.281883, 'c4': 0.605861}
+    self.ONES_CONSTS = {'c3': 1., 'c2': 1., 'c1': 1., 'c6': 1., 'c5': 1., 'c4': 1.}
     AbsolutePanel.__init__(self)
 
-    self.game_over_msg = HTML("")
-    self.add(self.game_over_msg)
-
-    self.welcome_label = HTML('Play first by clicking on one of the positions in the middle board or let the AI go first by clicking on "AI first".')
+    self.welcome_label = Label('To watch the AI play itself press either begin game button.\nThe code for this project is <a href="https://github.com/chetweger/min-max-games/tree/master/meta">here</a>.')
     self.add(self.welcome_label)
 
-    self.depthLimit = 3
-    self.human_first = True
-    self.ai_first = Button("AI first.", self)
-    self.add(self.ai_first)
+    self.depth_limit = 2
 
-    self.increase_depth = Button("Increase search depth.", self)
-    self.decrease_depth = Button("Decrease search depth.", self)
-    self.depth_label = HTML("""AI will search to a <a href="#depth_explanation">depth</a> of """ + str(self.depthLimit) +".")
+    self.new_game = Button("New game", self)
+    self.add(self.new_game)
 
+    self.train_td = Button("Begin game.  Learning AI first!", self)
+    self.add(self.train_td)
+
+    self.train_static = Button("Begin game.  Static AI first!", self)
+    self.add(self.train_static)
+
+    self.score_label = Label("CURRENT SCORE: Learning AI: %d | Static AI: %d"% (0,0))
+    self.add(self.score_label)
+
+    self.increase_depth = Button("Increase ply search depth.", self)
+    self.decrease_depth = Button("Decrease ply search depth.", self)
+    self.depth_label = Label("Current depth is " + str(self.depth_limit) +".")
     self.depth_grid = Grid()
     self.depth_grid.resize(1, 3)
     self.depth_grid.setBorderWidth(2)
@@ -54,12 +60,6 @@ class GridWidget(AbsolutePanel):
     self.depth_grid.setWidget(0, 0, self.decrease_depth)
     self.depth_grid.setWidget(0, 1, self.depth_label)
     self.depth_grid.setWidget(0, 2, self.increase_depth)
-
-    self.new_game = Button("New game", self)
-    self.add(self.new_game)
-
-    self.score_label = Label("CURRENT SCORE: Human: %d | AI: %d"% (0,0))
-    self.add(self.score_label)
 
     # initialize the board grid:
     self.g=Grid()
@@ -72,16 +72,16 @@ class GridWidget(AbsolutePanel):
 
     # initialize the contstants adjustment grid:
     self.adj_grid = Grid()
-    self.adj_grid.resize(7, 3)
+    self.adj_grid.resize(7, 4)
     self.adj_grid.setBorderWidth(2)
     self.adj_grid.setCellPadding(9)
     self.adj_grid.setCellSpacing(1)
     self.init_constants_adj_grid()
     self.add(self.adj_grid)
 
+    self.reset_constants = Button("Reset all of Learning AI's constants to 1.", self)
+    self.add(self.reset_constants)
 
-    self.max_player = '-1'
-    self.min_player = '-1'
     self.state_to_grid()
 
     explanation = """
@@ -95,9 +95,17 @@ it.  Play is stopped when all individual boards have been won or are completely 
 </p>
 
 <p>
+<h3>Turning Python into JavaScript with pyjs/pyjamas</h3>
+The AI for this game is programmed in python.  During initial development, the only interface to play the AI was through the python terminal.  When I decided to expand this project into a web app, I had to choose whether the AI would run on the client or the server.  I quickly decided that this computationally intensive task should be put client side which necessitated somehow transforming my python script into javascript.  I realized that I
+could translate my python code into javascript manually, but a superior solution would be finding an adequate python to javascript compiler/translator.  Pyjs/pyjamas seemed adequate for this job, and it also provides a convenient library for creating a user interface.  Indeed, pyjs/pyjamas has been able to do everything I needed it to do, but if I had to start over again, I would probably <em>not</em> use pyjs/pyjamas.  Due to cryptic or non existent error messages, debugging pyjs/pyjamas is an
+arduous process.  Indeed, the most difficult step was the initial translation of my python script into javascript which required a substantial change in my existing implementation to get around a <a href="https://github.com/pyjs/pyjs/issues/817">bug</a>.  In addition to cryptic error messages, the output of the pyjs/pyjamas compiler is extremely slow and innefficient. While the python CLI AI can perform a minimax search to a depth of 6 ply, the pyjs/pyjamas AI in the same time can only search to a depth
+of 3.  As a result, the AI for this web app has an inferior skill relative to the command line interface AI.
+</p>
+
+<p>
 <a name="depth_explanation"></a>
 <h3>How the AI Works</h3>
-The AI uses the <a href="http://en.wikipedia.org/wiki/Minimax">minimax</a> search algorithm to find a next move along with alpha beta pruning which I describe in more detail <a href="http://chet-weger.herokuapp.com/play_ttt/">here</a>.  In minimax search, the AI looks at all the possible moves that the player MAX can make (player MAX because the current player is trying to maximize the utility of its move), and selects the move with the highest predicted utility.  How does the player MAX calculate the predicted utility of a move or state?  Player MAX makes a recursive call to the minimax algorithm, except,
+The AI uses the <a href="http://en.wikipedia.org/wiki/Minimax">minimax</a> search algorithm to find a next move.  Basically the AI looks at all the possible moves that the player MAX can make (player MAX because the current player is trying to maximize the utility of its move), and selects the move with the highest predicted utility.  How does the player MAX calculate the predicted utility of a move or state?  Player MAX makes a recursive call to the minimax algorithm, except,
 this time the next player will be player MIN who is trying to minimize the utility of the positions.  Player MIN, like player MAX looks at all the possible moves, but choses the move with the lowest predicted utility.  How does player MIN calculate the predicted utility of a move?  Well you can already guess: making a recursive call to the minimax algorithm.  However, at some point these recursive calls must stop, so an additional parameter is passed into the minimax algorithm that
 keeps track of depth.  When the maximum depth has been reached, the minimax algorithm, rather than making a recursive call to itself, makes a call to a utility function that assigns a rough estimate of the value of the state.
 </p>
@@ -174,41 +182,42 @@ The <a href="http://chet-weger.herokuapp.com/learn_meta_ttt/">training regime</a
 </p>
 </div>
 
-<p>
-<h3>Turning Python into JavaScript with pyjs/pyjamas</h3>
-The AI for this game is programmed in python.  During initial development, the only interface to play the AI was through the python terminal.  When I decided to expand this project into a web app, I had to choose whether the AI would run on the client or the server.  I quickly decided that this computationally intensive task should be put client side which necessitated somehow transforming my python script into javascript.  I realized that I
-could translate my python code into javascript manually, but a superior solution would be finding an adequate python to javascript compiler/translator.  Pyjs/pyjamas seemed adequate for this job, and it also provides a convenient library for creating a user interface.  Indeed, pyjs/pyjamas has been able to do everything I needed it to do, but if I had to start over again, I would probably <em>not</em> use pyjs/pyjamas.  Due to cryptic or non existent error messages, debugging pyjs/pyjamas is an
-arduous process.  Indeed, the most difficult step was the initial translation of my python script into javascript which required a substantial change in my existing implementation to get around a <a href="https://github.com/pyjs/pyjs/issues/817">bug</a>.  In addition to cryptic error messages, the output of the pyjs/pyjamas compiler is extremely slow and innefficient. While the python CLI AI can perform a minimax search to a depth of 5 ply, the pyjs/pyjamas AI in the same time can only search to a depth
-of 3.  As a result, the AI for this web app has an inferior skill relative to the command line interface AI.
-</p>
-
 <br>
 </div>
 
 <p align="center">Written by <a href="http://chet-weger.herokuapp.com/">Chet Weger</a>.  Questions, comments, bugs?  Contact me at chetweger [at] gmail.com.</p>
 <p align="center"><a href="http://chet-weger.herokuapp.com/">Return to my home page.</a></p>
     """
-    explanation = HTML(explanation)
-    self.add(explanation)
+    self.add(HTML(explanation))
 
   def init_constants_adj_grid(self):
     '''Initializes the grid that allows the TD_CONSTS to be adjusted.
     '''
     self.decr_buttons = {}
-    self.adj_labels = {}
+    self.adj_learning_labels = {}
+    self.adj_static_labels = {}
     self.incr_buttons = {}
     td_keys = ['c1', 'c2', 'c3', 'c4', 'c5', 'c6']
-    self.adj_grid.setWidget(0, 1, HTML('''Adjust the <a href="#utility_function">constants</a> to change<br>the AI's behavior.'''))
+
+    learning_ai_header = Label("Constant for the learning AI.")
+    self.adj_grid.setWidget(0, 0, learning_ai_header)
+
+    static_ai_header = Label("Constants for the static AI.")
+    self.adj_grid.setWidget(0, 2, static_ai_header)
+
     for i, key in enumerate(td_keys):
-      j = i + 1
+      j = i + 1 # off by one because of header...
+      self.adj_learning_labels[key] = Label("Constant %d: %f" % (key[1], self.TD_CONSTS[key]))
+      self.adj_grid.setWidget(j, 0, self.adj_learning_labels[key])
+
       self.decr_buttons[key] = Button('<', self)
-      self.adj_grid.setWidget(j, 0, self.decr_buttons[key])
+      self.adj_grid.setWidget(j, 1, self.decr_buttons[key])
+
+      self.adj_static_labels[key] = Label("Constant %d: %f" % (key[1], self.CONSTS[key]))
+      self.adj_grid.setWidget(j, 2, self.adj_static_labels[key])
 
       self.incr_buttons[key] = Button('>', self)
-      self.adj_grid.setWidget(j, 2, self.incr_buttons[key])
-
-      self.adj_labels[key] = Label("Constant %d: %f" % (key[1], self.TD_CONSTS[key]))
-      self.adj_grid.setWidget(j, 1, self.adj_labels[key])
+      self.adj_grid.setWidget(j, 3, self.incr_buttons[key])
 
   def init(self):
     '''Initializes the grid on which the game is played.
@@ -223,7 +232,7 @@ of 3.  As a result, the AI for this web app has an inferior skill relative to th
         g.setCellSpacing(1)
         for x_cell in range(3):
           for y_cell in range(3):
-            b = Button('Play here.', self)
+            b = Button('AI could play here.', self)
             b.point = {'x_cell':x_cell, 'y_cell':y_cell, 'y_board': y_board, 'x_board': x_board}
             g.setWidget(y_cell, x_cell, b)
 
@@ -232,119 +241,155 @@ of 3.  As a result, the AI for this web app has an inferior skill relative to th
 
   def start_new_game(self):
     #g.__init__() nope, can't use this :(
-    self.state = State()
-    self.game_over = False
+    g.state = State()
+    g.game_over = False
 
-    self.depthLimit = 3
+    self.depthLimit = 2
     self.human_first = True
 
-    self.ai_first.setVisible(True)  # new game, so we make this button visible
-
-    self.check_win()
+    self.check_is_win()
 
     self.max_player = '-1'
     self.min_player = '-1'
     self.state_to_grid()
 
+
   def onClick(self, sender):
+    self.check_adjusts(sender)
+    if sender == self.reset_constants:
+      self.TD_CONSTS = self.ONES_CONSTS
+      self.sync_consts()
+
     if sender == self.increase_depth:
-      self.depthLimit += 1
-      self.depth_label.setHTML("""AI will search to a <a href="#depth_explanation">depth</a> of """ + str(self.depthLimit) +".")
+      self.depth_limit += 1
+      self.depth_label.setText("Current depth is " + str(self.depth_limit) +".")
 
     if sender == self.decrease_depth:
-      self.depthLimit -= 1
-      self.depth_label.setHTML("""AI will search to a <a href="#depth_explanation">depth</a> of """ + str(self.depthLimit) +".")
+      self.depth_limit -= 1
+      self.depth_label.setText("Current depth is " + str(self.depth_limit) +".")
 
     if sender == self.new_game:
       self.start_new_game()
 
-    self.check_adjusts(sender)
+    if sender == self.train_td:
+      self.state = State()
+      print "here!!!!"
 
-    if not self.game_over:
-      if sender == self.ai_first and self.min_player == -1: # we only set min_player and max_player when they are not yet initialized
-        self.human_first = False
-        self.max_player = '1'
-        self.min_player = '2'
-        self.state.next_piece[2] = self.max_player
+      self.static_ai_str = '2'
+      self.td_ai_str = '1'
 
-        self.ai_first.setVisible(False) # can't go first any more so we make it invisible...
+      self.state.next_piece = [1, 1, 1]
+      Timer(250, notify=self.td_ai_turn)
+      print "Done training."
 
-        new_state = ab(self.state, self.TD_CONSTS, depth_limit=self.depthLimit)[1]
-        last_position = find_last_move(self.state, new_state)
-        self.state = new_state
+    if sender == self.train_static:
+      self.state = State()
 
-        self.state_to_grid(prev_x_board=last_position['x_board'],
-                           prev_y_board=last_position['y_board'],
-                           prev_x_cell=last_position['x_cell'],
-                           prev_y_cell=last_position['y_cell'],)
+      self.static_ai_str = '1'
+      self.td_ai_str = '2'
 
-
-      if hasattr(sender, 'point'):
-        if self.min_player == -1: # we only set min_player and max_player when they are not yet initialized
-          self.max_player = '2'
-          self.min_player = '1'
-          self.ai_first.setVisible(False) # can't go first any more so we make it invisible...
-
-
-        point = sender.point
-
-
-        g = self.g.getWidget(point['y_board'], point['x_board'])
-        g.setText(point['y_cell'], point['x_cell'], str(self.min_player))
-
-        self.grid_to_state(point)
-
-        self.check_win()
-
-        self.state.next_piece[2] = self.max_player
-
-        new_state = ab(self.state, self.TD_CONSTS, depth_limit=self.depthLimit)[1]
-        last_position = find_last_move(self.state, new_state)
-        self.state = new_state
-
-        self.state_to_grid(prev_x_board=last_position['x_board'],
-                           prev_y_board=last_position['y_board'],
-                           prev_x_cell=last_position['x_cell'],
-                           prev_y_cell=last_position['y_cell'],)
-
-
-        self.check_win()
-
+      self.state.next_piece = [1, 1, 1]
+      Timer(250, notify=self.static_ai_turn)
+      print "Done training."
 
   def check_adjusts(self, sender):
+    print "adjusting constant for ", sender
     td_keys = ['c1', 'c2', 'c3', 'c4', 'c5', 'c6']
     for key in td_keys:
       if self.incr_buttons[key] == sender:
         self.change_td_const(key, '+')
       if self.decr_buttons[key] == sender:
         self.change_td_const(key, '-')
-      self.adj_labels[key].setText("Constant %d: %f" % (key[1], self.TD_CONSTS[key]))
+      self.TD_CONSTS = normalize(self.TD_CONSTS)
+      self.adj_learning_labels[key].setText("Constant %d: %f" % (key[1], self.TD_CONSTS[key]))
+    self.sync_consts()
 
   def change_td_const(self, key, sign):
     if sign == '+':
-      self.TD_CONSTS[key] += INCREMENT_AMOUNT
+      self.CONSTS[key] += INCREMENT_AMOUNT
     elif sign == '-':
-      self.TD_CONSTS[key] -= INCREMENT_AMOUNT
+      self.CONSTS[key] -= INCREMENT_AMOUNT
 
-  def check_win(self):
-    self.depth_label.setHTML("""AI will search to a <a href="#depth_explanation">depth</a> of """ + str(self.depthLimit) +".")
-    self.check_adjusts(None)
-    human_score = self.state.score[str(self.min_player)]
-    ai_score = self.state.score[str(self.max_player)]
-    self.score_label.setText("CURRENT SCORE: Human(%d): %d | AI(%d): %d" % (self.min_player, human_score, self.max_player, ai_score))
+  def sync_consts(self):
+    """Sync td rates with the current state.
+    """
+    td_keys = ['c1', 'c2', 'c3', 'c4', 'c5', 'c6']
+    for key in td_keys:
+      self.adj_learning_labels[key].setText("Constant %d: %f" % (key[1], self.TD_CONSTS[key]))
+      self.adj_static_labels[key].setText("Constant %d: %f" % (key[1], self.CONSTS[key]))
+
+  def check_is_win(self, last_position={}):
+    self.state_to_grid(prev_x_board=last_position['x_board'],
+                       prev_y_board=last_position['y_board'],
+                       prev_x_cell=last_position['x_cell'],
+                       prev_y_cell=last_position['y_cell'],)
+
+    learning_ai_score = self.state.score[self.td_ai_str]
+    static_ai_score = self.state.score[self.static_ai_str]
+    print "scores are ", p1_score, p2_score
+    self.score_label.setText("CURRENT SCORE: Learning AI(%d): %d | Static AI(%d): %d" % (self.td_ai_str, learning_ai_score, self.static_ai_str, static_ai_score))
+    self.state.printInfo()
     if is_over(self.state):
-      if human_score > ai_score:
-        msg = "Congratulations, you won! To increase the difficulty, increase the search depth."
-      elif human_score < ai_score:
-        msg = "You lost! Better luck next time."
-      elif human_score == ai_score:
-        msg = "Game ends in a tie."
-      self.game_over_msg.setText(msg)
-      self.game_over = True
-    if self.game_over:
-      self.game_over_msg.setVisible(True)
+      if learning_ai_score > static_ai_score:
+        msg = "the learning AI won with score %d vs %d." % (learning_ai_score, static_ai_score)
+      elif learning_ai_score < static_ai_score:
+        msg = "the static AI won with score %d vs %d." % (static_ai_score, learning_ai_score)
+      elif learning_ai_score == static_ai_score:
+        msg = "the game ended in a tie."
+      self.game_round += 1
+      game_over_message = Label("In game round " + str(self.game_round) + ", " + msg)
+      self.add(game_over_message)
+      return True
     else:
-      self.game_over_msg.setVisible(False)
+      return False
+
+  def static_ai_turn(self):
+    print "\n\nNaive AIs turn which plays the piece: ", self.state.next_piece[2]
+    print "next piece is ", self.state.next_piece
+    print "TD_CONSTS", self.TD_CONSTS
+    (expectedUtility, next_state) = ab(self.state,
+                                      self.CONSTS,
+                                      depth_limit=self.depth_limit)
+
+    last_position = find_last_move(self.state, next_state)
+
+    self.state = next_state
+    self.state.printInfo()
+
+    over = self.check_is_win(last_position)
+    print "back in static"
+    if not over:
+      self.pause_update = Timer(250, notify=self.td_ai_turn)
+    else:
+      return True
+
+  def td_ai_turn(self):
+    print "\n\nTD AI player starting turn. TD AI places the piece:", self.state.next_piece[2]
+    print "TD_CONSTS after being adjusted are: ", self.TD_CONSTS
+
+    # print, alpha-beta search etc.:
+    (expectedUtility, state) = ab(self.state,
+                                  self.TD_CONSTS,
+                                  depth_limit=self.depth_limit)
+    terminal_state = expectedUtility.terminal
+    self.TD_CONSTS = td_learning(terminal_state, self.TD_CONSTS, self.state)
+    self.sync_consts() # reflect the new TD_CONSTS in the game.
+
+    last_position = find_last_move(self.state, state)
+
+    self.state = state
+
+    state.printInfo()
+
+    print "TD_CONSTS after being adjusted are: ", self.TD_CONSTS
+
+    over = self.check_is_win(last_position)
+    print "back in td"
+    print "Is over ", over
+    if not over:
+      return Timer(250, notify=self.static_ai_turn)
+    else:
+      return True
 
   def will_buttons(self, y_board, x_board):
     # first we determine if the next_piece points to a playable board.
@@ -359,6 +404,7 @@ of 3.  As a result, the AI for this web app has an inferior skill relative to th
       if playable:
         return (y_board == piece[0]) and (x_board == piece[1])
     return False
+
 
   def state_to_grid(self, prev_x_board=-1, prev_y_board=-1, prev_x_cell=-1, prev_y_cell=-1):
     board = self.state.boards
@@ -378,11 +424,7 @@ of 3.  As a result, the AI for this web app has an inferior skill relative to th
 
             if board[y_board][x_board][y_cell][x_cell]['cell'] == 0:
               if will_make_buttons:
-                if self.min_player == -1:
-                  b = Button('Play 1 here.', self)
-                else:
-                  b = Button('Play %d here.' % (self.state.next_piece[2]), self)
-                b.point = {'x_cell':x_cell, 'y_cell':y_cell, 'y_board': y_board, 'x_board': x_board}
+                b = HTML('<p style="color:blue">AI %d could<br>play here.</p>' % (self.state.next_piece[2]), self)
               else:
                 b = HTML('-')
 
@@ -406,27 +448,6 @@ of 3.  As a result, the AI for this web app has an inferior skill relative to th
 
         self.add(g)
         self.g.setWidget(y_board, x_board, g)
-
-  def grid_to_state(self, point):
-    board = self.state.boards
-    for y_board in range(3):
-      for x_board in range(3):
-        g = self.g.getWidget(y_board, x_board)
-        for y_cell in range(3):
-          for x_cell in range(3):
-            if isinstance(g.getWidget(y_cell, x_cell), Button):
-              assert board[y_board][x_board][y_cell][x_cell]['cell'] == 0
-            elif (g.getText(y_cell, x_cell) == '1') or (g.getText(y_cell, x_cell) == '2'):
-              if self.state.boards[y_board][x_board][y_cell][x_cell]['cell'] == 0:
-                self.state.boards[y_board][x_board][y_cell][x_cell]['cell'] = int(g.getText(y_cell, x_cell))
-                piece = self.state.next_piece
-                piece[0] = y_cell
-                piece[1] = x_cell
-            else:
-              assert (g.getText(y_cell, x_cell) == '-')
-    if is_win(self.state.boards[point['y_board']][point['x_board']]):
-      self.state.score[str(self.min_player)] += 1
-
 
 if __name__ == '__main__':
   pyjd.setup("./GridTest.html")
