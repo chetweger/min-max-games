@@ -172,7 +172,6 @@ def td_learning(terminal_state, TD_CONSTS, prev_state):
 </Pre>
 The <a href="http://chet-weger.herokuapp.com/learn_meta_ttt/">training regime</a> for temporal difference learning proceeds by playing a game where the AI makes moves for both sides.  After only a few games of training, one can see dramatic improvements in the relative value of the constants.
 </p>
-</div>
 
 <p>
 <h3>Turning Python into JavaScript with pyjs/pyjamas</h3>
