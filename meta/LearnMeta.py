@@ -178,8 +178,8 @@ def td_learning(terminal_state, TD_CONSTS, prev_state):
   TD_CONSTS = normalize(TD_CONSTS)
   return TD_CONSTS
 </Pre>
-The <a href="http://chet-weger.herokuapp.com/learn_meta_ttt/">training regime</a> for temporal difference learning proceeds by playing a game where the AI makes moves for both sides.  After only a few games of training, one can see dramatic improvements in the relative value of the constants.  After about 15-20 training games, the learning AI is typically capable of beating the static AI.  Figure 1 shows how the static AI's constants improve over a series of twenty training games.  In this
-series of games, both AIs search to a depth of 3 ply, and the static AI's constats are the same as the default values in this application (i.e. they are {'c1':3, 'c2':2, 'c3':0.5, 'c4':0.5, 'c5':0.5, 'c6':0.5}). Notice that the static AI
+The <a href="http://chet-weger.herokuapp.com/learn_meta_ttt/">training regime</a> proceeds by playing a game where the AI makes moves for both sides.  After only a few games of training, one can see dramatic improvements in the relative value of the constants.  After about 15-20 training games, the learning AI is typically capable of beating the static AI.  Figure 1 shows how the static AI's constants improve over a series of twenty training games.  In this
+series of games, both AIs search to a depth of 3 ply, and the static AI's constants are the same as the default values in this application (i.e. they are {'c1':3, 'c2':2, 'c3':0.5, 'c4':0.5, 'c5':0.5, 'c6':0.5}). Notice that the static AI
 starts by consistently beating the learning AI, but the last 5 games are all won by the learning AI.  Other patterns are also noticeable from the graph.  The ending moves of a game tend to produce the most change in the constants.  This makes sense because most of the points in a game are typically won in the last quarter of a game.  When points are being won rapidly, then the difference between the predicted utility and the actual utility will be at its highest.
 </p>
 </div>
