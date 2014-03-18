@@ -82,7 +82,7 @@ class GridWidget(AbsolutePanel):
     <img width="600" align="right" src="http://chet-weger.herokuapp.com/media/imgs/alpha_beta.png"></img>
     The minimax search algorithm's efficiency can be dramatically improved with alpha beta pruning and a transposition table. These optimizations provide an exponential decrease in running time while guaranteeing to never return a state with a utility value less than the value of what the vanilla minimax search returns.  The logic behind alpha beta pruning is illustrated in Figure 1.  In chess, a transposition is a sequence of moves that result in a position that can be reached by one or
     more
-    alternate sequences of moves.  A transposition table is essentially a hash table of all positions that have been seen in a given minimax search.  A transposition table is therefore essentially a form a <a href="http://en.wikipedia.org/wiki/Memoization">memoization</a>.
+    alternate sequences of moves.  A transposition table is essentially a hash table of all positions that have been seen in a given minimax search.  A transposition table is therefore essentially a form of <a href="http://en.wikipedia.org/wiki/Memoization">memoization</a>.
     </p>
 
     <p>
@@ -96,8 +96,7 @@ class GridWidget(AbsolutePanel):
     <h3>Turning Python into JavaScript with pyjs/pyjamas</h3>
     The AI for this game is programmed in python.  During initial development, the only interface to play the AI was through the python terminal.  When I decided to expand this project into a web app, I had to choose whether the AI would run on the client or the server.  I quickly decided that this computationally intensive task should be put client side which necessitated somehow transforming my python script into javascript.  I realized that I
     could translate my python code into javascript manually, but a superior solution would be finding an adequate python to javascript compiler/translator.  Pyjs/pyjamas seemed adequate for this job, and it also provides a convenient library for creating a user interface.  Indeed, pyjs/pyjamas has been able to do everything I needed it to do, but if I had to start over again, I would probably <em>not</em> use pyjs/pyjamas.  Due to cryptic or non existent error messages, debugging pyjs/pyjamas is an
-    arduous process.  Indeed, the most difficult step was the initial translation of my python script into javascript which required a substantial change in my existing implementation to get around a <a href="https://github.com/pyjs/pyjs/issues/817">bug</a>.  In addition to cryptic error messages, the output of the pyjs/pyjamas compiler is extremely slow and inefficient.  However, due to the relative simplicity of tic tac toe and this implementation can solve tic-tac-toe from any
-    position in less than 10 seconds on most computers.</p>
+    arduous process.  Indeed, the most difficult step was the initial translation of my python script into javascript which required a substantial change in my existing implementation to get around a <a href="https://github.com/pyjs/pyjs/issues/817">bug</a>.  In addition to cryptic error messages, the output of the pyjs/pyjamas compiler is extremely slow and inefficient.  However, due to the relative simplicity of tic-tac-toe, this implementation can solve tic-tac-toe from any position in less than 10 seconds on most computers.</p>
 
 
     <p align="center">Written by <a href="http://chet-weger.herokuapp.com/">Chet Weger</a>.  Questions, comments, bugs?  Contact me at chetweger [at] gmail.com.</p>
