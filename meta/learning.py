@@ -9,17 +9,6 @@ To produce a graph of the AI training, type trainAI()
 You can start a new game of meta_tic-tac-toe with:
 playAI()'''
 
-# belongs in is_over lol
-"""
-if state.score['1'] == state.score['2']:
-  print "Game Over.\nBoth players tied at", state.score['2'], "points."
-elif state.score['1'] > state.score['2']:
-  print "Game Over.\nPlayer 1 won with", state.score['1'], "points versus", state.score['2'], "points for player 2!"
-elif state.score['1'] < state.score['2']:
-  print "Game Over.\nPlayer 2 won with", state.score['2'], "points versus", state.score['1'], "points for player 1"
-print "Final board position was:"
-state.printInfo()
-"""
 if __name__ == '__main__':
   '''Libraries required for the command line interface.
   We don't want to try to import these for pyjs.
@@ -772,13 +761,11 @@ def plot_results(history, victories):
                  "c4: relative number of side pieces",
                  "c5: relative number of blocking positions",
                  "c6: relative number of potential positions"),
-                 0)
+                 4)
   for i, victory in enumerate(victories):
     if i % 2 == 1:
-      print "A"
       vertical_offset = history[victory['index']]['c1'] + .23
     else:
-      print "B"
       vertical_offset = history[victory['index']]['c1'] + .1
     pyplot.annotate(victory['message'],
                     (victory['index'], history[victory['index']]['c1']),

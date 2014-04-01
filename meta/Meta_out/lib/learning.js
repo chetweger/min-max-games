@@ -1766,7 +1766,7 @@ var $generator_state = [0], $generator_exc = [null], $yield_value = null, $exc =
 		$m['pyplot']['xlabel']('Cumulative move number');
 		$m['pyplot']['title']('Figure 1. Results of Temporal Difference Learning');
 		$m['pyplot']['ylabel']('Constant value');
-		$m['pyplot']['legend']($p['tuple'](['c1: relative score', 'c2: relative number of center pieces', 'c3: relative number of corner pieces', 'c4: relative number of side pieces', 'c5: relative number of blocking positions', 'c6: relative number of potential positions']), 0);
+		$m['pyplot']['legend']($p['tuple'](['c1: relative score', 'c2: relative number of center pieces', 'c3: relative number of corner pieces', 'c4: relative number of side pieces', 'c5: relative number of blocking positions', 'c6: relative number of potential positions']), 4);
 		$iter73_iter = $p['enumerate'](victories);
 		$iter73_nextval=$p['__iter_prepare']($iter73_iter,false);
 		while (typeof($p['__wrapped_next']($iter73_nextval)['$nextval']) != 'undefined') {
