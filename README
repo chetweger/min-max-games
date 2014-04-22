@@ -1,7 +1,26 @@
 min-max-games
 =============
 
-A collection of min-max games written in python and translated into javascript using pyjs/pyjamas.
+A collection of AIs written in python and translated into javascript using pyjs/pyjamas.  The AIs use the following techniques from AI and machine learning:
+  1.) Min-max search
+  2.) Alpha-beta pruning
+  3.) Transposition tables
+  4.) A utility function composed of multiple basis functions
+  5.) Temporal difference learning to improve basis function constants
+
+This project is hosted online at the following urls:
+
+  TTT.py:
+
+    http://chet-weger.herokuapp.com/play_ttt/
+
+  Meta.py:
+  
+    http://chet-weger.herokuapp.com/play_meta_ttt/
+
+  LearnMeta.py:
+
+    http://chet-weger.herokuapp.com/learn_meta_ttt/
 
 Summary of contents:
 
@@ -34,17 +53,3 @@ Summary of contents:
   LearnMeta.html --> html stub for this interface
 
   LearnMeta_out --> result of LearnMeta.py being translated to javascript using pyjs
-
-This project is hosted online at the following urls:
-
-  TTT.py:
-
-    http://chet-weger.herokuapp.com/play_ttt/
-
-  Meta.py:
-  
-    http://chet-weger.herokuapp.com/play_meta_ttt/
-
-  LearnMeta.py:
-
-    http://chet-weger.herokuapp.com/learn_meta_ttt/
